@@ -1,9 +1,10 @@
-# Environment variables & secrets (NEVER commit)
+# Environment variables, local notes & secrets (NEVER commit)
 .env
 .env.*
 !.env.example
 .dev.vars
 .secrets/
+notas/
 registros_brevo.yml
 client_secret_*.json
 
