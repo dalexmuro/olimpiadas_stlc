@@ -1,0 +1,22 @@
+# Environment variables & secrets (NEVER commit)
+.env
+.env.*
+!.env.example
+.dev.vars
+.secrets/
+registros_brevo.yml
+client_secret_*.json
+
+# Dependencies & Build outputs
+node_modules/
+.next/
+.open-next/
+.wrangler/
+.cloudflare/
+dist/
+out/
+
+# OS & Editor files
+.DS_Store
+Thumbs.db
+*.log
