@@ -51,14 +51,16 @@ Plataforma web oficial del concurso anual de cuentos cortos **Olimpíadas Litera
 ## Comandos de Desarrollo, Verificación y Calidad
 
 ```bash
-npm run dev          # Inicia el servidor local de desarrollo (Next.js App Router)
-npm run build        # Compila la aplicación Next.js para producción
-npm run cf:build     # Empaqueta la aplicación para Cloudflare Workers (@opennextjs/cloudflare)
-npm run db:generate  # Genera migraciones SQL desde el esquema Drizzle (drizzle/migrations)
-npm run db:studio    # Abre el visor visual de tablas Drizzle Studio
-npm test             # Ejecuta la suite de tests unitarios (Vitest)
-npm run lint         # Verifica reglas de estilo y análisis estático (ESLint)
-npm run typecheck    # Verifica tipos estrictos de TypeScript
+npm run dev              # Inicia el servidor local de desarrollo (Next.js App Router)
+npm run build            # Compila la aplicación Next.js para producción
+npm run cf:build         # Empaqueta la aplicación para Cloudflare Workers (@opennextjs/cloudflare)
+npm run db:generate      # Genera migraciones SQL desde el esquema Drizzle (drizzle/migrations)
+npm run db:migrate:local # Aplica migraciones SQL pendientes en la base D1 local (.wrangler)
+npm run db:migrate:dev   # Aplica migraciones SQL pendientes en olimpiadas-db-dev (Cloudflare D1)
+npm run db:studio        # Abre el visor visual de tablas Drizzle Studio
+npm test                 # Ejecuta la suite de tests unitarios (Vitest)
+npm run lint             # Verifica reglas de estilo y análisis estático (ESLint)
+npm run typecheck        # Verifica tipos estrictos de TypeScript
 ```
 
 ---
