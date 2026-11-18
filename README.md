@@ -21,6 +21,8 @@ Plataforma web oficial del concurso anual de cuentos cortos **Olimpíadas Litera
 │   ├── db/                                    # Esquema Drizzle ORM y migraciones (Cloudflare D1)
 │   └── lib/                                   # Autenticación, correos, similitud de textos y cron
 ├── public/                                    # Archivos estáticos públicos
+├── wrangler.jsonc                             # Configuración de Cloudflare Workers, bindings D1/R2 y Cron
+├── open-next.config.ts                        # Configuración del adaptador @opennextjs/cloudflare
 ├── .secrets/                                  # Archivos auxiliares de credenciales locales (Ignorado en Git)
 ├── .env                                       # Variables de entorno locales (Ignorado en Git)
 ├── .env.example                               # Plantilla de variables de entorno
