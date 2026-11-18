@@ -33,10 +33,10 @@ The platform is designed as a **100% Serverless, Zero-Cold-Pause Cloud-Native Ar
 ### 2.1 GitHub Branching & Automatic Deployment
 The GitHub repository is connected directly to Cloudflare:
 
-| Environment | Git Branch | Domain | D1 Database (Name & UUID) | R2 Bucket | Cron Triggers |
+| Environment | Git Branch | Domain | D1 Database (Name & UUID) | R2 Bucket (Name & Region) | Cron Triggers |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Production (`prod`)** | `main` | `olimpiadas.sitelocuento.com` | `olimpiadas-db-prod` (`62d0469d-8c03-42a9-ac45-98b320f85b02`) | `olimpiadas-media-prod` | Enabled (`*/5 * * * *`) |
-| **Development (`dev`)** | `dev` | `dev-olimpiadas.sitelocuento.com` | `olimpiadas-db-dev` (`b03d7071-ddc3-4111-96e1-12c18da7245a`) | `olimpiadas-media-dev` | Enabled (`*/15 * * * *`) |
+| **Production (`prod`)** | `main` | `olimpiadas.sitelocuento.com` | `olimpiadas-db-prod` (`62d0469d-8c03-42a9-ac45-98b320f85b02`) | `olimpiadas-media-prod` (`WEUR`, Created `2026-11-18`) | Enabled (`*/5 * * * *`) |
+| **Development (`dev`)** | `dev` | `dev-olimpiadas.sitelocuento.com` | `olimpiadas-db-dev` (`b03d7071-ddc3-4111-96e1-12c18da7245a`) | `olimpiadas-media-dev` (`WEUR`, Created `2026-11-18`) | Enabled (`*/15 * * * *`) |
 
 - Pushing or merging a commit to `dev` automatically runs database migrations (`drizzle-kit migrate`) against `olimpiadas-db-dev` and deploys the staging build.
 - Merging `dev` into `main` automatically runs migrations against `olimpiadas-db-prod` and deploys to production.

@@ -36,10 +36,22 @@ Plataforma web oficial del concurso anual de cuentos cortos **Olimpíadas Litera
 - **Base de Datos:** Cloudflare D1 (SQLite Serverless) + Drizzle ORM
   - Producción: `olimpiadas-db-prod` (`62d0469d-8c03-42a9-ac45-98b320f85b02`)
   - Desarrollo: `olimpiadas-db-dev` (`b03d7071-ddc3-4111-96e1-12c18da7245a`)
-- **Almacenamiento Multimedia:** Cloudflare R2 (`olimpiadas-media-prod` / `olimpiadas-media-dev`)
+- **Almacenamiento Multimedia:** Cloudflare R2 (`WEUR`)
+  - Producción: `olimpiadas-media-prod`
+  - Desarrollo: `olimpiadas-media-dev`
 - **Autenticación:** Better Auth (Correo/Contraseña + Google OAuth + Microsoft OAuth)
 - **Correos Transaccionales:** Brevo API (`olimpiadas@sitelocuento.com`)
 - **Tareas Programadas:** Cloudflare Cron Triggers (`*/5 * * * *`)
+
+---
+
+## Comandos de Verificación y Calidad
+
+```bash
+npm test          # Ejecuta la suite de tests unitarios (Vitest)
+npm run lint      # Verifica reglas de estilo y análisis estático (ESLint)
+npm run typecheck # Verifica tipos estrictos de TypeScript
+```
 
 ---
 
