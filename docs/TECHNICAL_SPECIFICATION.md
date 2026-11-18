@@ -23,7 +23,7 @@ The platform is designed as a **100% Serverless, Zero-Cold-Pause Cloud-Native Ar
 | **Authentication** | **Better Auth** (with Drizzle D1 Adapter) | Handles Email/Password (with verification & password reset), **Google OAuth**, and **Microsoft Entra ID (Azure AD) OAuth** directly in D1 without per-MAU fees. |
 | **Object Storage (Media)** | **Cloudflare R2** | Stores participant profile photos (`avatars/`) and prompt images (`prompts/`). 10 GB/month free with zero egress fees. |
 | **Scheduled Tasks (Cron)** | **Cloudflare Cron Triggers** (`*/5 * * * *`) | Runs every 5 minutes inside Cloudflare Workers to evaluate stage transitions, prompt deadlines, missed-prompt disqualifications, and 1-hour reminder emails. |
-| **Transactional Email** | **Brevo API** (HTTP REST API) | 300 free emails/day (9,000/month), allowing burst notifications to all participants from `olimpiadas@sitelocuento.com`. |
+| **Transactional Email** | **Brevo API** (HTTP REST API via `src/lib/email.ts`) | 300 free emails/day (9,000/month), allowing burst notifications to all participants from `olimpiadas@sitelocuento.com`, with automatic dry-run support while DNS verification is pending. |
 | **Text Similarity & Diff** | **`diff` (Myers Diff) + Levenshtein Ratio** | Computes real-time similarity percentage in Stage 3 and renders side-by-side / inline red-green diff views for Administrators in Stage 4. |
 
 ---
