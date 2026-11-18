@@ -14,6 +14,7 @@ function createMockD1Binding(): D1DatabaseBinding {
       first: async () => null,
       run: async () => ({ success: true, results: [] }),
       all: async () => ({ success: true, results: [] }),
+      raw: async () => [],
     }),
     batch: async () => [],
     exec: async () => ({ count: 0, duration: 0 }),

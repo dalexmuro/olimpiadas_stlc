@@ -57,6 +57,8 @@ npm run cf:build         # Empaqueta la aplicación para Cloudflare Workers (@op
 npm run db:generate      # Genera migraciones SQL desde el esquema Drizzle (drizzle/migrations)
 npm run db:migrate:local # Aplica migraciones SQL pendientes en la base D1 local (.wrangler)
 npm run db:migrate:dev   # Aplica migraciones SQL pendientes en olimpiadas-db-dev (Cloudflare D1)
+npm run db:seed:local    # Ejecuta la semilla inicial (plantillas E01-E26 y páginas) en D1 local
+npm run db:seed:dev      # Ejecuta la semilla inicial en olimpiadas-db-dev (Cloudflare D1)
 npm run db:studio        # Abre el visor visual de tablas Drizzle Studio
 npm test                 # Ejecuta la suite de tests unitarios (Vitest)
 npm run lint             # Verifica reglas de estilo y análisis estático (ESLint)

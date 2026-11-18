@@ -14,6 +14,7 @@ export interface D1PreparedStatementLike {
   first<T = Record<string, unknown>>(colName?: string): Promise<T | null>;
   run<T = Record<string, unknown>>(): Promise<{ success: boolean; results?: T[] }>;
   all<T = Record<string, unknown>>(): Promise<{ success: boolean; results: T[] }>;
+  raw<T = unknown[]>(): Promise<T[]>;
 }
 
 export interface D1DatabaseBinding {
