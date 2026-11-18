@@ -55,7 +55,7 @@ The GitHub repository is connected directly to Cloudflare:
 
 ## 3. Complete Database Schema (Cloudflare D1 / SQLite via Drizzle ORM)
 
-Implemented in `src/db/schema.ts` (22 SQLite tables in total: 4 authentication tables + 18 contest domain tables). All timestamps are stored in ISO-8601 UTC format (`TEXT` or integer epoch milliseconds) and converted to/from **`America/Caracas` (UTC-4)** in business logic and UI presentation.
+Implemented in `src/db/schema.ts` (22 SQLite tables in total: 4 authentication tables + 18 contest domain tables). All timestamps are stored in ISO-8601 UTC format (`TEXT` or integer epoch milliseconds) and converted to/from **`America/Caracas` (UTC-4)** via `src/lib/timezone.ts` in business logic and UI presentation.
 
 ### 3.1 Users & Authentication Tables (`users`, `sessions`, `accounts`, `verifications`)
 
