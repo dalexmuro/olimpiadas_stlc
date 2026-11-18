@@ -1,0 +1,166 @@
+/**
+ * Authentication Forms Validation & Helpers
+ * Step 1.11: Validation for /login, /registro, /recuperar-clave, and /verificar-correo
+ */
+
+import { MIN_PASSWORD_LENGTH } from "./auth";
+
+export const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+export const PHONE_REGEX = /^[+\d][\d\s\-()]{6,20}$/;
+
+export const COUNTRIES_LIST = [
+  "Argentina",
+  "Bolivia",
+  "Chile",
+  "Colombia",
+  "Costa Rica",
+  "Cuba",
+  "Ecuador",
+  "El Salvador",
+  "España",
+  "Estados Unidos",
+  "Francia",
+  "Guatemala",
+  "Honduras",
+  "México",
+  "Nicaragua",
+  "Panamá",
+  "Paraguay",
+  "Perú",
+  "Puerto Rico",
+  "República Dominicana",
+  "Uruguay",
+  "Venezuela",
+  "Otro",
+] as const;
+
+export interface FormValidationResult {
+  valid: boolean;
+  fieldErrors: Record<string, string>;
+}
+
+export interface LoginFormInput {
+  email: string;
+  password: string;
+}
+
+/**
+ * Validates the login form fields (`email` and `password`).
+ */
+export function validateLoginForm(input: LoginFormInput): FormValidationResult {
+  const fieldErrors: Record<string, string> = {};
+  const trimmedEmail = input.email.trim();
+
+  if (!trimmedEmail || !EMAIL_REGEX.test(trimmedEmail)) {
+    fieldErrors.email = "Ingresa un correo electrónico válido.";
+  }
+
+  if (!input.password || input.password.length === 0) {
+    fieldErrors.password = "Ingresa tu contraseña.";
+  }
+
+  return {
+    valid: Object.keys(fieldErrors).length === 0,
+    fieldErrors,
+  };
+}
+
+export interface RegisterFormInput {
+  firstName: string;
+  lastName: string;
+  country: string;
+  phone: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+}
+
+/**
+ * Validates the registration form fields, enforcing all mandatory personal fields
+ * (`firstName`, `lastName`, `country`, `phone`, `email`) and password rules.
+ */
+export function validateRegisterForm(
+  input: RegisterFormInput
+): FormValidationResult {
+  const fieldErrors: Record<string, string> = {};
+
+  if (!input.firstName.trim()) {
+    fieldErrors.firstName = "El nombre es obligatorio.";
+  }
+  if (!input.lastName.trim()) {
+    fieldErrors.lastName = "El apellido es obligatorio.";
+  }
+  if (!input.country.trim()) {
+    fieldErrors.country = "Selecciona tu país de residencia.";
+  }
+
+  const trimmedPhone = input.phone.trim();
+  if (!trimmedPhone || !PHONE_REGEX.test(trimmedPhone)) {
+    fieldErrors.phone =
+      "Ingresa un número de teléfono válido (ej. +58 412 1234567).";
+  }
+
+  const trimmedEmail = input.email.trim();
+  if (!trimmedEmail || !EMAIL_REGEX.test(trimmedEmail)) {
+    fieldErrors.email = "Ingresa un correo electrónico válido.";
+  }
+
+  if (input.password.length < MIN_PASSWORD_LENGTH) {
+    fieldErrors.password = `La contraseña debe tener al menos ${MIN_PASSWORD_LENGTH} caracteres.`;
+  }
+
+  if (input.password !== input.confirmPassword) {
+    fieldErrors.confirmPassword = "Las contraseñas no coinciden.";
+  }
+
+  return {
+    valid: Object.keys(fieldErrors).length === 0,
+    fieldErrors,
+  };
+}
+
+/**
+ * Validates the forgot-password email request form.
+ */
+export function validateForgotPasswordForm(email: string): FormValidationResult {
+  const fieldErrors: Record<string, string> = {};
+  const trimmed = email.trim();
+
+  if (!trimmed || !EMAIL_REGEX.test(trimmed)) {
+    fieldErrors.email = "Ingresa el correo electrónico asociado a tu cuenta.";
+  }
+
+  return {
+    valid: Object.keys(fieldErrors).length === 0,
+    fieldErrors,
+  };
+}
+
+/**
+ * Validates the password reset form when a user sets a new password with a token.
+ */
+export function validateResetPasswordForm(input: {
+  token: string;
+  password: string;
+  confirmPassword: string;
+}): FormValidationResult {
+  const fieldErrors: Record<string, string> = {};
+
+  if (!input.token.trim()) {
+    fieldErrors.token =
+      "El enlace de recuperación no es válido o ha expirado.";
+  }
+
+  if (input.password.length < MIN_PASSWORD_LENGTH) {
+    fieldErrors.password = `La nueva contraseña debe tener al menos ${MIN_PASSWORD_LENGTH} caracteres.`;
+  }
+
+  if (input.password !== input.confirmPassword) {
+    fieldErrors.confirmPassword = "Las contraseñas no coinciden.";
+  }
+
+  return {
+    valid: Object.keys(fieldErrors).length === 0,
+    fieldErrors,
+  };
+}

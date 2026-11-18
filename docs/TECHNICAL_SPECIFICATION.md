@@ -460,7 +460,7 @@ To build and verify the application systematically, development will proceed in 
 
 - **Phase 1 — Foundation, Database & Authentication:**
   - Initialize Next.js + OpenNext Cloudflare project, Tailwind CSS, Drizzle ORM, and D1 schema migrations.
-  - Configure Better Auth (Email/Password + Verification + Reset + Google OAuth + Microsoft OAuth) and the mandatory *"Complete Your Profile"* gate.
+  - Configure Better Auth (Email/Password + Verification + Reset + Google OAuth + Microsoft OAuth), auth screens (`/login`, `/registro`, `/recuperar-clave`, `/verificar-correo`), and the mandatory *"Complete Your Profile"* gate.
   - Build Public Pages (*Landing*, *Bases del Concurso*, *¿Quiénes somos?*) and Profile Management (including R2 avatar upload).
 - **Phase 2 — Superadmin Core & Collaborative Prompt Bank:**
   - Build Role Management, Edition Creator & Stage Date Validator (enforcing sequential order and 48h buffers in `America/Caracas`).
