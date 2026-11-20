@@ -12,12 +12,14 @@ import { Stage1Registration } from "@/components/stages/Stage1Registration";
 import { Stage2Writing } from "@/components/stages/Stage2Writing";
 import { Stage3Submission } from "@/components/stages/Stage3Submission";
 import { Stage4ParticipantView } from "@/components/stages/Stage4ParticipantView";
+import { Stage5Voting } from "@/components/stages/Stage5Voting";
 import { createDbClient } from "@/db";
 import {
   editionPrompts,
   editions,
   enrollments,
   stories,
+  storyReadsPreselections,
   users,
 } from "@/db/schema";
 import { createAuthInstance } from "@/lib/auth";
@@ -33,6 +35,10 @@ import {
   type Stage2ExistingStorySnapshot,
 } from "@/lib/stage2-writing";
 import type { Stage3StoryItem } from "@/lib/stage3-submission";
+import {
+  sortStoriesDeterministicallyForVoter,
+  type AnonymousVotingStoryItem,
+} from "@/lib/stage5-voting";
 import { formatCaracasDateTime } from "@/lib/timezone";
 
 export const dynamic = "force-dynamic";
@@ -306,6 +312,83 @@ export default async function ConcursoPage() {
     );
   }
 
+  let stage5Content: React.ReactNode = null;
+  if (stage === "VOTING" && enrollment) {
+    const [promptRows, activeEnrollments, postulatedStories, voterProgress] =
+      await Promise.all([
+        db
+          .select()
+          .from(editionPrompts)
+          .where(eq(editionPrompts.editionId, edition.id)),
+        db
+          .select({ id: enrollments.id })
+          .from(enrollments)
+          .where(
+            and(
+              eq(enrollments.editionId, edition.id),
+              eq(enrollments.status, "ACTIVE")
+            )
+          ),
+        db
+          .select()
+          .from(stories)
+          .where(
+            and(
+              eq(stories.editionId, edition.id),
+              eq(stories.isPostulated, true)
+            )
+          ),
+        db
+          .select()
+          .from(storyReadsPreselections)
+          .where(
+            and(
+              eq(storyReadsPreselections.editionId, edition.id),
+              eq(storyReadsPreselections.voterId, user.id)
+            )
+          ),
+      ]);
+
+    const activeEnrollmentIds = new Set(activeEnrollments.map((e) => e.id));
+    const promptById = new Map(promptRows.map((p) => [p.id, p]));
+    const progressByStoryId = new Map(voterProgress.map((p) => [p.storyId, p]));
+
+    const anonymousItems: AnonymousVotingStoryItem[] = postulatedStories
+      .filter((s) => activeEnrollmentIds.has(s.enrollmentId))
+      .map((s) => {
+        const prompt = promptById.get(s.promptId);
+        const progress = progressByStoryId.get(s.id);
+        return {
+          id: s.id,
+          promptNumber: prompt?.promptNumber ?? 0,
+          promptTitle: prompt?.title ?? "",
+          promptBody: prompt?.body ?? "",
+          promptMediaType: prompt?.mediaType ?? null,
+          promptMediaUrl: prompt?.mediaUrl ?? null,
+          title: s.editedTitle ?? s.originalTitle,
+          body: s.editedBody ?? s.originalBody,
+          isOwnStory: s.authorId === user.id,
+          isRead: progress?.isRead ?? false,
+          isPreselected: progress?.isPreselected ?? false,
+        };
+      });
+
+    const randomizedStories = sortStoriesDeterministicallyForVoter(
+      user.id,
+      anonymousItems
+    );
+
+    stage5Content = (
+      <Stage5Voting
+        enrollmentStatus={enrollment.status}
+        disqualificationReason={enrollment.disqualificationReason}
+        initialHasVoted={enrollment.hasVoted}
+        votingEndAt={edition.votingEndAt}
+        stories={randomizedStories}
+      />
+    );
+  }
+
   return (
     <main className="mx-auto max-w-4xl space-y-8 px-4 py-12">
       <ContestHeader
@@ -342,13 +425,16 @@ export default async function ConcursoPage() {
 
       {stage4Content}
 
+      {stage5Content}
+
       {stage !== "BEFORE_REGISTRATION" &&
         stage !== "REGISTRATION" &&
         stage !== "WRITING" &&
         stage !== "BUFFER_BEFORE_SUBMISSION" &&
         stage !== "SUBMISSION" &&
         stage !== "ADMIN_REVIEW" &&
-        stage !== "BUFFER_BEFORE_VOTING" && (
+        stage !== "BUFFER_BEFORE_VOTING" &&
+        stage !== "VOTING" && (
           <section className="rounded-card border border-ink bg-paper-2 p-8">
             <h2>Etapa en curso</h2>
             <p className="lead mt-3 text-ink-2">
