@@ -468,7 +468,7 @@ To build and verify the application systematically, development will proceed in 
   - Build the Collaborative Prompt Bank (`/admin/banco-consignas`, `/api/admin/banco-consignas/*`, `/api/upload/prompt-image`, `src/lib/prompt-bank.ts` with R2 image / YouTube-Vimeo embed, anonymous thumbs up/down voting, visible comments, and vote reset on edit) and Edition Prompt Package validation workflow (`/admin/consignas-edicion`, `/api/admin/consignas-edicion/*`, `src/lib/edition-prompts.ts` with `E25` dispatch, admin simple majority approval, and Superadmin overrides).
   - Build the Email Template Editor (`/admin/correos`, `/api/admin/correos`, `src/lib/email-template-editor.ts` for `E01`–`E26` with clickable `{{TAG}}` cursor insertion, live preview, and test email dispatch), Static Public Pages Editor (`/admin/paginas`, `/api/admin/paginas`, `src/lib/site-pages-editor.ts`), and Brevo dispatch service.
 - **Phase 3 — Stage 1 (Registration) & Stage 2 (Prompt Writing Marathon):**
-  - Build Participant Dashboard with the visual stage timeline and dynamic status badge.
+  - Build Participant Dashboard with the visual stage timeline and dynamic status badge (`src/lib/contest-stage.ts`, `src/components/participant/ContestHeader.tsx`).
   - Build Stage 1 enrollment flow and Stage 2 Prompt Reader + Story Editor (live character counter, min/max validation, local auto-save, <1h countdown, and missed-prompt counter).
 - **Phase 4 — Stage 3 (Selection & Editing) & Stage 4 (Admin Review & 24h Window):**
   - Build Stage 3 story list, reader with Previous/Next navigation and prompt modal, irreversible selection, live similarity calculator, and final postulation.
