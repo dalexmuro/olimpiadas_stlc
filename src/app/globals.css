@@ -1,13 +1,232 @@
-@import "tailwindcss";
+/* Hallmark · shape: Marquee Hero · genre: editorial · theme: Riso (deal 3/3, seed olimp-adas-literarias-sitelocuento-fa42·2e0e7279·2026-11-20·r0) · job: sign up · draw: c6e2b0
+ * hero: Banner · nav: floating pill · footer: statement · imagery: none (words-led literary contest) · signature: misregistered risograph headline and three-plate process separations
+ * axes: light/grotesk-heavy/chromatic-pink · posture: committed · contrast: pass · fold: pass · v2.0.0 */
+/* Hallmark · pre-emit critique: P8 H9 E9 S8 R9 V9 · weakest: P, tightened literary copy to real contest facts with zero invented figures */
+/* Hallmark · waive 38iii · riso.md § Type · Riso theme signature uses one focal misregistered word in the hero headline */
 
-:root {
-  --background: #f8fafc;
-  --foreground: #0f172a;
+@import "tailwindcss";
+@import "./tokens.css";
+@import "./base.css" layer(base);
+
+@layer components {
+  .riso-nav-shell {
+    position: sticky;
+    top: var(--space-md);
+    z-index: var(--z-sticky-nav);
+    padding-inline: var(--gutter);
+  }
+
+  .riso-nav-pill {
+    max-width: var(--container);
+    margin-inline: auto;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-md);
+    padding: var(--space-sm) var(--space-lg);
+    background: var(--color-paper);
+    border: 1.5px solid var(--color-ink);
+    border-radius: var(--radius-pill);
+  }
+
+  .riso-wordmark {
+    font-family: var(--font-display);
+    font-weight: var(--display-weight);
+    font-size: var(--text-lg);
+    letter-spacing: var(--tracking-display);
+    line-height: 1;
+    color: var(--color-ink);
+    text-decoration: none;
+  }
+
+  .riso-nav-link {
+    font-family: var(--font-body);
+    font-weight: 500;
+    font-size: var(--text-sm);
+    color: var(--color-ink);
+    text-decoration: none;
+    padding-block: var(--space-2xs);
+    border-bottom: 2px solid transparent;
+    transition: border-color var(--dur-short) var(--ease-out);
+  }
+
+  .riso-nav-link:hover,
+  .riso-nav-link[aria-current="page"] {
+    border-bottom-color: var(--color-accent);
+  }
+
+  .riso-link {
+    color: var(--color-ink);
+    text-decoration: underline;
+    text-decoration-color: var(--color-accent);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.18em;
+    transition: text-decoration-thickness var(--dur-short) var(--ease-out);
+  }
+
+  .riso-link:hover {
+    text-decoration-thickness: 4px;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
+    padding: 0 var(--space-lg);
+    border: 1.5px solid transparent;
+    border-radius: var(--radius-card);
+    font-family: var(--font-display);
+    font-weight: var(--display-weight);
+    font-size: 0.9375rem;
+    line-height: 1;
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+      background-color var(--dur-short) var(--ease-out),
+      color var(--dur-short) var(--ease-out),
+      transform var(--dur-micro) var(--ease-out);
+  }
+
+  .btn:active {
+    transform: translate(1px, 1px);
+  }
+
+  .btn--primary {
+    background: var(--color-accent);
+    color: var(--color-accent-ink);
+    border-color: var(--color-accent);
+  }
+
+  .btn--primary:hover {
+    background: var(--color-paper-3);
+    border-color: var(--color-paper-3);
+  }
+
+  .btn--secondary {
+    background: transparent;
+    border-color: var(--color-ink);
+    color: var(--color-ink);
+  }
+
+  .btn--secondary:hover {
+    background: var(--color-paper-2);
+  }
+
+  .misreg {
+    position: relative;
+    display: inline-block;
+    isolation: isolate;
+  }
+
+  .misreg::after {
+    content: attr(data-text);
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    white-space: nowrap;
+    pointer-events: none;
+    color: var(--color-accent);
+    transform: translate(3px, 3px);
+    animation: riso-register var(--dur-long) var(--ease-out) both;
+  }
+
+  .riso-plate {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 260px;
+    padding: var(--space-lg);
+    border: 1.5px solid var(--color-ink);
+    border-radius: var(--radius-card);
+    background: var(--color-paper);
+    overflow: hidden;
+  }
+
+  .riso-plate-disc {
+    position: absolute;
+    right: -28px;
+    top: 24px;
+    width: 176px;
+    height: 176px;
+    border-radius: 9999px;
+    background: var(--color-accent);
+    pointer-events: none;
+  }
+
+  .riso-plate-disc--overprint {
+    mix-blend-mode: multiply;
+  }
+
+  .riso-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-sm);
+    padding-block: var(--space-lg);
+    border-top: var(--rule-hair) solid var(--color-rule);
+  }
+
+  @media (min-width: 48rem) {
+    .riso-row {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+      gap: var(--gap-columns);
+      align-items: baseline;
+    }
+  }
+
+  .band--solid {
+    background: var(--color-ink);
+    color: var(--color-paper);
+  }
+
+  .band--screen {
+    background: var(--color-paper-2);
+    color: var(--color-ink);
+  }
+
+  .grained {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .grained::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    opacity: var(--texture-opacity);
+    background-size: 200px 200px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 9 -4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+  }
+
+  .riso-prose h2 {
+    font-size: var(--text-2xl);
+    margin-top: var(--space-xl);
+    margin-bottom: var(--space-sm);
+  }
+
+  .riso-prose h3 {
+    font-size: var(--text-title);
+    margin-top: var(--space-lg);
+    margin-bottom: var(--space-xs);
+  }
+
+  .riso-prose p {
+    margin-bottom: var(--space-md);
+    color: var(--color-ink-2);
+  }
 }
 
-body {
-  background-color: var(--background);
-  color: var(--foreground);
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
+@keyframes riso-register {
+  from {
+    transform: translate(0, 0);
+    opacity: 0.4;
+  }
+  to {
+    transform: translate(3px, 3px);
+    opacity: 1;
+  }
 }

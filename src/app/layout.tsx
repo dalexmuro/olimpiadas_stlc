@@ -15,7 +15,17 @@ export default function RootLayout({
 }>) {
   return (
     <html lang={APP_BRAND.defaultLocale}>
-      <body className="min-h-screen bg-slate-50 text-slate-900 antialiased">
+      <head>
+        <link
+          href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@800&display=swap"
+          rel="stylesheet"
+        />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,400;7..72,500&display=swap"
+          rel="stylesheet"
+        />
+      </head>
+      <body className="min-h-screen bg-paper text-ink font-body antialiased">
         {children}
       </body>
     </html>

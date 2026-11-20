@@ -34,7 +34,8 @@ Plataforma web oficial del concurso anual de cuentos cortos **Olimpíadas Litera
 
 ## Stack Tecnológico
 
-- **Framework Full-Stack:** Next.js (App Router) + TypeScript + Tailwind CSS
+- **Framework Full-Stack:** Next.js (App Router) + TypeScript + Tailwind CSS v4
+- **Sistema de Diseño Visual:** Hallmark (`Riso` — `Cabinet Grotesk 800` + `Literata`, tokens en `src/app/tokens.css` y `src/app/base.css`)
 - **Infraestructura y Hosting:** Cloudflare Workers / Pages (`@opennextjs/cloudflare`)
 - **Base de Datos:** Cloudflare D1 (SQLite Serverless) + Drizzle ORM
   - Producción: `olimpiadas-db-prod` (`62d0469d-8c03-42a9-ac45-98b320f85b02`)
