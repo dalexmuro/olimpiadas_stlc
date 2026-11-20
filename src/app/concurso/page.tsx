@@ -427,6 +427,24 @@ export default async function ConcursoPage() {
 
       {stage5Content}
 
+      {stage === "WINNERS_ANNOUNCED" && (
+        <section className="rounded-card border-2 border-ink bg-paper-2 p-8">
+          <h2>Gracias por participar en {edition.title}</h2>
+          <p className="lead mt-3 text-ink-2">
+            Esta edición ha concluido y los ganadores oficiales ya han sido
+            anunciados. Agradecemos tu entusiasmo, tu escritura y tus lecturas.
+          </p>
+          <div className="mt-6 flex flex-wrap gap-4">
+            <a href="/resultados" className="btn btn--primary">
+              Ver ganadores oficiales
+            </a>
+            <a href={`/ediciones/${edition.slug}`} className="btn btn--secondary">
+              Leer todos los cuentos
+            </a>
+          </div>
+        </section>
+      )}
+
       {stage !== "BEFORE_REGISTRATION" &&
         stage !== "REGISTRATION" &&
         stage !== "WRITING" &&
@@ -434,7 +452,8 @@ export default async function ConcursoPage() {
         stage !== "SUBMISSION" &&
         stage !== "ADMIN_REVIEW" &&
         stage !== "BUFFER_BEFORE_VOTING" &&
-        stage !== "VOTING" && (
+        stage !== "VOTING" &&
+        stage !== "WINNERS_ANNOUNCED" && (
           <section className="rounded-card border border-ink bg-paper-2 p-8">
             <h2>Etapa en curso</h2>
             <p className="lead mt-3 text-ink-2">
