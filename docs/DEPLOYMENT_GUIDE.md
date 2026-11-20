@@ -51,3 +51,28 @@ La base `olimpiadas-db-dev` ya tiene aplicada la migración inicial y la semilla
 npx wrangler d1 migrations apply olimpiadas-db-prod --remote
 npx wrangler d1 execute olimpiadas-db-prod --remote --file=./drizzle/seed.sql
 ```
+
+---
+
+## 4. Configuración DNS en IONOS (`sitelocuento.com`)
+
+Para apuntar los subdominios oficiales hacia Cloudflare Workers desde el panel DNS de **IONOS** (`Dominios y SSL → sitelocuento.com → DNS`):
+
+1. **En Cloudflare Dashboard:**
+   - Entra a **Workers & Pages → `olimpiadas-stlc` → Settings → Domains & Routes** (y repite para `olimpiadas-stlc-dev`) para obtener el hostname objetivo `*.workers.dev` (o la zona/dominio personalizado asignado).
+2. **En el panel DNS de IONOS (`sitelocuento.com`), crea estos 2 registros `CNAME`:**
+
+| Tipo | Host | Apunta a (Valor) | TTL |
+| :--- | :--- | :--- | :--- |
+| `CNAME` | `olimpiadas` | Hostname de Cloudflare para `olimpiadas-stlc` | `3600` (o automático) |
+| `CNAME` | `dev-olimpiadas` | Hostname de Cloudflare para `olimpiadas-stlc-dev` | `3600` (o automático) |
+
+3. **URIs de redirección OAuth a verificar en Google Cloud y Microsoft Entra ID:**
+   - **Google OAuth (Producción):** `https://olimpiadas.sitelocuento.com/api/auth/callback/google`
+   - **Google OAuth (Desarrollo):** `https://dev-olimpiadas.sitelocuento.com/api/auth/callback/google`
+   - **Microsoft OAuth (Producción):** `https://olimpiadas.sitelocuento.com/api/auth/callback/microsoft`
+
+4. **Comprobación rápida tras propagación DNS (5–15 min):**
+   - `https://dev-olimpiadas.sitelocuento.com/`
+   - `https://olimpiadas.sitelocuento.com/`
+
