@@ -469,7 +469,7 @@ To build and verify the application systematically, development will proceed in 
   - Build the Email Template Editor (`/admin/correos`, `/api/admin/correos`, `src/lib/email-template-editor.ts` for `E01`–`E26` with clickable `{{TAG}}` cursor insertion, live preview, and test email dispatch), Static Public Pages Editor (`/admin/paginas`, `/api/admin/paginas`, `src/lib/site-pages-editor.ts`), and Brevo dispatch service.
 - **Phase 3 — Stage 1 (Registration) & Stage 2 (Prompt Writing Marathon):**
   - Build Participant Dashboard with the visual stage timeline and dynamic status badge (`src/lib/contest-stage.ts`, `src/components/participant/ContestHeader.tsx`).
-  - Build Stage 1 enrollment flow and Stage 2 Prompt Reader + Story Editor (live character counter, min/max validation, local auto-save, <1h countdown, and missed-prompt counter).
+  - Build Stage 1 enrollment flow (`src/lib/stage1-registration.ts`, `/api/contest/enroll`, `src/components/stages/Stage1Registration.tsx` with mandatory Contest Rules acceptance, idempotent `enrollments` creation, and `E03` confirmation email) and Stage 2 Prompt Reader + Story Editor (live character counter, min/max validation, local auto-save, <1h countdown, and missed-prompt counter).
 - **Phase 4 — Stage 3 (Selection & Editing) & Stage 4 (Admin Review & 24h Window):**
   - Build Stage 3 story list, reader with Previous/Next navigation and prompt modal, irreversible selection, live similarity calculator, and final postulation.
   - Build Stage 4 Admin Story Reader, side-by-side/inline visual Diff Viewer, Excessive Modification Alert queue, 2-admin validation voting, and the 24h participant correction window.
