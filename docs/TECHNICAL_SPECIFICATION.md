@@ -473,7 +473,7 @@ To build and verify the application systematically, development will proceed in 
 - **Phase 4 — Stage 3 (Selection & Editing) & Stage 4 (Admin Review & 24h Window):**
   - Build Text Similarity & Myers Diff engine (`src/lib/similarity.ts` with `normalizeTextForSimilarity`, `calculateStorySimilarity`, `computeWordDiffSegments`, and `formatSimilarityBadgeLabel`).
   - Build Stage 3 story list, reader with Previous/Next navigation and prompt modal, irreversible selection, live similarity calculator, and final postulation (`src/lib/stage3-submission.ts`, `/api/contest/submission`, `src/components/stages/Stage3Submission.tsx`, integrated in `/concurso` with `E10` dispatch).
-  - Build Stage 4 Admin Story Reader, side-by-side/inline visual Diff Viewer, Excessive Modification Alert queue, 2-admin validation voting, and the 24h participant correction window.
+  - Build Stage 4 Admin Story Reader, side-by-side/inline visual Diff Viewer, Excessive Modification Alert queue, 2-admin validation voting, and the 24h participant correction window (`src/lib/stage4-admin-review.ts`, `/api/admin/cuentos`, `/api/contest/correction`, `src/app/admin/cuentos/page.tsx`, `src/components/stages/Stage4ParticipantView.tsx`, with `E11`/`E12`/`E13` dispatch).
 - **Phase 5 — Stage 5 (Participant Voting) & Stage 6 (Jury & Tie-Breaker):**
   - Build deterministic randomized story list, *"Leído"* and *"Preseleccionar"* toggles, and the interactive click/drag Top 3 voting screen.
   - Implement Top 10 + Ties cutoff algorithm, automatic Jury point multiplier brackets, pause-on-missing-juror logic, and conditional Jury Tie-Breaker round.

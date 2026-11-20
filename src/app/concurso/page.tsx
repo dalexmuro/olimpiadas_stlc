@@ -11,6 +11,7 @@ import { ContestHeader } from "@/components/participant/ContestHeader";
 import { Stage1Registration } from "@/components/stages/Stage1Registration";
 import { Stage2Writing } from "@/components/stages/Stage2Writing";
 import { Stage3Submission } from "@/components/stages/Stage3Submission";
+import { Stage4ParticipantView } from "@/components/stages/Stage4ParticipantView";
 import { createDbClient } from "@/db";
 import {
   editionPrompts,
@@ -255,6 +256,56 @@ export default async function ConcursoPage() {
     );
   }
 
+  let stage4Content: React.ReactNode = null;
+  if (
+    (stage === "ADMIN_REVIEW" || stage === "BUFFER_BEFORE_VOTING") &&
+    enrollment
+  ) {
+    let selectedStoryForStage4: {
+      id: string;
+      promptNumber: number;
+      originalBody: string;
+      editedTitle: string;
+      editedBody: string;
+    } | null = null;
+
+    if (enrollment.selectedStoryId) {
+      const storyRows = await db
+        .select()
+        .from(stories)
+        .where(eq(stories.id, enrollment.selectedStoryId));
+      const foundStory = storyRows[0];
+      if (foundStory) {
+        const promptRows = await db
+          .select()
+          .from(editionPrompts)
+          .where(eq(editionPrompts.id, foundStory.promptId));
+        selectedStoryForStage4 = {
+          id: foundStory.id,
+          promptNumber: promptRows[0]?.promptNumber ?? 0,
+          originalBody: foundStory.originalBody,
+          editedTitle: foundStory.editedTitle ?? foundStory.originalTitle,
+          editedBody: foundStory.editedBody ?? foundStory.originalBody,
+        };
+      }
+    }
+
+    stage4Content = (
+      <Stage4ParticipantView
+        enrollmentStatus={enrollment.status}
+        disqualificationReason={enrollment.disqualificationReason}
+        inCorrectionWindow={enrollment.inCorrectionWindow}
+        correctionDeadlineAt={enrollment.correctionDeadlineAt}
+        correctionSubmittedAt={enrollment.correctionSubmittedAt}
+        votingStartAt={edition.votingStartAt}
+        minChars={edition.minChars}
+        maxChars={edition.maxChars}
+        minSimilarityPct={edition.minSimilarityPct}
+        story={selectedStoryForStage4}
+      />
+    );
+  }
+
   return (
     <main className="mx-auto max-w-4xl space-y-8 px-4 py-12">
       <ContestHeader
@@ -289,11 +340,15 @@ export default async function ConcursoPage() {
 
       {stage3Content}
 
+      {stage4Content}
+
       {stage !== "BEFORE_REGISTRATION" &&
         stage !== "REGISTRATION" &&
         stage !== "WRITING" &&
         stage !== "BUFFER_BEFORE_SUBMISSION" &&
-        stage !== "SUBMISSION" && (
+        stage !== "SUBMISSION" &&
+        stage !== "ADMIN_REVIEW" &&
+        stage !== "BUFFER_BEFORE_VOTING" && (
           <section className="rounded-card border border-ink bg-paper-2 p-8">
             <h2>Etapa en curso</h2>
             <p className="lead mt-3 text-ink-2">
