@@ -78,6 +78,8 @@ Secretos requeridos en GitHub Actions (`Settings → Secrets and variables → A
 - `CLOUDFLARE_API_TOKEN`
 - `CLOUDFLARE_ACCOUNT_ID` (`72a8537e848ff38b562b789901671eec`)
 
+Para sincronizar secretos de ejecución (`BETTER_AUTH_SECRET`, `BREVO_API_KEY`, OAuth, `SUPERADMIN_INITIAL_EMAIL`) hacia Cloudflare Workers usa `npm run cf:secrets:dev` / `npm run cf:secrets:prod`. Consulta la guía completa en [`docs/DEPLOYMENT_GUIDE.md`](docs/DEPLOYMENT_GUIDE.md).
+
 ---
 
 ## Documentación

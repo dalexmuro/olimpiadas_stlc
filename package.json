@@ -8,6 +8,8 @@
     "build": "next build",
     "start": "next start",
     "cf:build": "opennextjs-cloudflare build",
+    "cf:secrets:dev": "node scripts/sync-cloudflare-secrets.mjs dev",
+    "cf:secrets:prod": "node scripts/sync-cloudflare-secrets.mjs prod",
     "db:generate": "drizzle-kit generate",
     "db:migrate:local": "wrangler d1 migrations apply olimpiadas-db-dev --env dev --local",
     "db:migrate:dev": "wrangler d1 migrations apply olimpiadas-db-dev --env dev --remote",
