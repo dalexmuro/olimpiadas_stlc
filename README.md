@@ -68,6 +68,18 @@ npm run typecheck        # Verifica tipos estrictos de TypeScript
 
 ---
 
+## Despliegue CI/CD (GitHub Actions → Cloudflare Workers)
+
+El flujo [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) ejecuta `typecheck`, `lint`, `test`, compila con `npm run cf:build`, aplica migraciones D1 y despliega automáticamente:
+- **Rama `dev`** → Worker `olimpiadas-stlc-dev` + `olimpiadas-db-dev` (`https://dev-olimpiadas.sitelocuento.com`)
+- **Rama `main`** → Worker `olimpiadas-stlc` + `olimpiadas-db-prod` (`https://olimpiadas.sitelocuento.com`)
+
+Secretos requeridos en GitHub Actions (`Settings → Secrets and variables → Actions`):
+- `CLOUDFLARE_API_TOKEN`
+- `CLOUDFLARE_ACCOUNT_ID` (`72a8537e848ff38b562b789901671eec`)
+
+---
+
 ## Documentación
 
 1. **[Guía Funcional para Organizadores](docs/GUIA_FUNCIONAL_ORGANIZADORES.md):** Explicación completa de todas las etapas, roles y reglas del concurso en lenguaje no técnico.
