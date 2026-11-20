@@ -32,6 +32,8 @@ describe("CI/CD Deployment Configuration (Step 7.1)", () => {
     );
     const yaml = readFileSync(workflowPath, "utf8");
 
+    expect(yaml).toContain("actions/checkout@v5");
+    expect(yaml).toContain("actions/setup-node@v5");
     expect(yaml).toContain("npm run typecheck");
     expect(yaml).toContain("npm run lint");
     expect(yaml).toContain("npm test");
