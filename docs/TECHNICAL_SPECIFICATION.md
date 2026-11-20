@@ -465,7 +465,7 @@ To build and verify the application systematically, development will proceed in 
 - **Phase 2 — Superadmin Core & Collaborative Prompt Bank:**
   - Build Protected `/admin` Layout & Role-Based Navigation (`src/lib/admin-access.ts`, `src/components/admin/AdminShell.tsx`, `src/app/admin/layout.tsx`, `src/app/admin/page.tsx`).
   - Build Role Management (`/admin/roles`, `/api/admin/roles`, `src/lib/role-management.ts` with odd jury validation and `audit_logs` recording), Edition Creator & Stage Date Validator (`/admin/ediciones`, `/api/admin/ediciones`, `src/lib/edition-management.ts` enforcing sequential order and both mandatory 48h buffers in `America/Caracas`).
-  - Build the Collaborative Prompt Bank (`/admin/banco-consignas`, `/api/admin/banco-consignas/*`, `/api/upload/prompt-image`, `src/lib/prompt-bank.ts` with R2 image / YouTube-Vimeo embed, anonymous thumbs up/down voting, visible comments, and vote reset on edit) and Edition Prompt Package validation workflow.
+  - Build the Collaborative Prompt Bank (`/admin/banco-consignas`, `/api/admin/banco-consignas/*`, `/api/upload/prompt-image`, `src/lib/prompt-bank.ts` with R2 image / YouTube-Vimeo embed, anonymous thumbs up/down voting, visible comments, and vote reset on edit) and Edition Prompt Package validation workflow (`/admin/consignas-edicion`, `/api/admin/consignas-edicion/*`, `src/lib/edition-prompts.ts` with `E25` dispatch, admin simple majority approval, and Superadmin overrides).
   - Build the Email Template Editor (`E01`–`E26` with clickable `{{TAG}}` insertion) and Brevo dispatch service.
 - **Phase 3 — Stage 1 (Registration) & Stage 2 (Prompt Writing Marathon):**
   - Build Participant Dashboard with the visual stage timeline and dynamic status badge.
