@@ -464,7 +464,7 @@ To build and verify the application systematically, development will proceed in 
   - Build Public Pages (*Landing*, *Bases del Concurso*, *¿Quiénes somos?*) and Profile Management (`/perfil`, `/api/profile`, `/api/upload/avatar`, `/api/media/[...key]` for R2 avatar upload & email re-verification).
 - **Phase 2 — Superadmin Core & Collaborative Prompt Bank:**
   - Build Protected `/admin` Layout & Role-Based Navigation (`src/lib/admin-access.ts`, `src/components/admin/AdminShell.tsx`, `src/app/admin/layout.tsx`, `src/app/admin/page.tsx`).
-  - Build Role Management (`/admin/roles`, `/api/admin/roles`, `src/lib/role-management.ts` with odd jury validation and `audit_logs` recording), Edition Creator & Stage Date Validator (enforcing sequential order and 48h buffers in `America/Caracas`).
+  - Build Role Management (`/admin/roles`, `/api/admin/roles`, `src/lib/role-management.ts` with odd jury validation and `audit_logs` recording), Edition Creator & Stage Date Validator (`/admin/ediciones`, `/api/admin/ediciones`, `src/lib/edition-management.ts` enforcing sequential order and both mandatory 48h buffers in `America/Caracas`).
   - Build the Collaborative Prompt Bank (propose with image/video, anonymous 👍/👎 voting, comments, vote reset on edit) and Edition Prompt Package validation workflow.
   - Build the Email Template Editor (`E01`–`E26` with clickable `{{TAG}}` insertion) and Brevo dispatch service.
 - **Phase 3 — Stage 1 (Registration) & Stage 2 (Prompt Writing Marathon):**
