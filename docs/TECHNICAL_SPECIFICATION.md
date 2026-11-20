@@ -463,6 +463,7 @@ To build and verify the application systematically, development will proceed in 
   - Configure Better Auth (Email/Password + Verification + Reset + Google OAuth + Microsoft OAuth), auth screens (`/login`, `/registro`, `/recuperar-clave`, `/verificar-correo`), and the mandatory *"Complete Your Profile"* gate (`/completar-perfil` + `/api/profile/complete`).
   - Build Public Pages (*Landing*, *Bases del Concurso*, *¿Quiénes somos?*) and Profile Management (`/perfil`, `/api/profile`, `/api/upload/avatar`, `/api/media/[...key]` for R2 avatar upload & email re-verification).
 - **Phase 2 — Superadmin Core & Collaborative Prompt Bank:**
+  - Build Protected `/admin` Layout & Role-Based Navigation (`src/lib/admin-access.ts`, `src/components/admin/AdminShell.tsx`, `src/app/admin/layout.tsx`, `src/app/admin/page.tsx`).
   - Build Role Management, Edition Creator & Stage Date Validator (enforcing sequential order and 48h buffers in `America/Caracas`).
   - Build the Collaborative Prompt Bank (propose with image/video, anonymous 👍/👎 voting, comments, vote reset on edit) and Edition Prompt Package validation workflow.
   - Build the Email Template Editor (`E01`–`E26` with clickable `{{TAG}}` insertion) and Brevo dispatch service.
