@@ -471,6 +471,7 @@ To build and verify the application systematically, development will proceed in 
   - Build Participant Dashboard (`/concurso`, `src/app/concurso/page.tsx`) with the visual stage timeline and dynamic status badge (`src/lib/contest-stage.ts`, `src/components/participant/ContestHeader.tsx`).
   - Build Stage 1 enrollment flow (`src/lib/stage1-registration.ts`, `/api/contest/enroll`, `src/components/stages/Stage1Registration.tsx` with mandatory Contest Rules acceptance, idempotent `enrollments` creation, and `E03` confirmation email) and Stage 2 Prompt Reader + Story Editor (`src/lib/stage2-writing.ts`, `/api/contest/stories`, `src/components/stages/Stage2Writing.tsx` with live character counter, min/max validation, `localStorage` auto-save, `< 1h` urgent countdown, unlimited re-edits while open, hidden closed prompts, waiting screens, and disqualified screen).
 - **Phase 4 — Stage 3 (Selection & Editing) & Stage 4 (Admin Review & 24h Window):**
+  - Build Text Similarity & Myers Diff engine (`src/lib/similarity.ts` with `normalizeTextForSimilarity`, `calculateStorySimilarity`, `computeWordDiffSegments`, and `formatSimilarityBadgeLabel`).
   - Build Stage 3 story list, reader with Previous/Next navigation and prompt modal, irreversible selection, live similarity calculator, and final postulation.
   - Build Stage 4 Admin Story Reader, side-by-side/inline visual Diff Viewer, Excessive Modification Alert queue, 2-admin validation voting, and the 24h participant correction window.
 - **Phase 5 — Stage 5 (Participant Voting) & Stage 6 (Jury & Tie-Breaker):**
