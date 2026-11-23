@@ -22,3 +22,15 @@ out/
 .DS_Store
 Thumbs.db
 *.log
+
+# Local AI agent tooling & skill caches (never commit)
+.agent/
+.agents/
+.claude/
+.gemini/
+.hallmark/
+.impeccable/
+.github/agents/
+.github/hooks/
+.github/skills/
+skills-lock.json
