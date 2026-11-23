@@ -40,6 +40,11 @@ export default function ProfilePage() {
   const [passwordAlert, setPasswordAlert] = useState<string | null>(null);
   const [savingPassword, setSavingPassword] = useState(false);
 
+  const [signingOut, setSigningOut] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deletingAccount, setDeletingAccount] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
   useEffect(() => {
     async function loadProfile() {
       try {
@@ -199,6 +204,46 @@ export default function ProfilePage() {
       setPasswordAlert("No fue posible conectar con el servidor.");
     } finally {
       setSavingPassword(false);
+    }
+  }
+
+  async function handleSignOut() {
+    setSigningOut(true);
+    try {
+      await fetch("/api/auth/sign-out", {
+        method: "POST",
+        credentials: "same-origin",
+      });
+    } finally {
+      window.location.href = "/";
+    }
+  }
+
+  async function handleDeleteAccount() {
+    setDeletingAccount(true);
+    setDeleteError(null);
+    try {
+      const res = await fetch("/api/profile", {
+        method: "DELETE",
+        credentials: "same-origin",
+      });
+      const data = (await res.json().catch(() => null)) as {
+        ok?: boolean;
+        error?: string;
+      } | null;
+
+      if (!res.ok || !data?.ok) {
+        setDeleteError(
+          data?.error ?? "No fue posible eliminar tu cuenta. Inténtalo de nuevo."
+        );
+        return;
+      }
+
+      window.location.href = "/";
+    } catch {
+      setDeleteError("No fue posible conectar con el servidor.");
+    } finally {
+      setDeletingAccount(false);
     }
   }
 
@@ -491,8 +536,102 @@ export default function ProfilePage() {
           </button>
         </form>
       </section>
+
+      {/* Sección 4: Sesión y eliminación de cuenta */}
+      <section className="mt-8 rounded-[24px] border border-rule bg-surface p-7 shadow-card sm:p-8">
+        <h2>Sesión y cuenta</h2>
+        <p className="mt-2 text-sm text-muted">
+          Cierra tu sesión actual en este dispositivo o elimina tu cuenta de
+          forma permanente.
+        </p>
+
+        {deleteError && !showDeleteModal && (
+          <div
+            role="alert"
+            className="mt-4 rounded-input border border-error/30 bg-error/5 px-4 py-3 text-sm text-error"
+          >
+            {deleteError}
+          </div>
+        )}
+
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-4 border-t border-rule pt-6">
+          <button
+            type="button"
+            disabled={signingOut}
+            onClick={() => void handleSignOut()}
+            className="btn btn--secondary"
+          >
+            {signingOut ? "Cerrando sesión…" : "Cerrar sesión"}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setDeleteError(null);
+              setShowDeleteModal(true);
+            }}
+            className="btn border-error/40 bg-surface text-error hover:border-error hover:bg-error/5"
+          >
+            Eliminar cuenta
+          </button>
+        </div>
+      </section>
         </PageReveal>
       </main>
+
+      {showDeleteModal && (
+        <div
+          className="ta-modal-backdrop"
+          onClick={() => !deletingAccount && setShowDeleteModal(false)}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="delete-account-title"
+            className="ta-modal-dialog"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <h2
+              id="delete-account-title"
+              className="font-display text-2xl font-bold tracking-display text-ink"
+            >
+              ¿Eliminar tu cuenta permanentemente?
+            </h2>
+            <p className="mt-3 text-sm leading-relaxed text-muted">
+              Esta acción cerrará tu sesión y borrará tus datos personales y
+              accesos vinculados. No se puede deshacer.
+            </p>
+
+            {deleteError && (
+              <div
+                role="alert"
+                className="mt-4 rounded-input border border-error/30 bg-error/5 px-4 py-3 text-sm text-error"
+              >
+                {deleteError}
+              </div>
+            )}
+
+            <div className="mt-7 flex flex-wrap justify-end gap-3">
+              <button
+                type="button"
+                disabled={deletingAccount}
+                onClick={() => setShowDeleteModal(false)}
+                className="btn btn--secondary"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                disabled={deletingAccount}
+                onClick={() => void handleDeleteAccount()}
+                className="btn border-error bg-error text-accent-ink hover:opacity-90"
+              >
+                {deletingAccount ? "Eliminando…" : "Sí, eliminar mi cuenta"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <Footer />
     </div>

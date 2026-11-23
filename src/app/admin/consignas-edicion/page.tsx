@@ -179,12 +179,12 @@ export default function AdminEditionPromptsPage() {
   }
 
   return (
-    <section className="border-t-2 border-ink pt-6">
+    <section className="border-t border-rule pt-6">
       <h1>Consignas de la edición</h1>
-      <p className="lead mt-3 text-ink-2">
+      <p className="lead mt-3 text-muted">
         {edition
           ? `Paquete oficial de consignas para ${edition.title}.`
-          : "Crea y activa primero una edición en /admin/ediciones para programar consignas."}
+          : "Aún no hay una edición activa."}
       </p>
 
       {errorMessage && (

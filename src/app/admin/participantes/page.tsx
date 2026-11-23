@@ -176,16 +176,15 @@ export default function AdminParticipantesPage() {
 
   return (
     <div className="space-y-8">
-      <header className="border-b-2 border-ink pb-4">
-        <div className="flex items-center gap-2 text-accent-2">
-          <Users className="h-5 w-5" aria-hidden="true" />
-          <span className="text-sm font-semibold">Intervención manual</span>
-        </div>
-        <h1 className="mt-1">Participantes de la edición</h1>
-        <p className="mt-1 text-sm text-ink-2">
+      <header className="border-b border-rule pb-4">
+        <h1 className="flex items-center gap-2.5">
+          <Users className="h-6 w-6 text-accent" aria-hidden="true" />
+          <span>Participantes de la edición</span>
+        </h1>
+        <p className="mt-1.5 text-sm text-muted">
           {edition
             ? `${edition.title} (${participants.length} inscritos)`
-            : "No hay una edición activa configurada."}
+            : "Aún no hay una edición activa configurada."}
         </p>
       </header>
 

@@ -5,7 +5,7 @@
 
 import { eq } from "drizzle-orm";
 import type { AppDatabase } from "@/db";
-import { users } from "@/db/schema";
+import { accounts, sessions, users, verifications } from "@/db/schema";
 import { MIN_PASSWORD_LENGTH } from "./auth";
 import {
   EMAIL_REGEX,
@@ -275,4 +275,76 @@ export async function uploadAvatarToR2(
     avatarUrl,
     objectKey,
   };
+}
+
+export interface DeleteUserAccountResult {
+  deleted: boolean;
+  anonymized?: boolean;
+  error?: string;
+}
+
+/**
+ * Permanently deletes a user's account, sessions, OAuth links, and verification tokens.
+ * Protects against deleting the last remaining SUPERADMIN account, and falls back
+ * to full anonymization if historical contest rows reference the user via foreign keys.
+ */
+export async function deleteUserAccountInDb(options: {
+  db: AppDatabase;
+  userId: string;
+  email: string;
+  nowIso?: string;
+}): Promise<DeleteUserAccountResult> {
+  const { db, userId, email } = options;
+  const nowIso = options.nowIso ?? new Date().toISOString();
+
+  const targetRows = await db
+    .select({ id: users.id, role: users.role })
+    .from(users)
+    .where(eq(users.id, userId));
+  const targetUser = targetRows[0];
+
+  if (targetUser?.role === "SUPERADMIN") {
+    const superadmins = await db
+      .select({ id: users.id })
+      .from(users)
+      .where(eq(users.role, "SUPERADMIN"));
+    if (superadmins.length <= 1) {
+      return {
+        deleted: false,
+        error:
+          "No puedes eliminar la última cuenta de superadministrador. Asigna primero otro superadministrador.",
+      };
+    }
+  }
+
+  await db.delete(sessions).where(eq(sessions.userId, userId));
+  await db.delete(accounts).where(eq(accounts.userId, userId));
+  await db
+    .delete(verifications)
+    .where(eq(verifications.identifier, email.trim().toLowerCase()));
+
+  try {
+    await db.delete(users).where(eq(users.id, userId));
+    return { deleted: true, anonymized: false };
+  } catch {
+    // Historical contest records reference this user — erase all PII and revoke access
+    await db
+      .update(users)
+      .set({
+        name: "Cuenta eliminada",
+        firstName: "Cuenta",
+        lastName: "eliminada",
+        email: `eliminada-${userId}@deleted.local`,
+        emailVerified: false,
+        country: null,
+        phone: null,
+        avatarUrl: null,
+        image: null,
+        profileCompleted: false,
+        role: "PARTICIPANT",
+        updatedAt: nowIso,
+      })
+      .where(eq(users.id, userId));
+    return { deleted: true, anonymized: true };
+  }
 }

@@ -64,15 +64,14 @@ export default function AdminLogPage() {
 
   return (
     <div className="space-y-8">
-      <header className="border-b-2 border-ink pb-4">
-        <div className="flex items-center gap-2 text-accent-2">
-          <ScrollText className="h-5 w-5" aria-hidden="true" />
-          <span className="text-sm font-semibold">Auditoría inmutable</span>
-        </div>
-        <h1 className="mt-1">Historial de acciones administrativas</h1>
-        <p className="mt-1 text-sm text-ink-2">
-          Registro cronológico visible para todos los administradores y
-          superadministradores.
+      <header className="border-b border-rule pb-4">
+        <h1 className="flex items-center gap-2.5">
+          <ScrollText className="h-6 w-6 text-accent" aria-hidden="true" />
+          <span>Historial de acciones</span>
+        </h1>
+        <p className="mt-1.5 text-sm text-muted">
+          Registro cronológico inmutable de las intervenciones realizadas en el
+          certamen.
         </p>
       </header>
 

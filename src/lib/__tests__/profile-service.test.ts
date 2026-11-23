@@ -3,6 +3,7 @@ import { createDbClient } from "@/db";
 import type { D1DatabaseBinding, R2BucketBinding } from "../cloudflare-env";
 import { MAX_IMAGE_SIZE_BYTES } from "../cloudflare-resources";
 import {
+  deleteUserAccountInDb,
   updateUserProfileInDb,
   uploadAvatarToR2,
   validatePasswordChangeForm,
@@ -238,5 +239,26 @@ describe("Step 1.13 — Profile Management, Email Re-Verification & R2 Avatar Up
       contentType: "image/webp",
     });
     expect(queries.some((q) => q.includes('update "users"'))).toBe(true);
+  });
+
+  it("deletes user sessions, OAuth accounts, verifications, and user record", async () => {
+    const { binding, queries } = createProfileServiceTestD1Binding();
+    const db = createDbClient(binding);
+
+    const result = await deleteUserAccountInDb({
+      db,
+      userId: "user_9",
+      email: "lector@ejemplo.com",
+    });
+
+    expect(result.deleted).toBe(true);
+    expect(result.anonymized).toBe(false);
+    expect(queries.some((q) => q.includes('delete from "sessions"'))).toBe(
+      true
+    );
+    expect(queries.some((q) => q.includes('delete from "accounts"'))).toBe(
+      true
+    );
+    expect(queries.some((q) => q.includes('delete from "users"'))).toBe(true);
   });
 });

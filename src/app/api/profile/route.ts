@@ -12,6 +12,7 @@ import { APP_BRAND } from "@/lib/app-metadata";
 import { createAuthInstance, splitDisplayName } from "@/lib/auth";
 import type { CloudflareEnv } from "@/lib/cloudflare-env";
 import {
+  deleteUserAccountInDb,
   updateUserProfileInDb,
   type ProfileUpdateInput,
 } from "@/lib/profile-service";
@@ -105,4 +106,40 @@ export async function PUT(request: Request): Promise<Response> {
     emailChanged: result.emailChanged,
     verificationSent: result.verificationSent,
   });
+}
+
+export async function DELETE(request: Request): Promise<Response> {
+  const { env } = await getCloudflareContext({ async: true });
+  const cfEnv = env as unknown as CloudflareEnv;
+  const db = createDbClient(cfEnv.DB);
+  const auth = createAuthInstance(db, cfEnv, request.url);
+
+  const session = await auth.api.getSession({ headers: request.headers });
+  if (!session?.user?.id) {
+    return NextResponse.json(
+      { ok: false, error: "Debes iniciar sesión para eliminar tu cuenta." },
+      { status: 401 }
+    );
+  }
+
+  const result = await deleteUserAccountInDb({
+    db,
+    userId: session.user.id,
+    email: session.user.email,
+  });
+
+  if (!result.deleted) {
+    return NextResponse.json(
+      { ok: false, error: result.error ?? "No se pudo eliminar la cuenta." },
+      { status: 400 }
+    );
+  }
+
+  try {
+    await auth.api.signOut({ headers: request.headers });
+  } catch {
+    // Session row was already deleted in D1
+  }
+
+  return NextResponse.json({ ok: true, anonymized: result.anonymized ?? false });
 }

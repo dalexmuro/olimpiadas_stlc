@@ -63,20 +63,17 @@ export default function AdminEstadisticasPage() {
 
   return (
     <div className="space-y-8">
-      <header className="flex flex-wrap items-baseline justify-between gap-4 border-b-2 border-ink pb-4">
+      <header className="flex flex-wrap items-baseline justify-between gap-4 border-b border-rule pb-4">
         <div>
-          <div className="flex items-center gap-2 text-accent-2">
-            <BarChart3 className="h-5 w-5" aria-hidden="true" />
-            <span className="text-sm font-semibold">
-              Panel exclusivo de administradores
-            </span>
-          </div>
-          <h1 className="mt-1">Estadísticas en tiempo real</h1>
+          <h1 className="flex items-center gap-2.5">
+            <BarChart3 className="h-6 w-6 text-accent" aria-hidden="true" />
+            <span>Estadísticas en tiempo real</span>
+          </h1>
           {data?.edition && (
-            <p className="mt-1 text-sm text-ink-2">
+            <p className="mt-1.5 text-sm text-muted">
               {data.edition.title}
               {data.generatedAt
-                ? ` / Actualizado: ${formatCaracasDateTime(data.generatedAt)}`
+                ? ` — Actualizado: ${formatCaracasDateTime(data.generatedAt)}`
                 : ""}
             </p>
           )}
