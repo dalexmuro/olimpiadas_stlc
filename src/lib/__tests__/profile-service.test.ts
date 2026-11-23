@@ -220,6 +220,8 @@ describe("Step 1.13 — Profile Management, Email Re-Verification & R2 Avatar Up
     expect(storedObjects.size).toBe(0);
 
     const validBuffer = new ArrayBuffer(4096);
+    const webpHeader = new Uint8Array(validBuffer);
+    webpHeader.set([0x52, 0x49, 0x46, 0x46, 0, 0, 0, 0, 0x57, 0x45, 0x42, 0x50]);
     const uploaded = await uploadAvatarToR2({
       db,
       mediaBucket: bucket,

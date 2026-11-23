@@ -393,6 +393,7 @@ export async function uploadPromptImageToR2(options: {
   const validation = validateMediaUpload({
     mimeType: options.mimeType,
     sizeBytes: options.bytes.byteLength,
+    bytes: options.bytes,
   });
 
   if (!validation.valid) {

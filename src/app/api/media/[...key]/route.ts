@@ -5,6 +5,7 @@
 
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import type { CloudflareEnv } from "@/lib/cloudflare-env";
+import { ALLOWED_IMAGE_MIME_TYPES } from "@/lib/cloudflare-resources";
 
 export async function GET(
   _request: Request,
@@ -25,12 +26,19 @@ export async function GET(
     return new Response("Archivo no encontrado.", { status: 404 });
   }
 
+  const rawContentType = object.httpMetadata?.contentType ?? "";
+  const safeContentType = (
+    ALLOWED_IMAGE_MIME_TYPES as readonly string[]
+  ).includes(rawContentType)
+    ? rawContentType
+    : "application/octet-stream";
+
   const body = await object.arrayBuffer();
   return new Response(body, {
     status: 200,
     headers: {
-      "Content-Type":
-        object.httpMetadata?.contentType ?? "application/octet-stream",
+      "Content-Type": safeContentType,
+      "X-Content-Type-Options": "nosniff",
       "Cache-Control":
         object.httpMetadata?.cacheControl ??
         "public, max-age=31536000, immutable",

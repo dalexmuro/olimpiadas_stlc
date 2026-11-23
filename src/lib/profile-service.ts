@@ -238,6 +238,7 @@ export async function uploadAvatarToR2(
   const validation = validateMediaUpload({
     mimeType: input.mimeType,
     sizeBytes: input.bytes.byteLength,
+    bytes: input.bytes,
   });
 
   if (!validation.valid) {

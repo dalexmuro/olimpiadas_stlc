@@ -3,6 +3,7 @@ import {
   CLOUDFLARE_ENVIRONMENTS,
   MAX_IMAGE_SIZE_BYTES,
   buildR2MediaKey,
+  detectImageMimeFromBytes,
   getCloudflareAccountId,
   getCloudflareConfig,
   validateMediaUpload,
@@ -84,6 +85,30 @@ describe("Step 1.1 — Cloudflare R2 & D1 Resource Configuration", () => {
       1700000000500
     );
     expect(promptKey).toBe("prompts/prompt-abc/1700000000500.jpg");
+  });
+
+  it("validates binary magic bytes and rejects spoofed MIME types", () => {
+    const pngBytes = new Uint8Array([
+      0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0, 0, 0, 0,
+    ]);
+    expect(detectImageMimeFromBytes(pngBytes)).toBe("image/png");
+    expect(
+      validateMediaUpload({
+        mimeType: "image/png",
+        sizeBytes: pngBytes.byteLength,
+        bytes: pngBytes,
+      })
+    ).toEqual({ valid: true });
+
+    const fakeHtmlBytes = new TextEncoder().encode("<html><script>1</script></html>");
+    expect(detectImageMimeFromBytes(fakeHtmlBytes)).toBeNull();
+    const spoofed = validateMediaUpload({
+      mimeType: "image/png",
+      sizeBytes: fakeHtmlBytes.byteLength,
+      bytes: fakeHtmlBytes,
+    });
+    expect(spoofed.valid).toBe(false);
+    expect(spoofed.error).toContain("contenido real");
   });
 
   it("throws an error if entityId is empty after sanitization", () => {

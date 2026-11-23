@@ -187,11 +187,13 @@ describe("Step 2.4 — Collaborative Prompt Bank (Media, Anonymous Votes & Reset
       delete: async () => undefined,
     };
 
+    const jpegBuffer = new ArrayBuffer(2048);
+    new Uint8Array(jpegBuffer).set([0xff, 0xd8, 0xff, 0xe0]);
     const result = await uploadPromptImageToR2({
       mediaBucket: bucket,
       promptScopeId: "admin_1",
       mimeType: "image/jpeg",
-      bytes: new ArrayBuffer(2048),
+      bytes: jpegBuffer,
       timestampMs: 1700000001000,
     });
 

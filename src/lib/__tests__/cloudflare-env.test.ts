@@ -41,7 +41,7 @@ describe("Step 1.3 — Wrangler Configuration & Bindings Validation", () => {
     const rawContent = fs.readFileSync(wranglerPath, "utf-8");
     const parsed = JSON.parse(rawContent) as WranglerConfigShape;
 
-    expect(parsed.main).toBe(".open-next/worker.js");
+    expect(parsed.main).toBe("src/worker.ts");
     expect(parsed.compatibility_flags).toContain("nodejs_compat");
 
     // Production bindings
