@@ -1,25 +1,17 @@
 "use client";
 
 import { useMemo, useState, type FormEvent } from "react";
-import {
-  AlertTriangle,
-  BookOpen,
-  CheckCircle2,
-  ChevronLeft,
-  ChevronRight,
-  FileText,
-  Lock,
-  Save,
-  X,
-} from "lucide-react";
+import { BookOpen, CheckCircle2, FileText } from "lucide-react";
 import type { DisqualificationReason, EnrollmentStatus } from "@/db/schema";
-import { parseVideoEmbedUrl } from "@/lib/prompt-bank";
-import { MAX_STORY_TITLE_LENGTH, getDisqualificationReasonLabel } from "@/lib/stage2-writing";
 import {
   validateStage3EditInput,
   type Stage3StoryItem,
 } from "@/lib/stage3-submission";
 import { formatCaracasDateTime } from "@/lib/timezone";
+import { DisqualifiedNotice } from "./DisqualifiedNotice";
+import { PromptViewerModal } from "./PromptViewerModal";
+import { Stage3StoryEditor } from "./Stage3StoryEditor";
+import { Stage3StoryReader } from "./Stage3StoryReader";
 
 export interface Stage3SubmissionProps {
   enrollmentStatus: EnrollmentStatus;
@@ -83,22 +75,7 @@ export function Stage3Submission({
   }, [selectedStory, editTitle, editBody, minChars, maxChars, minSimilarityPct]);
 
   if (enrollmentStatus === "DISQUALIFIED") {
-    return (
-      <section className="rounded-card border border-error bg-paper-2 p-8">
-        <div className="flex items-start gap-3">
-          <AlertTriangle
-            className="mt-1 h-5 w-5 shrink-0 text-error"
-            aria-hidden="true"
-          />
-          <div>
-            <h2>Participación descalificada</h2>
-            <p className="lead mt-3 text-ink-2">
-              {getDisqualificationReasonLabel(disqualificationReason)}
-            </p>
-          </div>
-        </div>
-      </section>
-    );
+    return <DisqualifiedNotice reason={disqualificationReason} />;
   }
 
   async function handleConfirmSelect(story: Stage3StoryItem) {
@@ -251,13 +228,6 @@ export function Stage3Submission({
     }
   }
 
-  const promptModalVideoUrl =
-    promptModalStory?.promptMediaType === "VIDEO" &&
-    promptModalStory.promptMediaUrl
-      ? parseVideoEmbedUrl(promptModalStory.promptMediaUrl)
-      : null;
-
-  // Definitive postulation completed view
   if (selectedStory?.isPostulated) {
     return (
       <div className="space-y-6">
@@ -304,9 +274,8 @@ export function Stage3Submission({
         </section>
 
         {promptModalStory && (
-          <PromptModal
-            story={promptModalStory}
-            videoEmbedUrl={promptModalVideoUrl}
+          <PromptViewerModal
+            prompt={promptModalStory}
             onClose={() => setPromptModalStory(null)}
           />
         )}
@@ -319,7 +288,6 @@ export function Stage3Submission({
 
   return (
     <div className="space-y-6">
-      {/* Persistent reminder banner required until definitive postulation */}
       <div
         role="status"
         className="border-l-4 border-accent bg-paper-2 px-5 py-4 text-sm font-medium text-ink"
@@ -347,7 +315,6 @@ export function Stage3Submission({
         </div>
       )}
 
-      {/* MODE A: Selecting which Stage 2 story to postulate */}
       {!selectedStory && !readingStory && (
         <section className="rounded-card border border-ink bg-paper p-8">
           <h2>Tus cuentos de la etapa de escritura</h2>
@@ -393,202 +360,48 @@ export function Stage3Submission({
         </section>
       )}
 
-      {/* MODE A.2: Story Reader with Prev/Next, Back to list, Prompt Modal, and Select button */}
       {!selectedStory && readingStory && readingIndex !== null && (
-        <section className="rounded-card border border-ink bg-paper p-8">
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-rule pb-4">
-            <button
-              type="button"
-              onClick={() => setReadingIndex(null)}
-              className="btn btn--secondary"
-            >
-              Volver a la lista
-            </button>
-            <div className="flex flex-wrap items-center gap-2">
-              <button
-                type="button"
-                disabled={readingIndex <= 0}
-                onClick={() => setReadingIndex((i) => (i !== null ? i - 1 : 0))}
-                className="btn btn--secondary"
-              >
-                <ChevronLeft className="mr-1 inline h-4 w-4" aria-hidden="true" />
-                Anterior
-              </button>
-              <button
-                type="button"
-                disabled={readingIndex >= stories.length - 1}
-                onClick={() =>
-                  setReadingIndex((i) =>
-                    i !== null ? Math.min(stories.length - 1, i + 1) : 0
-                  )
-                }
-                className="btn btn--secondary"
-              >
-                Siguiente
-                <ChevronRight className="ml-1 inline h-4 w-4" aria-hidden="true" />
-              </button>
-            </div>
-          </div>
-
-          <div className="mt-6 flex flex-wrap items-baseline justify-between gap-4">
-            <div>
-              <p className="text-sm font-semibold text-accent-2">
-                Consigna {readingStory.promptNumber}
-              </p>
-              <h2 className="mt-1">{readingStory.originalTitle}</h2>
-            </div>
-            <button
-              type="button"
-              onClick={() => setPromptModalStory(readingStory)}
-              className="riso-link text-sm font-medium"
-            >
-              Ver consigna completa
-            </button>
-          </div>
-
-          <article className="mt-6 whitespace-pre-wrap text-base leading-relaxed text-ink">
-            {readingStory.originalBody}
-          </article>
-
-          <div className="mt-8 flex flex-wrap items-center justify-between gap-4 border-t border-rule pt-6">
-            <span className="text-xs text-muted num">
-              Extensión original: {readingStory.originalCharCount} caracteres
-            </span>
-            <button
-              type="button"
-              onClick={() => setConfirmSelectStory(readingStory)}
-              className="btn btn--primary"
-            >
-              Seleccionar este cuento
-            </button>
-          </div>
-        </section>
+        <Stage3StoryReader
+          story={readingStory}
+          readingIndex={readingIndex}
+          totalStories={stories.length}
+          onBackToList={() => setReadingIndex(null)}
+          onPrev={() => setReadingIndex((i) => (i !== null ? i - 1 : 0))}
+          onNext={() =>
+            setReadingIndex((i) =>
+              i !== null ? Math.min(stories.length - 1, i + 1) : 0
+            )
+          }
+          onOpenPrompt={setPromptModalStory}
+          onRequestSelect={setConfirmSelectStory}
+        />
       )}
 
-      {/* MODE B: Editing & Definitive Postulation of the selected story */}
       {selectedStory && editValidation && (
-        <section className="rounded-card border border-ink bg-paper-2 p-8">
-          <div className="flex flex-wrap items-baseline justify-between gap-4 border-b border-rule pb-4">
-            <div>
-              <p className="text-sm font-semibold text-accent-2">
-                Cuento seleccionado: Consigna {selectedStory.promptNumber}
-              </p>
-              <h2 className="mt-1">Edita y postula tu cuento</h2>
-            </div>
-            <button
-              type="button"
-              onClick={() => setPromptModalStory(selectedStory)}
-              className="riso-link text-sm font-medium"
-            >
-              Ver consigna completa
-            </button>
-          </div>
-
-          <form onSubmit={handleSaveDraft} className="mt-6 space-y-6" noValidate>
-            <div>
-              <label
-                htmlFor="stage3-title"
-                className="block text-sm font-semibold text-ink"
-              >
-                Título del cuento
-              </label>
-              <input
-                id="stage3-title"
-                type="text"
-                maxLength={MAX_STORY_TITLE_LENGTH}
-                value={editTitle}
-                onChange={(e) => setEditTitle(e.target.value)}
-                className="mt-2 w-full rounded-input border border-ink bg-paper px-3 py-2 text-base text-ink"
-                required
-              />
-            </div>
-
-            <div>
-              <div className="flex flex-wrap items-baseline justify-between gap-3">
-                <label
-                  htmlFor="stage3-body"
-                  className="block text-sm font-semibold text-ink"
-                >
-                  Texto del cuento
-                </label>
-                <div className="flex flex-wrap items-center gap-4 text-xs font-semibold num">
-                  <span
-                    className={
-                      editValidation.charCount < minChars ||
-                      editValidation.charCount > maxChars
-                        ? "text-error"
-                        : "text-success"
-                    }
-                  >
-                    {editValidation.charCount} caracteres ({minChars} a {maxChars})
-                  </span>
-                  <span
-                    className={
-                      editValidation.meetsSimilarityThreshold
-                        ? "text-success"
-                        : "text-error"
-                    }
-                  >
-                    Similitud: {editValidation.similarityPct.toFixed(1)}% (mín.{" "}
-                    {minSimilarityPct}%)
-                  </span>
-                </div>
-              </div>
-
-              <textarea
-                id="stage3-body"
-                rows={14}
-                value={editBody}
-                onChange={(e) => setEditBody(e.target.value)}
-                className="mt-2 w-full rounded-input border border-ink bg-paper px-3 py-3 text-base leading-relaxed text-ink"
-                required
-              />
-
-              {editValidation.errors.length > 0 && (
-                <ul className="mt-2 space-y-1 text-xs text-error">
-                  {editValidation.errors.map((err) => (
-                    <li key={err}>{err}</li>
-                  ))}
-                </ul>
-              )}
-            </div>
-
-            <div className="flex flex-wrap items-center justify-between gap-4 border-t border-rule pt-6">
-              <button
-                type="submit"
-                disabled={busyAction !== null || !editValidation.valid}
-                className="btn btn--secondary"
-              >
-                <Save className="mr-2 inline h-4 w-4" aria-hidden="true" />
-                {busyAction === "save_draft"
-                  ? "Guardando…"
-                  : "Guardar borrador"}
-              </button>
-
-              <button
-                type="button"
-                disabled={busyAction !== null || !editValidation.valid}
-                onClick={() => setConfirmPostulateOpen(true)}
-                className="btn btn--primary"
-              >
-                <Lock className="mr-2 inline h-4 w-4" aria-hidden="true" />
-                Postular definitivamente
-              </button>
-            </div>
-          </form>
-        </section>
+        <Stage3StoryEditor
+          story={selectedStory}
+          editTitle={editTitle}
+          editBody={editBody}
+          minChars={minChars}
+          maxChars={maxChars}
+          minSimilarityPct={minSimilarityPct}
+          validation={editValidation}
+          busyAction={busyAction}
+          onTitleChange={setEditTitle}
+          onBodyChange={setEditBody}
+          onSaveDraft={handleSaveDraft}
+          onOpenPrompt={setPromptModalStory}
+          onOpenConfirmPostulate={() => setConfirmPostulateOpen(true)}
+        />
       )}
 
-      {/* Modal: Complete Prompt Viewer */}
       {promptModalStory && (
-        <PromptModal
-          story={promptModalStory}
-          videoEmbedUrl={promptModalVideoUrl}
+        <PromptViewerModal
+          prompt={promptModalStory}
           onClose={() => setPromptModalStory(null)}
         />
       )}
 
-      {/* Modal: Irreversible Selection Confirmation */}
       {confirmSelectStory && (
         <div
           role="dialog"
@@ -628,7 +441,6 @@ export function Stage3Submission({
         </div>
       )}
 
-      {/* Modal: Irreversible Definitive Postulation Confirmation */}
       {confirmPostulateOpen && selectedStory && (
         <div
           role="dialog"
@@ -668,72 +480,6 @@ export function Stage3Submission({
           </div>
         </div>
       )}
-    </div>
-  );
-}
-
-function PromptModal({
-  story,
-  videoEmbedUrl,
-  onClose,
-}: {
-  story: Stage3StoryItem;
-  videoEmbedUrl: string | null;
-  onClose: () => void;
-}) {
-  return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="prompt-modal-title"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-ink/60 p-4"
-    >
-      <div className="max-h-[85vh] w-full max-w-2xl overflow-y-auto rounded-card border-2 border-ink bg-paper p-6">
-        <div className="flex items-start justify-between gap-4 border-b border-rule pb-3">
-          <div>
-            <p className="text-xs font-semibold text-accent-2">
-              Consigna {story.promptNumber}
-            </p>
-            <h3 id="prompt-modal-title" className="mt-1">
-              {story.promptTitle}
-            </h3>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Cerrar consigna"
-            className="btn btn--secondary"
-          >
-            <X className="h-4 w-4" aria-hidden="true" />
-          </button>
-        </div>
-
-        <div className="mt-4 whitespace-pre-wrap text-sm leading-relaxed text-ink">
-          {story.promptBody}
-        </div>
-
-        {story.promptMediaType === "IMAGE" && story.promptMediaUrl && (
-          <figure className="mt-4">
-            <img
-              src={story.promptMediaUrl}
-              alt={`Imagen de la consigna ${story.promptNumber}`}
-              className="max-h-80 w-auto border border-rule object-contain"
-            />
-          </figure>
-        )}
-
-        {videoEmbedUrl && (
-          <div className="mt-4 aspect-video w-full overflow-hidden border border-rule">
-            <iframe
-              src={videoEmbedUrl}
-              title={`Video de la consigna ${story.promptNumber}`}
-              className="h-full w-full"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            />
-          </div>
-        )}
-      </div>
     </div>
   );
 }
