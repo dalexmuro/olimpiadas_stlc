@@ -85,8 +85,9 @@ export function StageExplorer() {
 
   return (
     <section
+      id="etapas"
       aria-labelledby="etapas-titulo"
-      className="mt-28 border-t border-rule pt-10 sm:mt-36 sm:pt-12"
+      className="mt-16 scroll-mt-24 border-t border-rule pt-10 sm:mt-20 sm:pt-12"
     >
       <div className="mb-12 flex flex-wrap items-baseline justify-between gap-4 sm:mb-14">
         <h2 id="etapas-titulo">

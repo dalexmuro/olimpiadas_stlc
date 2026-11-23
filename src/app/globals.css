@@ -210,6 +210,53 @@
     animation: ta-caret-blink 1.15s steps(1) infinite;
   }
 
+  /* Subtle Scroll-Down Cue (fades out once #etapas enters viewport) */
+  .ta-scroll-cue {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    margin-top: 8px;
+    border-radius: var(--radius-pill);
+    border: 1px solid color-mix(in oklab, var(--color-rule) 85%, transparent);
+    background: color-mix(in oklab, var(--color-surface) 72%, transparent);
+    color: var(--color-muted);
+    cursor: pointer;
+    opacity: 0.85;
+    transform: translateY(0);
+    transition:
+      opacity 280ms var(--ease-out),
+      transform 280ms var(--ease-out),
+      color var(--dur-short) var(--ease-out),
+      border-color var(--dur-short) var(--ease-out),
+      background-color var(--dur-short) var(--ease-out);
+  }
+
+  .ta-scroll-cue:hover,
+  .ta-scroll-cue:focus-visible {
+    opacity: 1;
+    color: var(--color-accent-deep);
+    border-color: color-mix(in oklab, var(--color-accent) 45%, transparent);
+    background: var(--color-accent-soft);
+  }
+
+  .ta-scroll-cue--hidden {
+    opacity: 0;
+    transform: translateY(8px);
+    pointer-events: none;
+  }
+
+  .ta-scroll-cue-icon {
+    animation: ta-scroll-bob 2.2s ease-in-out infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ta-scroll-cue-icon {
+      animation: none;
+    }
+  }
+
   /* Open-Paper Editorial Stage Index (no solid boxes) */
   .ta-index-grid {
     display: grid;
@@ -824,5 +871,14 @@
   }
   50%, 100% {
     opacity: 0;
+  }
+}
+
+@keyframes ta-scroll-bob {
+  0%, 100% {
+    transform: translateY(-2px);
+  }
+  50% {
+    transform: translateY(4px);
   }
 }

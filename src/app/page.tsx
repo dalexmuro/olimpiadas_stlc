@@ -3,6 +3,7 @@ import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { HomeInfoSections } from "@/components/home/HomeInfoSections";
+import { ScrollCue } from "@/components/home/ScrollCue";
 import { StageExplorer } from "@/components/home/StageExplorer";
 import { Footer } from "@/components/layout/Footer";
 import { Navbar } from "@/components/layout/Navbar";
@@ -136,41 +137,45 @@ export default async function HomePage() {
         {/* Open-Paper Editorial Hero: Official SVG emblem + expressive literary tagline */}
         <section
           aria-label="Presentación del certamen"
-          className="flex min-h-[78vh] flex-col items-center justify-center py-12 text-center sm:py-20"
+          className="flex min-h-[calc(100svh-76px)] flex-col items-center pb-24 pt-6 text-center sm:pb-28 sm:pt-8"
         >
-          <div
-            id="hero-emblem-trigger"
-            className="flex flex-col items-center"
-          >
-            <img
-              src="/images/logo-olimpiadas.svg"
-              alt={`Emblema oficial de las ${APP_BRAND.contestName}`}
-              className="h-auto w-56 sm:w-72"
-            />
-            <p className="mt-4 font-display text-4xl font-extrabold leading-none tracking-[-0.035em] text-ink sm:text-5xl">
-              Olimpíadas <span className="ta-serif-italic">Literarias</span>
+          <div className="my-auto flex flex-col items-center py-6">
+            <div
+              id="hero-emblem-trigger"
+              className="flex flex-col items-center"
+            >
+              <img
+                src="/images/logo-olimpiadas.svg"
+                alt={`Emblema oficial de las ${APP_BRAND.contestName}`}
+                className="h-auto w-56 sm:w-72"
+              />
+              <p className="mt-4 font-display text-4xl font-extrabold leading-none tracking-[-0.035em] text-ink sm:text-5xl">
+                Olimpíadas <span className="ta-serif-italic">Literarias</span>
+              </p>
+              {editionStatus.isActive && (
+                <span className="mt-2 text-xs font-medium tracking-wide text-muted">
+                  {editionStatus.editionTitle}
+                </span>
+              )}
+            </div>
+
+            <p className="mt-12 max-w-3xl font-display text-2xl font-bold leading-[1.16] tracking-display text-ink sm:mt-14 sm:text-4xl lg:text-[2.75rem]">
+              Escribe sin miedo, juega con cada{" "}
+              <span className="ta-serif-italic">consigna</span> y celebra tus{" "}
+              <span className="ta-serif-italic">cuentos</span> junto a otros
+              lectores.
             </p>
-            {editionStatus.isActive && (
-              <span className="mt-2 text-xs font-medium tracking-wide text-muted">
-                {editionStatus.editionTitle}
+
+            <div className="ta-status-line mt-9" aria-live="polite">
+              <span className="ta-status-dot-airy" aria-hidden="true" />
+              <span>
+                {editionStatus.stageLabel}
+                <span className="ta-caret" aria-hidden="true" />
               </span>
-            )}
+            </div>
           </div>
 
-          <p className="mt-12 max-w-3xl font-display text-2xl font-bold leading-[1.16] tracking-display text-ink sm:mt-14 sm:text-4xl lg:text-[2.75rem]">
-            Escribe sin miedo, juega con cada{" "}
-            <span className="ta-serif-italic">consigna</span> y celebra tus{" "}
-            <span className="ta-serif-italic">cuentos</span> junto a otros
-            lectores.
-          </p>
-
-          <div className="ta-status-line mt-9" aria-live="polite">
-            <span className="ta-status-dot-airy" aria-hidden="true" />
-            <span>
-              {editionStatus.stageLabel}
-              <span className="ta-caret" aria-hidden="true" />
-            </span>
-          </div>
+          <ScrollCue targetId="etapas" />
         </section>
 
         {/* Open-Paper Interactive Editorial Index */}
