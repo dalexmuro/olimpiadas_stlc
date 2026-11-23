@@ -252,10 +252,10 @@ export default function AdminPromptBankPage() {
           </label>
           <textarea
             id="pb-body"
-            rows={14}
+            rows={7}
             value={body}
             onChange={(e) => setBody(e.target.value)}
-            className="mt-1 block min-h-96 w-full resize-y rounded-card border border-ink bg-paper p-3 text-sm leading-relaxed text-ink"
+            className="mt-1.5 block min-h-44 w-full resize-y rounded-input border border-rule bg-surface p-4 text-sm leading-relaxed text-ink"
           />
         </div>
 
