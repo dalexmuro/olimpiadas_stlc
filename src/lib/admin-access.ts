@@ -35,7 +35,7 @@ export const ADMIN_NAV_TABS: readonly AdminNavTab[] = [
   },
   {
     href: "/admin/consignas-edicion",
-    label: "Consignas de edición",
+    label: "Consignas activas",
     description: "Paquete de consignas de la edición actual y validación de administradores.",
     accessTier: "shared",
     superadminOnly: false,
