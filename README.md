@@ -1,89 +1,151 @@
-# Olimpíadas Literarias de SiTeLoCuento
+# Olimpíadas Literarias — SiTeLoCuento
 
-Plataforma web oficial del concurso anual de cuentos cortos **Olimpíadas Literarias de SiTeLoCuento**, organizado por el club de escritura **SiTeLoCuento**.
+**English** | [Español](README.es.md)
 
-- **Producción (`main`):** `https://olimpiadas.sitelocuento.com`
-- **Desarrollo / Pruebas (`dev`):** `https://dev-olimpiadas.sitelocuento.com`
-- **Zona horaria oficial del sistema:** `America/Caracas` (UTC-4)
+[![Next.js 15](https://img.shields.io/badge/Next.js-15_App_Router-black?logo=next.js)](https://nextjs.org/)
+[![Cloudflare Workers](https://img.shields.io/badge/Cloudflare-Workers_%2B_D1_%2B_R2-F38020?logo=cloudflare&logoColor=white)](https://developers.cloudflare.com/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-Strict-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Vitest](https://img.shields.io/badge/Tests-144_Passing-15803D?logo=vitest&logoColor=white)](https://vitest.dev/)
+
+A full-stack, serverless web platform for the annual short-story writing competition **Olimpíadas Literarias**, organized by the **SiTeLoCuento** writing club — **engineered end-to-end using AI Coding Agents** under a spec-driven, human-in-the-loop governance model.
+
+- **Production (`main`):** `https://olimpiadas.sitelocuento.com`
+- **Staging (`dev`):** `https://dev-olimpiadas.sitelocuento.com`
+- **Official Contest Timezone:** `America/Caracas` (UTC-4)
 
 ---
 
-## Estructura del Proyecto
+## Agentic AI Engineering Showcase
 
-```text
-├── docs/                                      # Documentación funcional y técnica
-│   ├── FUNCTIONAL_SPECIFICATION_AGENT.md      # Especificación funcional exhaustiva (Inglés)
-│   ├── TECHNICAL_SPECIFICATION.md             # Arquitectura, esquema BD D1 y algoritmos
-│   └── GUIA_FUNCIONAL_ORGANIZADORES.md        # Guía en lenguaje natural para organizadores
-├── src/                                       # Código fuente de la aplicación
-│   ├── app/                                   # Rutas, páginas y endpoints (Next.js App Router)
-│   ├── components/                            # Componentes visuales e interactivos
-│   ├── db/                                    # Esquema Drizzle ORM y migraciones (Cloudflare D1)
-│   └── lib/                                   # Autenticación, correos, similitud de textos y cron
-├── public/                                    # Archivos estáticos públicos
-├── wrangler.jsonc                             # Configuración de Cloudflare Workers, bindings D1/R2 y Cron
-├── drizzle.config.ts                          # Configuración de Drizzle Kit (SQLite / Cloudflare D1)
-├── open-next.config.ts                        # Configuración del adaptador @opennextjs/cloudflare
-├── .secrets/                                  # Archivos auxiliares de credenciales locales (Ignorado en Git)
-├── .env                                       # Variables de entorno locales (Ignorado en Git)
-├── .env.example                               # Plantilla de variables de entorno
-└── AGENTS.md                                  # Instrucciones para agentes de IA
+This repository serves as a real-world portfolio reference for **AI-Native Software Delivery** and **Gen AI Consulting** — demonstrating how an entire production-grade SaaS platform can be architected, implemented, tested, visually refined, and deployed using coding agents with strict engineering discipline:
+
+- **Spec-Driven Delivery:** Every domain rule, database table, state machine transition, and email trigger (`E01`–`E26`) was formally specified in [`docs/FUNCTIONAL_SPECIFICATION_AGENT.md`](docs/FUNCTIONAL_SPECIFICATION_AGENT.md) and [`docs/TECHNICAL_SPECIFICATION.md`](docs/TECHNICAL_SPECIFICATION.md) prior to implementation.
+- **Agent Governance (`AGENTS.md`):** Explicit operational guardrails enforce step-by-step execution, mandatory verification gates (`vitest`, `eslint`, `tsc --noEmit`), single-accent design token compliance, and human-owned Git commits.
+- **Design System Engineering (`PRODUCT.md`):** Custom **Editorial Ámbar SiTeLoCuento** single-accent visual system (`#D47E17` / `#B3640C`, `Bricolage Grotesque`, `DM Sans`, `Newsreader` italic) paired with GSAP motion choreography (`SplitText`, `ScrollTrigger`, `ScrollToPlugin`) and `prefers-reduced-motion` accessibility.
+- **Production-Grade Quality:** 22 normalized SQLite/D1 tables, 4 RBAC roles with server-side route guards, banking-style rolling session timeout, **38 test files / 144 passing unit tests**, 0 lint/typecheck errors, and automated GitHub Actions CI/CD targeting a **\$0/month serverless edge stack**.
+
+---
+
+## Architecture Overview
+
+```mermaid
+flowchart LR
+  User["Browser (Desktop & Mobile)"] --> Worker["Cloudflare Worker (Next.js 15 + OpenNext)"]
+  Worker --> D1["Cloudflare D1 (22 SQLite Tables via Drizzle)"]
+  Worker --> R2["Cloudflare R2 (Avatars & Prompt Media)"]
+  Worker --> Auth["Better Auth (Email, Google, Microsoft OAuth)"]
+  Worker --> Brevo["Brevo REST API (26 Automated Email Templates)"]
+  Cron["Cloudflare Cron Triggers"] --> Worker
+```
+
+### Core Capabilities
+- **Multi-Edition Annual Lifecycle:** 7 sequential contest stages (Registration → Prompt Writing → Story Selection & Editing → Admin Review & 24h Correction Window → Anonymous Randomized Peer Voting → Independent Jury Evaluation & Tie-Breaker → Official Winners & Public Anthology).
+- **Text Similarity & Diff Engine:** Myers Diff + Levenshtein ratio prevents story replacement during Stage 3 editing and provides side-by-side red/green diffs for administrators in Stage 4.
+- **Authentication & Banking-Style Sessions:**
+  - Email/Password (duplicate-email pre-check, 3-of-4 strong password policy with info popover, show/hide toggle, email verification `E01` & recovery `E02`) + Google & Microsoft OAuth (`tenant: "common"`) with automatic profile prefill.
+  - Rolling short-lived D1 session tokens: **15-minute** expiry when the tab is closed; **25-minute** inactivity warning modal with **5-minute** countdown (`Seguir conectado` / `Cerrar sesión`) and cross-tab sync when open.
+  - Self-service profile management with unified country-code phone input, R2 avatar upload, sign-out, and safe account deletion (`DELETE /api/profile`).
+- **Role-Based Access Control (RBAC):** `PARTICIPANT`, `JURY`, `ADMIN`, and `SUPERADMIN` enforced at both API and Next.js Server Component layout levels, plus an immutable administrative Audit Log.
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+| :--- | :--- |
+| **Framework** | Next.js 15 (App Router) + React 19 + TypeScript (strict) |
+| **Styling & Motion** | Tailwind CSS v4 + Editorial Ámbar CSS Tokens + Lucide Icons + GSAP (`SplitText`, `ScrollTrigger`, `ScrollToPlugin`) |
+| **Edge Runtime** | Cloudflare Workers via `@opennextjs/cloudflare` |
+| **Database & ORM** | Cloudflare D1 (Serverless SQLite) + Drizzle ORM & Drizzle Kit |
+| **Media Storage** | Cloudflare R2 |
+| **Auth & Security** | Better Auth (Drizzle D1 Adapter) + Rolling Session Guard |
+| **Transactional Email** | Brevo HTTP REST API |
+| **Testing & CI/CD** | Vitest + ESLint + TypeScript + GitHub Actions |
+
+---
+
+## Local Setup & Quick Start
+
+### Prerequisites
+- **Node.js 20+** and `npm`
+- **Git**
+- A **Cloudflare** account (`npx wrangler login`) if running commands against remote D1/R2/Workers
+
+### 1. Clone & Install Dependencies
+```bash
+git clone https://github.com/dalexmuro/olimpiadas_stlc.git
+cd olimpiadas_stlc
+npm install --legacy-peer-deps
+```
+
+### 2. Configure Environment Variables
+Create a local `.env` file from the template:
+```bash
+cp .env.example .env
+```
+Populate the required credentials (`BETTER_AUTH_SECRET`, `BREVO_API_KEY`, Google/Microsoft OAuth credentials, and `SUPERADMIN_INITIAL_EMAIL`). `.env` is excluded from version control.
+
+### 3. Initialize Local Cloudflare D1 Database
+Apply SQL migrations and seed initial email templates (`E01`–`E26`) and public pages:
+```bash
+npx wrangler d1 migrations apply olimpiadas-db-prod --local
+npx wrangler d1 execute olimpiadas-db-prod --local --file=./drizzle/seed.sql
+```
+*(For the `dev` local database binding, run `npm run db:migrate:local` and `npm run db:seed:local`.)*
+
+### 4. Start Development Server & Verify
+```bash
+npm run dev       # Starts local server on http://localhost:3000
+npm test          # Runs the full Vitest unit test suite
+npm run lint      # Runs ESLint static analysis
+npm run typecheck # Runs TypeScript strict type-checking
+```
+
+### 5. Optional: Promote a Local Test User to `SUPERADMIN`
+```bash
+npx wrangler d1 execute olimpiadas-db-prod --local --command "UPDATE users SET email_verified = 1, role = 'SUPERADMIN', profile_completed = 1 WHERE lower(email) = 'admin@example.com';"
 ```
 
 ---
 
-## Stack Tecnológico
-
-- **Framework Full-Stack:** Next.js (App Router) + TypeScript + Tailwind CSS v4
-- **Sistema de Diseño Visual:** Hallmark (`Riso` — `Cabinet Grotesk 800` + `Literata`, tokens en `src/app/tokens.css` y `src/app/base.css`)
-- **Infraestructura y Hosting:** Cloudflare Workers / Pages (`@opennextjs/cloudflare`)
-- **Base de Datos:** Cloudflare D1 (SQLite Serverless) + Drizzle ORM
-  - Producción: `olimpiadas-db-prod` (`62d0469d-8c03-42a9-ac45-98b320f85b02`)
-  - Desarrollo: `olimpiadas-db-dev` (`b03d7071-ddc3-4111-96e1-12c18da7245a`)
-- **Almacenamiento Multimedia:** Cloudflare R2 (`WEUR`)
-  - Producción: `olimpiadas-media-prod`
-  - Desarrollo: `olimpiadas-media-dev`
-- **Autenticación:** Better Auth (Correo/Contraseña + Google OAuth + Microsoft OAuth)
-- **Correos Transaccionales:** Brevo API (`olimpiadas@sitelocuento.com`)
-- **Tareas Programadas:** Cloudflare Cron Triggers (`*/5 * * * *`)
-
----
-
-## Comandos de Desarrollo, Verificación y Calidad
+## Available Scripts
 
 ```bash
-npm run dev              # Inicia el servidor local de desarrollo (Next.js App Router)
-npm run build            # Compila la aplicación Next.js para producción
-npm run cf:build         # Empaqueta la aplicación para Cloudflare Workers (@opennextjs/cloudflare)
-npm run db:generate      # Genera migraciones SQL desde el esquema Drizzle (drizzle/migrations)
-npm run db:migrate:local # Aplica migraciones SQL pendientes en la base D1 local (.wrangler)
-npm run db:migrate:dev   # Aplica migraciones SQL pendientes en olimpiadas-db-dev (Cloudflare D1)
-npm run db:seed:local    # Ejecuta la semilla inicial (plantillas E01-E26 y páginas) en D1 local
-npm run db:seed:dev      # Ejecuta la semilla inicial en olimpiadas-db-dev (Cloudflare D1)
-npm run db:studio        # Abre el visor visual de tablas Drizzle Studio
-npm test                 # Ejecuta la suite de tests unitarios (Vitest)
-npm run lint             # Verifica reglas de estilo y análisis estático (ESLint)
-npm run typecheck        # Verifica tipos estrictos de TypeScript
+npm run dev              # Start Next.js local dev server
+npm run build            # Next.js production build
+npm run cf:build         # Build bundle for Cloudflare Workers (@opennextjs/cloudflare)
+npm run cf:secrets:dev   # Sync .env secrets to dev Worker (olimpiadas-stlc-dev)
+npm run cf:secrets:prod  # Sync .env secrets to prod Worker (olimpiadas-stlc)
+npm run db:generate      # Generate Drizzle SQL migrations from src/db/schema.ts
+npm run db:migrate:local # Apply migrations to local dev D1
+npm run db:migrate:dev   # Apply migrations to remote dev D1
+npm run db:seed:local    # Seed templates and public pages in local dev D1
+npm run db:seed:dev      # Seed templates and public pages in remote dev D1
+npm run db:studio        # Launch Drizzle Studio visual DB browser
+npm test                 # Run all Vitest unit tests
+npm run lint             # Run ESLint across src/**/*.{ts,tsx}
+npm run typecheck        # Run tsc --noEmit
 ```
 
 ---
 
-## Despliegue CI/CD (GitHub Actions → Cloudflare Workers)
+## CI/CD Pipeline (GitHub Actions → Cloudflare Workers)
 
-El flujo [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) ejecuta `typecheck`, `lint`, `test`, compila con `npm run cf:build`, aplica migraciones D1 y despliega automáticamente:
-- **Rama `dev`** → Worker `olimpiadas-stlc-dev` + `olimpiadas-db-dev` (`https://dev-olimpiadas.sitelocuento.com`)
-- **Rama `main`** → Worker `olimpiadas-stlc` + `olimpiadas-db-prod` (`https://olimpiadas.sitelocuento.com`)
+[`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) automatically runs `typecheck`, `lint`, `test`, `cf:build`, D1 migrations, and Worker deployment:
+- **`dev` branch** → `olimpiadas-stlc-dev` + `olimpiadas-db-dev`
+- **`main` branch** → `olimpiadas-stlc` + `olimpiadas-db-prod`
 
-Secretos requeridos en GitHub Actions (`Settings → Secrets and variables → Actions`):
-- `CLOUDFLARE_API_TOKEN`
-- `CLOUDFLARE_ACCOUNT_ID` (`72a8537e848ff38b562b789901671eec`)
-
-Para sincronizar secretos de ejecución (`BETTER_AUTH_SECRET`, `BREVO_API_KEY`, OAuth, `SUPERADMIN_INITIAL_EMAIL`) hacia Cloudflare Workers usa `npm run cf:secrets:dev` / `npm run cf:secrets:prod`. Consulta la guía completa en [`docs/DEPLOYMENT_GUIDE.md`](docs/DEPLOYMENT_GUIDE.md).
+Required GitHub Actions secrets: `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`.
 
 ---
 
-## Documentación
+## Bilingual Documentation
 
-1. **[Guía Funcional para Organizadores](docs/GUIA_FUNCIONAL_ORGANIZADORES.md):** Explicación completa de todas las etapas, roles y reglas del concurso en lenguaje no técnico.
-2. **[Especificación Funcional para Desarrollo](docs/FUNCTIONAL_SPECIFICATION_AGENT.md):** Reglas de negocio detalladas, estados, validaciones y catálogo de correos automáticos (`E01`–`E26`).
-3. **[Especificación Técnica y Arquitectura](docs/TECHNICAL_SPECIFICATION.md):** Esquema SQL de las 17 tablas, algoritmos de similitud y desempate, motor de Cron y hoja de ruta en 6 fases.
+| Document | English | Español |
+| :--- | :--- | :--- |
+| **Project Overview & Setup** | [README.md](README.md) | [README.es.md](README.es.md) |
+| **Functional Specification (Agent & Dev)** | [FUNCTIONAL_SPECIFICATION_AGENT.md](docs/FUNCTIONAL_SPECIFICATION_AGENT.md) | [ESPECIFICACION_FUNCIONAL_AGENTE.md](docs/ESPECIFICACION_FUNCIONAL_AGENTE.md) |
+| **Technical Specification & Architecture** | [TECHNICAL_SPECIFICATION.md](docs/TECHNICAL_SPECIFICATION.md) | [ESPECIFICACION_TECNICA.md](docs/ESPECIFICACION_TECNICA.md) |
+| **Organizer Functional Guide** | [ORGANIZER_FUNCTIONAL_GUIDE.md](docs/ORGANIZER_FUNCTIONAL_GUIDE.md) | [GUIA_FUNCIONAL_ORGANIZADORES.md](docs/GUIA_FUNCIONAL_ORGANIZADORES.md) |
+| **Deployment & Secrets Guide** | [DEPLOYMENT_GUIDE.md](docs/DEPLOYMENT_GUIDE.md) | [GUIA_DESPLIEGUE.md](docs/GUIA_DESPLIEGUE.md) |
+| **Agent Governance & Design System** | [AGENTS.md](AGENTS.md) / [PRODUCT.md](PRODUCT.md) | [AGENTS.md](AGENTS.md) / [PRODUCT.md](PRODUCT.md) |

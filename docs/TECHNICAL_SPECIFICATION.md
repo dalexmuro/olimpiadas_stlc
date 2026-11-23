@@ -1,5 +1,7 @@
 # Olimpíadas Literarias de SiTeLoCuento — Technical Specification & Architecture Document
 
+**English** | [Español](ESPECIFICACION_TECNICA.md)
+
 **Document Status:** Approved Technical Baseline  
 **Companion Document:** `FUNCTIONAL_SPECIFICATION_AGENT.md`  
 **Organizer / Writing Club:** SiTeLoCuento  
@@ -16,11 +18,11 @@ The platform is designed as a **100% Serverless, Zero-Cold-Pause Cloud-Native Ar
 | Layer | Technology | Justification |
 | :--- | :--- | :--- |
 | **Full-Stack Framework** | **Next.js (App Router) + TypeScript** (via `@opennextjs/cloudflare`) | Unified frontend and backend API/Server Actions in a single repository with React Server Components. |
-| **Styling & UI** | **Tailwind CSS + shadcn/ui + Lucide Icons** | 100% responsive (mobile/tablet/desktop), accessible modals, drag-and-drop / click-to-assign voting UI. |
+| **Styling & UI** | **Tailwind CSS v4 + Editorial Ámbar SiTeLoCuento + Lucide Icons + GSAP** | Single-accent `#D47E17` / `#B3640C` token system (`tokens.css`, `base.css`, `globals.css`), `Bricolage Grotesque` / `DM Sans` / `Newsreader` italic typography, GSAP (`SplitText`, `ScrollTrigger`, `ScrollToPlugin`) animations respecting `prefers-reduced-motion`, 100% responsive UI. |
 | **Hosting & Compute** | **Cloudflare Workers / Pages** | Edge execution, native integration with GitHub for automatic deployments (`main` $\rightarrow$ `prod`, `dev` $\rightarrow$ `dev`). |
 | **Database** | **Cloudflare D1 (Serverless SQLite)** | Never pauses due to inactivity (unlike Supabase Free). Instant reads/writes, native Cloudflare dashboard table viewer. |
 | **ORM & Migrations** | **Drizzle ORM + Drizzle Kit** | Lightweight, type-safe SQL ORM built specifically for Cloudflare D1 and edge runtimes; includes Drizzle Studio for visual DB management. |
-| **Authentication** | **Better Auth** (with Drizzle D1 Adapter via `src/lib/auth.ts` and `/api/auth/[...all]`) | Handles Email/Password (with verification `E01` & password reset `E02`), **Google OAuth**, and **Microsoft Entra ID OAuth (`tenant: "common"`)** directly in D1 without per-MAU fees. |
+| **Authentication & Sessions** | **Better Auth** (Drizzle D1 Adapter via `src/lib/auth.ts`, `/api/auth/[...all]`, `/api/auth/check-email`, `/api/auth/keep-alive`) | Email/Password (verification `E01`, reset `E02`, duplicate-email pre-check, 3-of-4 strong password rules), **Google OAuth** and **Microsoft Entra ID OAuth (`tenant: "common"`)** with automatic `firstName`/`lastName`/`avatarUrl` mapping and `SUPERADMIN_INITIAL_EMAIL` promotion, dynamic `workers.dev`/`localhost` origin support, and banking-style rolling session timeout (15-min closed-tab D1 expiry, 5-min active heartbeat, 25-min idle warning modal + 5-min countdown). |
 | **Object Storage (Media)** | **Cloudflare R2** | Stores participant profile photos (`avatars/`) and prompt images (`prompts/`). 10 GB/month free with zero egress fees. |
 | **Scheduled Tasks (Cron)** | **Cloudflare Cron Triggers** (`*/5 * * * *`) | Runs every 5 minutes inside Cloudflare Workers to evaluate stage transitions, prompt deadlines, missed-prompt disqualifications, and 1-hour reminder emails. |
 | **Transactional Email** | **Brevo API** (HTTP REST API via `src/lib/email.ts`) | 300 free emails/day (9,000/month), allowing burst notifications to all participants from `olimpiadas@sitelocuento.com`, with automatic dry-run support while DNS verification is pending. |
@@ -43,13 +45,18 @@ The GitHub repository is connected directly to Cloudflare:
 
 ### 2.2 Required Environment Variables (`wrangler.jsonc` / Cloudflare Secrets)
 - `BETTER_AUTH_SECRET`: Secret key for session signing.
-- `BETTER_AUTH_URL`: Base URL (`https://olimpiadas.sitelocuento.com` in prod).
+- `BETTER_AUTH_URL`: Base URL (`https://olimpiadas.sitelocuento.com` in prod; dynamically adapts to `*.workers.dev` and `localhost` via `resolveEffectiveAuthBaseUrl` & `resolveRequestUrlFromHeaders`).
 - `GOOGLE_CLIENT_ID` & `GOOGLE_CLIENT_SECRET`: Google OAuth credentials.
 - `MICROSOFT_CLIENT_ID` & `MICROSOFT_CLIENT_SECRET`: Microsoft OAuth credentials.
 - `BREVO_API_KEY`: API key for sending transactional emails via Brevo.
-- `EMAIL_FROM_ADDRESS`: `olimpiadas@sitelocuento.com`
+- `EMAIL_FROM_ADDRESS`: `olimpiadas@sitelocuento.com` in prod (can point to a verified Brevo sender in `dev` while custom DNS is pending).
 - `EMAIL_FROM_NAME`: `Olimpíadas Literarias de SiTeLoCuento`
-- `SUPERADMIN_INITIAL_EMAIL`: Pre-configured email automatically granted `SUPERADMIN` role on initial seed.
+- `SUPERADMIN_INITIAL_EMAIL`: Pre-configured email automatically granted `SUPERADMIN` role on account creation (`databaseHooks.user.create.before`).
+
+### 2.3 Security Controls (RBAC, Sessions & Account Deletion)
+- **Server-Side Superadmin Route Guards:** `src/lib/admin-session.ts` (`requireSuperadminOrRedirect`) guards `/admin/ediciones`, `/admin/roles`, `/admin/correos`, and `/admin/paginas` via dedicated `layout.tsx` files in addition to `403` API checks; `/admin` filters visible dashboard sections by role via `getVisibleAdminTabs`.
+- **Banking-Style Rolling Sessions:** Configured in `src/lib/session-timeout.ts`, `src/lib/auth.ts`, `src/app/api/auth/keep-alive/route.ts`, and `src/components/auth/SessionActivityGuard.tsx` (15-min closed-tab server expiry, 5-min keep-alive heartbeat, 25-min open-tab warning modal with 5-min countdown and cross-tab `localStorage` sync, automatic sign-out at 30 min).
+- **Safe Account Deletion (`DELETE /api/profile`):** Implemented in `deleteUserAccountInDb` (`src/lib/profile-service.ts`); blocks deletion of the last remaining `SUPERADMIN`, wipes sessions/OAuth links/verifications, and gracefully falls back to full PII anonymization if historical contest records reference the user.
 
 ---
 

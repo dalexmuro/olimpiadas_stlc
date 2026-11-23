@@ -1,78 +1,72 @@
-# Guía de Despliegue y Secretos — Olimpíadas Literarias de SiTeLoCuento
+# Deployment & Secrets Guide — Olimpíadas Literarias
 
-Esta guía documenta la configuración de secretos en GitHub Actions y Cloudflare Workers para los entornos **`dev`** (`dev-olimpiadas.sitelocuento.com`) y **`prod`** (`olimpiadas.sitelocuento.com`).
+**English** | [Español](GUIA_DESPLIEGUE.md)
+
+This guide documents GitHub Actions secrets, Cloudflare Workers runtime secrets, D1 migrations, and DNS configuration for both isolated environments: **`dev`** (`dev-olimpiadas.sitelocuento.com`) and **`prod`** (`olimpiadas.sitelocuento.com`).
 
 ---
 
-## 1. Secretos en GitHub Actions
+## 1. GitHub Actions Secrets
 
-En el repositorio `dalexmuro/olimpiadas_stlc`, ir a **Settings → Secrets and variables → Actions → New repository secret** y agregar:
+In your GitHub repository, navigate to **Settings → Secrets and variables → Actions → New repository secret** and configure:
 
-| Nombre | Valor |
+| Secret Name | Description |
 | :--- | :--- |
-| `CLOUDFLARE_API_TOKEN` | Token de API de Cloudflare con permisos de **Workers Scripts (Edit)**, **D1 (Edit)** y **R2 Storage (Edit)** |
-| `CLOUDFLARE_ACCOUNT_ID` | `72a8537e848ff38b562b789901671eec` |
+| `CLOUDFLARE_API_TOKEN` | Cloudflare API token with **Workers Scripts (Edit)**, **D1 (Edit)**, and **R2 Storage (Edit)** permissions |
+| `CLOUDFLARE_ACCOUNT_ID` | Your Cloudflare Account ID |
 
 ---
 
-## 2. Variables y Secretos en Cloudflare Workers (`prod` y `dev`)
+## 2. Cloudflare Workers Runtime Variables & Secrets (`prod` and `dev`)
 
-Las variables no sensibles (`APP_ENV`, `BETTER_AUTH_URL`, `EMAIL_FROM_ADDRESS`, `EMAIL_FROM_NAME`) ya están definidas en [`wrangler.jsonc`](../wrangler.jsonc).
+Non-sensitive runtime variables (`APP_ENV`, `BETTER_AUTH_URL`, `EMAIL_FROM_ADDRESS`, `EMAIL_FROM_NAME`) are defined in [`wrangler.jsonc`](../wrangler.jsonc).
 
-Los secretos cifrados se sincronizan desde tu archivo local `.env` (ignorado en Git) usando:
+Encrypted runtime secrets are synced from your local `.env` file (excluded from Git) using the provided helper script:
 
 ```bash
-# Validar sin subir nada
+# Dry-run validation (no changes pushed)
 node scripts/sync-cloudflare-secrets.mjs dev --dry-run
 node scripts/sync-cloudflare-secrets.mjs prod --dry-run
 
-# Subir secretos cifrados a Cloudflare Workers
+# Push encrypted secrets to Cloudflare Workers
 npm run cf:secrets:dev
 npm run cf:secrets:prod
 ```
 
-| Secreto | `dev` (`olimpiadas-stlc-dev`) | `prod` (`olimpiadas-stlc`) |
+| Secret | `dev` (`olimpiadas-stlc-dev`) | `prod` (`olimpiadas-stlc`) |
 | :--- | :---: | :---: |
-| `BETTER_AUTH_SECRET` | Obligatorio | Obligatorio |
-| `BREVO_API_KEY` | Obligatorio | Obligatorio |
-| `GOOGLE_CLIENT_ID` | Obligatorio | Obligatorio |
-| `GOOGLE_CLIENT_SECRET` | Obligatorio | Obligatorio |
-| `MICROSOFT_CLIENT_ID` | Opcional | Obligatorio |
-| `MICROSOFT_CLIENT_SECRET` | Opcional | Obligatorio |
-| `SUPERADMIN_INITIAL_EMAIL` | Obligatorio (`dalexmuro@gmail.com`) | Obligatorio (`dalexmuro@gmail.com`) |
+| `BETTER_AUTH_SECRET` | Required | Required |
+| `BREVO_API_KEY` | Required | Required |
+| `GOOGLE_CLIENT_ID` | Required | Required |
+| `GOOGLE_CLIENT_SECRET` | Required | Required |
+| `MICROSOFT_CLIENT_ID` | Optional | Required |
+| `MICROSOFT_CLIENT_SECRET` | Optional | Required |
+| `SUPERADMIN_INITIAL_EMAIL` | Required | Required |
 
 ---
 
-## 3. Migración y Semilla Inicial en Producción (`olimpiadas-db-prod`)
+## 3. Initial D1 Migration & Seed (Production & Dev)
 
-La base `olimpiadas-db-dev` ya tiene aplicada la migración inicial y la semilla (`E01`–`E26` + páginas estáticas). Al preparar el primer despliegue en `main`:
+Before the first production launch on `main`, apply the schema migration and initial seed (`E01`–`E26` email templates + static public pages):
 
 ```bash
+# Production
 npx wrangler d1 migrations apply olimpiadas-db-prod --remote
 npx wrangler d1 execute olimpiadas-db-prod --remote --file=./drizzle/seed.sql
+
+# Development
+npx wrangler d1 migrations apply olimpiadas-db-dev --env dev --remote
+npx wrangler d1 execute olimpiadas-db-dev --env dev --remote --file=./drizzle/seed.sql
 ```
 
 ---
 
-## 4. Configuración DNS en IONOS (`sitelocuento.com`)
+## 4. Custom Domain DNS & OAuth Callback URIs
 
-Para apuntar los subdominios oficiales hacia Cloudflare Workers desde el panel DNS de **IONOS** (`Dominios y SSL → sitelocuento.com → DNS`):
-
-1. **En Cloudflare Dashboard:**
-   - Entra a **Workers & Pages → `olimpiadas-stlc` → Settings → Domains & Routes** (y repite para `olimpiadas-stlc-dev`) para obtener el hostname objetivo `*.workers.dev` (o la zona/dominio personalizado asignado).
-2. **En el panel DNS de IONOS (`sitelocuento.com`), crea estos 2 registros `CNAME`:**
-
-| Tipo | Host | Apunta a (Valor) | TTL |
-| :--- | :--- | :--- | :--- |
-| `CNAME` | `olimpiadas` | Hostname de Cloudflare para `olimpiadas-stlc` | `3600` (o automático) |
-| `CNAME` | `dev-olimpiadas` | Hostname de Cloudflare para `olimpiadas-stlc-dev` | `3600` (o automático) |
-
-3. **URIs de redirección OAuth a verificar en Google Cloud y Microsoft Entra ID:**
-   - **Google OAuth (Producción):** `https://olimpiadas.sitelocuento.com/api/auth/callback/google`
-   - **Google OAuth (Desarrollo):** `https://dev-olimpiadas.sitelocuento.com/api/auth/callback/google`
-   - **Microsoft OAuth (Producción):** `https://olimpiadas.sitelocuento.com/api/auth/callback/microsoft`
-
-4. **Comprobación rápida tras propagación DNS (5–15 min):**
-   - `https://dev-olimpiadas.sitelocuento.com/`
-   - `https://olimpiadas.sitelocuento.com/`
-
+1. **Cloudflare Custom Domains:** Under **Workers & Pages → Settings → Domains & Routes**, attach your production and staging subdomains to `olimpiadas-stlc` and `olimpiadas-stlc-dev`.
+2. **DNS Records:** Configure `CNAME` records pointing your subdomains (`olimpiadas` and `dev-olimpiadas`) to the target Cloudflare Workers routes.
+3. **OAuth Authorized Redirect URIs (Google Cloud Console & Microsoft Entra ID):**
+   - **Google OAuth (Prod):** `https://olimpiadas.sitelocuento.com/api/auth/callback/google`
+   - **Google OAuth (Dev):** `https://dev-olimpiadas.sitelocuento.com/api/auth/callback/google` (plus your `*.workers.dev` preview URL during staging)
+   - **Microsoft OAuth (Prod):** `https://olimpiadas.sitelocuento.com/api/auth/callback/microsoft`
+   - **Microsoft OAuth (Dev):** `https://dev-olimpiadas.sitelocuento.com/api/auth/callback/microsoft`

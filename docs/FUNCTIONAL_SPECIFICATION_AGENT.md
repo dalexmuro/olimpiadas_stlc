@@ -1,5 +1,7 @@
 # Olimpíadas Literarias de SiTeLoCuento — Comprehensive Functional Specification (Agent & Developer Reference)
 
+**English** | [Español](ESPECIFICACION_FUNCIONAL_AGENTE.md)
+
 **Document Status:** Approved Functional Baseline (Infrastructure-Agnostic)  
 **Target Audience:** AI Agents, Software Architects, and Developers  
 **Organizer / Writing Club:** SiTeLoCuento  
@@ -35,37 +37,48 @@ Roles are assigned globally at the **User Profile** level by the Superadministra
 
 ## 3. Authentication & User Profile Management
 
-### 3.1 Authentication Methods
+### 3.1 Authentication Methods & Security Policies
 1. **Email & Password:**
-   - Requires **Email Verification** (via verification link/token sent to the user's email) before activation.
-   - Includes a **"Forgot Password"** recovery flow via email token.
+   - Pre-registration duplicate-email verification (`POST /api/auth/check-email`) displays an explicit alert with direct links to Sign In and Password Recovery if the email already exists.
+   - **Strong Password Policy:** Minimum **8 characters** and at least **3 of 4** categories (uppercase letter, lowercase letter, number, special character), shown in an interactive Info tooltip on `/registro` alongside a show/hide password toggle (`Eye`/`EyeOff`).
+   - Requires **Email Verification** (via verification link/token `E01` sent to the user's email) before activation.
+   - Includes a **"Forgot Password"** recovery flow (`E02`) via email token.
 2. **Social OAuth Providers:**
-   - **Google Sign-In**
-   - **Microsoft Sign-In**
+   - **Google Sign-In** and **Microsoft Sign-In** (via `POST /api/auth/sign-in/social`).
+   - Automatically pre-populates `first_name`, `last_name`, and `avatar_url` from the provider profile (all editable afterward by the user).
+   - Successful sign-in redirects directly to `/concurso`.
+3. **Banking-Style Inactivity & Closed-Tab Session Timeout:**
+   - Active users remain logged in via periodic rolling token refresh (`POST /api/auth/keep-alive`).
+   - If the tab remains open without activity for **25 minutes**, an accessible warning modal displays a **5-minute countdown** allowing the user to **Stay Connected** or **Sign Out**; if no action is taken (30 minutes total), the session signs out automatically and redirects to `/login?motivo=inactividad`.
+   - If the tab/browser is closed, heartbeats stop and the server-side session token expires automatically in **15 minutes** (shorter than the open-tab idle limit).
 
-### 3.2 Mandatory Profile Fields
+### 3.2 Mandatory Profile Fields & Account Controls
 Every user profile contains the following fields:
 - `first_name` (Nombre) — **Mandatory**
 - `last_name` (Apellido) — **Mandatory**
-- `country` (País de residencia) — **Mandatory**
+- `country` (País de residencia) — **Mandatory** (automatically populates the international dial code and country-specific phone format placeholder)
 - `email` (Correo electrónico) — **Mandatory** (Editable by user; changing email requires re-verification)
-- `phone` (Número de teléfono) — **Mandatory**
-- `avatar_url` (Foto de perfil) — **Optional** (Displayed publicly on the Winners page if the participant wins 1st, 2nd, or 3rd place)
+- `phone` (Número de teléfono) — **Mandatory** (Unified split input: country dial code on the left + local number on the right separated by a vertical divider)
+- `avatar_url` (Foto de perfil) — **Optional** (Pre-populated from Google/Microsoft when available; editable via R2 upload; displayed publicly on the Winners page if the participant wins 1st, 2nd, or 3rd place)
 - `password` (Contraseña) — Editable by user
+- **Session & Account Actions (bottom of `/perfil`):** Includes **Delete Account** (left, with confirmation modal and protection against deleting the last `SUPERADMIN`) and **Sign Out** (right).
 
 ### 3.3 First-Login Profile Completion Gate
-- When a user signs up via **Google** or **Microsoft** (which do not provide `country` or `phone`), the system must intercept navigation and redirect the user to a mandatory **"Complete Your Profile"** screen before allowing contest enrollment or dashboard access.
+- When a user signs up via **Google** or **Microsoft** (which do not provide `country` or `phone`), the system intercepts navigation and redirects the user to a mandatory **"Complete Your Profile"** screen (`/completar-perfil`) pre-filled with their OAuth `first_name` and `last_name` before allowing contest enrollment or dashboard access.
 
 ---
 
 ## 4. Public Website & Participant Dashboard
 
 ### 4.1 Public Navigation & Pages (Accessible Without Login)
-- **Home / Landing Page:** Displays the active Contest Edition title, current stage status, call-to-action to Sign In / Create Account, and contest overview.
+- **Editorial Navigation System (Ámbar SiTeLoCuento `#D47E17`):**
+  - **Sticky Top Bar:** Contest emblem & title on the left (appears on scroll on `/` and triggers smooth scroll-to-top; links to `/` on inner pages); on the right, authenticated user name (`/perfil`) + primary workspace CTA (`Entrar` / `Concurso` / `Jurado` / `Panel Admin`, hidden on `/login` and `/registro`), plus the **SiTeLoCuento** club logo (desktop horizontal logo / compact mobile icon with exit confirmation modal) shown exclusively on the homepage `/`.
+  - **Bottom Orchestrated Menu:** Compact floating **Menú** pill opening a GSAP orchestrated ease-reverse drawer with `Inicio` (inner pages), `Bases del Concurso`, `Quiénes somos`, conditional `Ediciones` (shown once at least one edition has `winnersAnnounced = true`), mobile profile link, and `Cerrar sesión` when logged in.
+- **Home / Landing Page (`/`):** Four full-viewport sections (`Inicio`, `Tres pasos, un solo cuento`, `Preguntas frecuentes` with exclusive native accordion, and closing CTA + Footer) with GSAP `SplitText` hero reveal, block-by-block wheel/touch paging via a solid amber transition curtain, persistent scroll-down cue (hiding on the final section), and delicate solid-amber overscroll bounce below the footer.
 - **Contest Rules (*Bases del Concurso*):** Editable rich-text page managed by the Superadmin.
-- **About Us (*¿Quiénes somos? / Historia del concurso y organizadores*):** Editable rich-text page managed by the Superadmin.
-- **Winners Page (*Resultados [Nombre de Edición]*):** Published upon triggering the *Winners Announcement* stage for the latest completed edition.
-- **Edition Stories & Past Editions (*Cuentos participantes / Ediciones anteriores*):** Public archive showing all finalist stories from the current completed edition and previous years' editions.
+- **About Us (*¿Quiénes somos?*):** Editable rich-text page managed by the Superadmin.
+- **Winners Page (*Resultados*):** Published upon triggering the *Winners Announcement* stage for the latest completed edition.
+- **Edition Stories & Past Editions (*Ediciones*):** Public archive showing all finalist stories from completed editions.
 
 ### 4.2 Logged-In Participant Header / Main View
 Whenever an authenticated user logs in, they see:

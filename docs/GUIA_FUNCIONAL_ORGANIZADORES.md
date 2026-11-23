@@ -1,4 +1,7 @@
 # Guía de Funcionamiento de la Plataforma Web "Olimpíadas Literarias de SiTeLoCuento"
+
+[English](ORGANIZER_FUNCTIONAL_GUIDE.md) | **Español**
+
 **Documento para el Equipo Organizador — Club de Escritura SiTeLoCuento**
 
 ---
@@ -52,9 +55,10 @@ El concurso avanza automáticamente según el calendario que configure el Supera
 ---
 
 ### Etapa 1: Creación de Cuenta e Inscripciones
-1. **Crear cuenta o entrar:** El usuario puede registrarse usando su correo y contraseña (recibirá un correo para confirmar su cuenta y tendrá opción de *"Olvidé mi contraseña"*), o bien entrar directamente con un clic usando su cuenta de **Google** o **Microsoft**.
-2. **Datos obligatorios:** Todo participante debe completar su **Nombre, Apellido, País de residencia, Correo electrónico y Número de teléfono** (y opcionalmente su foto de perfil).
-3. **Inscribirse en la edición del año:** Una vez dentro de su cuenta, mientras estén abiertas las inscripciones, el usuario hace clic en **"Inscribirme al concurso"** y acepta las Bases del Concurso. En ese momento recibe un correo de bienvenida confirmando su inscripción.
+1. **Crear cuenta o entrar:** El usuario puede registrarse usando su correo y contraseña (el sistema verifica si el correo ya existe, exige una contraseña segura de al menos 8 caracteres con 3 de 4 tipos de carácter, permite ver/ocultar la contraseña, envía correo de verificación y ofrece *"Olvidé mi contraseña"*), o bien entrar directamente con un clic usando su cuenta de **Google** o **Microsoft** (que precargan automáticamente nombre, apellido y foto de perfil, siempre editables). Al iniciar sesión accede directo a `/concurso`.
+2. **Datos obligatorios y cuenta:** Todo participante debe completar su **Nombre, Apellido, País de residencia, Correo electrónico y Número de teléfono** (con código de país autocompletado según el país seleccionado y formato de ejemplo real) y opcionalmente su foto de perfil. Desde **Mi Perfil** también puede **Cerrar sesión** o **Eliminar cuenta** con confirmación de seguridad.
+3. **Seguridad de sesión por inactividad:** Mientras el usuario utiliza la página, su sesión se mantiene activa automáticamente. Si deja la pestaña abierta sin usarla durante 25 minutos, aparece un aviso con cuenta regresiva de 5 minutos para elegir entre **Seguir conectado** o **Cerrar sesión** (y si no responde, se cierra sola). Si cierra la pestaña o el navegador, la sesión caduca en 15 minutos por seguridad.
+4. **Inscribirse en la edición del año:** Una vez dentro de su cuenta, mientras estén abiertas las inscripciones, el usuario hace clic en **"Inscribirme al concurso"** y acepta las Bases del Concurso. En ese momento recibe un correo de bienvenida confirmando su inscripción.
    * *¿Qué pasa si alguien entra al sitio cuando ya cerraron las inscripciones y no se inscribió?* Podrá ver su perfil personal, pero no tendrá acceso a las pantallas de participación del concurso en curso.
 
 ---
