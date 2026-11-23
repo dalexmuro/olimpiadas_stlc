@@ -48,7 +48,7 @@ export function Navbar({
       return;
     }
 
-    const heroLogo = document.querySelector('[data-slot="logo-olimpiadas"]');
+    const heroLogo = document.getElementById("hero-emblem-trigger");
     if (!heroLogo) {
       setHeroLogoHidden(false);
       return;
@@ -103,9 +103,15 @@ export function Navbar({
             aria-label={`${APP_BRAND.contestName} — Ir al inicio`}
             aria-hidden={!showDualHeader}
             tabIndex={showDualHeader ? 0 : -1}
-            className={`ta-contest-mini hover:text-accent-deep ${showDualHeader ? "ta-contest-mini--visible" : ""}`}
+            className={`ta-contest-mini gap-2.5 hover:text-accent-deep ${showDualHeader ? "ta-contest-mini--visible" : ""}`}
           >
-            {APP_BRAND.contestName}
+            <img
+              src="/images/logo-olimpiadas.svg"
+              alt=""
+              aria-hidden="true"
+              className="h-7 w-auto"
+            />
+            <span>{APP_BRAND.contestName}</span>
           </Link>
 
           <div className="ml-auto flex items-center gap-5">

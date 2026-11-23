@@ -133,30 +133,28 @@ export default async function HomePage() {
       <main id="contenido" className="container flex-1">
         <h1 className="visually-hidden">{APP_BRAND.contestName}</h1>
 
-        {/* Open-Paper Editorial Hero: Large centered emblem space framed by subtle corner crop marks */}
+        {/* Open-Paper Editorial Hero: Official SVG emblem + expressive literary tagline */}
         <section
           aria-label="Presentación del certamen"
-          className="flex min-h-[78vh] flex-col items-center justify-center py-14 text-center sm:py-20"
+          className="flex min-h-[78vh] flex-col items-center justify-center py-12 text-center sm:py-20"
         >
           <div
-            data-slot="logo-olimpiadas"
-            role="img"
-            aria-label={`Emblema oficial de las ${APP_BRAND.contestName}`}
-            className="ta-crop-stage"
+            id="hero-emblem-trigger"
+            className="flex flex-col items-center"
           >
-            <span className="ta-crop-corners" aria-hidden="true" />
-            <div className="ta-emblem-inner">
-              <p className="font-display text-4xl font-extrabold leading-[0.98] tracking-[-0.04em] text-ink sm:text-6xl">
-                Olimpíadas
-                <br />
-                Literarias
-              </p>
-              {editionStatus.isActive && (
-                <span className="mt-2 text-xs font-medium tracking-wide text-muted">
-                  {editionStatus.editionTitle}
-                </span>
-              )}
-            </div>
+            <img
+              src="/images/logo-olimpiadas.svg"
+              alt={`Emblema oficial de las ${APP_BRAND.contestName}`}
+              className="h-auto w-56 sm:w-72"
+            />
+            <p className="mt-4 font-display text-4xl font-extrabold leading-none tracking-[-0.035em] text-ink sm:text-5xl">
+              Olimpíadas <span className="ta-serif-italic">Literarias</span>
+            </p>
+            {editionStatus.isActive && (
+              <span className="mt-2 text-xs font-medium tracking-wide text-muted">
+                {editionStatus.editionTitle}
+              </span>
+            )}
           </div>
 
           <p className="mt-12 max-w-3xl font-display text-2xl font-bold leading-[1.16] tracking-display text-ink sm:mt-14 sm:text-4xl lg:text-[2.75rem]">

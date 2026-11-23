@@ -16,21 +16,21 @@
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
   --color-error: #b91c1c;
   --color-success: #16795c;
-  --color-paper: #faf9f5;
-  --color-paper-2: #f1f2ee;
-  --color-paper-3: #e8f4ef;
+  --color-paper: #faf8f4;
+  --color-paper-2: #f3efe8;
+  --color-paper-3: #fdf3e4;
   --color-surface: #ffffff;
-  --color-ink: #11211b;
-  --color-ink-2: #273a32;
-  --color-muted: #485a53;
-  --color-rule: #e0e3dc;
-  --color-accent: #16795c;
-  --color-accent-2: #105c45;
-  --color-accent-deep: #105c45;
-  --color-accent-soft: #e8f4ef;
+  --color-ink: #1b1917;
+  --color-ink-2: #332e2a;
+  --color-muted: #625a53;
+  --color-rule: #e6e0d6;
+  --color-accent: #d47e17;
+  --color-accent-2: #b3640c;
+  --color-accent-deep: #b3640c;
+  --color-accent-soft: #fdf3e4;
   --color-accent-ink: #ffffff;
-  --color-focus: #16795c;
-  --color-focus-on-dark: #86e5c5;
+  --color-focus: #b3640c;
+  --color-focus-on-dark: #fde09e;
   --font-display: var(--font-bricolage), "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
   --font-body: var(--font-dm-sans), "DM Sans", ui-sans-serif, system-ui, sans-serif;
   --font-serif: var(--font-newsreader), "Newsreader", Georgia, serif;
@@ -38,7 +38,7 @@
   --radius-card: 24px;
   --radius-input: 14px;
   --radius-pill: 999px;
-  --shadow-card: 0 2px 6px rgba(17, 33, 27, 0.05), 0 18px 36px -22px rgba(17, 33, 27, 0.16);
+  --shadow-card: 0 2px 6px rgba(27, 25, 23, 0.05), 0 18px 36px -22px rgba(27, 25, 23, 0.16);
   --tracking-display: -0.03em;
 }
 :root {

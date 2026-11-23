@@ -1,4 +1,4 @@
-/* Taller Abierto — Single-accent Verde Bosque (#16795C) Design System for Olimpíadas Literarias */
+/* Taller Abierto Editorial — Single-accent Ámbar SiTeLoCuento (#D47E17) Design System for Olimpíadas Literarias */
 
 @import "tailwindcss";
 @import "./tokens.css";
@@ -343,11 +343,11 @@
   }
 
   .ta-stage-read[data-stage="1"] {
-    background: color-mix(in oklab, var(--color-accent) 10%, transparent);
+    background: color-mix(in oklab, var(--color-accent) 11%, transparent);
   }
 
   .ta-stage-read[data-stage="2"] {
-    background: color-mix(in oklab, var(--color-ink) 5%, transparent);
+    background: color-mix(in oklab, var(--color-accent) 16%, transparent);
   }
 
   .ta-stage-kicker {

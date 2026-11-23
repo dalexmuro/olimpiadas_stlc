@@ -50,8 +50,10 @@ A diferencia de concursos literarios tradicionales por correo electrónico o for
 
 - **Documentación funcional y técnica:** `docs/FUNCTIONAL_SPECIFICATION_AGENT.md`, `docs/TECHNICAL_SPECIFICATION.md`, `docs/GUIA_FUNCIONAL_ORGANIZADORES.md`.
 - **Entorno desplegado de pruebas:** Cloudflare Workers (`olimpiadas-stlc-dev`) con 50 rutas activas y base de datos D1.
+- **Activos oficiales integrados:**
+  - Emblema vectorial oficial del certamen: `public/images/logo-olimpiadas.svg` (y `src/app/icon.svg` como favicon).
+  - Logo oficial del club organizador: `public/images/logo-sitelocuento.png`.
 - **Ausencias confirmadas (no inventar):**
-  - El emblema/logo oficial de la edición aún está pendiente de incorporarse como archivo final en el repositorio (actualmente existe espacio reservado).
   - No existen testimonios reales, menciones de prensa ni cifras históricas públicas verificadas; ninguna superficie debe fabricarlos.
 
 ## Product Principles
