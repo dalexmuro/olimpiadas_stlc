@@ -284,12 +284,17 @@ export function Navbar({
               onClick={() => setShowClubModal(true)}
               title="Sitio oficial de la comunidad SiTeLoCuento"
               aria-label="Sitio oficial de la comunidad SiTeLoCuento"
-              className="ta-brand ta-brand-trigger"
+              className="ta-brand ta-brand-trigger shrink-0"
             >
+              <img
+                src="/images/logo-sitelocuento-mobile.png"
+                alt="SiTeLoCuento"
+                className="h-8 w-8 shrink-0 object-contain sm:hidden"
+              />
               <img
                 src="/images/logo-sitelocuento.png"
                 alt="SiTeLoCuento"
-                className="h-7 w-auto sm:h-8"
+                className="hidden h-8 w-auto shrink-0 object-contain sm:block"
               />
               <span className="ta-tooltip" role="tooltip">
                 Sitio oficial de la comunidad SiTeLoCuento

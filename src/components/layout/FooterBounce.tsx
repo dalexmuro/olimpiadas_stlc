@@ -49,10 +49,45 @@ export function FooterBounce() {
       triggerBounce(event.deltaY * 0.35);
     };
 
+    let touchStartY = 0;
+
+    const handleTouchStart = (event: TouchEvent) => {
+      if (event.touches.length !== 1) return;
+      touchStartY = event.touches[0].clientY;
+    };
+
+    const handleTouchMove = (event: TouchEvent) => {
+      if (event.touches.length !== 1) return;
+      if (
+        document.querySelector('[role="dialog"]') ||
+        document.querySelector('[data-menu-open="true"]')
+      ) {
+        return;
+      }
+
+      const dy = touchStartY - event.touches[0].clientY;
+      if (dy < 24) return;
+
+      const atBottom =
+        window.scrollY + window.innerHeight >=
+        document.documentElement.scrollHeight - 8;
+      if (!atBottom) return;
+
+      const now = performance.now();
+      if (now < cooldownUntil) return;
+      cooldownUntil = now + 450;
+
+      triggerBounce(dy * 0.6);
+    };
+
     window.addEventListener("wheel", handleWheel, { passive: true });
+    window.addEventListener("touchstart", handleTouchStart, { passive: true });
+    window.addEventListener("touchmove", handleTouchMove, { passive: true });
 
     return () => {
       window.removeEventListener("wheel", handleWheel);
+      window.removeEventListener("touchstart", handleTouchStart);
+      window.removeEventListener("touchmove", handleTouchMove);
       gsap.killTweensOf(block);
     };
   }, []);

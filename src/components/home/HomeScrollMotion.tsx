@@ -334,6 +334,70 @@ export function HomeScrollMotion({ children }: HomeScrollMotionProps) {
         runAmberPanelTransition(targetId, scrollTarget, direction);
       };
 
+      let touchStartY = 0;
+      let touchStartX = 0;
+      let touchHandled = false;
+
+      const handleTouchStart = (event: TouchEvent) => {
+        if (event.touches.length !== 1) return;
+        touchStartY = event.touches[0].clientY;
+        touchStartX = event.touches[0].clientX;
+        touchHandled = false;
+      };
+
+      const handleTouchMove = (event: TouchEvent) => {
+        if (event.touches.length !== 1) return;
+        if (
+          document.querySelector('[role="dialog"]') ||
+          document.querySelector('[data-menu-open="true"]')
+        ) {
+          return;
+        }
+
+        const now = performance.now();
+        if (now < lockedUntil || touchHandled) {
+          event.preventDefault();
+          return;
+        }
+
+        const dy = touchStartY - event.touches[0].clientY;
+        const dx = Math.abs(touchStartX - event.touches[0].clientX);
+
+        // Wait for clear vertical swipe intent
+        if (Math.abs(dy) < 28 || dx > Math.abs(dy)) return;
+
+        const sections = HOME_SECTION_IDS.map((id) =>
+          document.getElementById(id)
+        ).filter((el): el is HTMLElement => el !== null);
+        if (sections.length < 2) return;
+
+        const direction: 1 | -1 = dy > 0 ? 1 : -1;
+        const currentIdx = getActiveSectionIndex(sections);
+        const currentEl = sections[currentIdx];
+        const rect = currentEl.getBoundingClientRect();
+        const isLastSection = currentIdx === sections.length - 1;
+
+        if (direction > 0 && rect.bottom > window.innerHeight + 12) {
+          return;
+        }
+        if (direction < 0 && !isLastSection && rect.top < -12) {
+          return;
+        }
+
+        const targetIdx = currentIdx + direction;
+        if (targetIdx < 0 || targetIdx >= sections.length) {
+          return;
+        }
+
+        event.preventDefault();
+        touchHandled = true;
+        const targetEl = sections[targetIdx];
+        const targetId = targetEl.id;
+        const scrollTarget: number | HTMLElement =
+          targetIdx === 0 ? 0 : targetEl;
+        runAmberPanelTransition(targetId, scrollTarget, direction);
+      };
+
       const handleCustomTransition = (event: Event) => {
         const custom = event as CustomEvent<{
           targetId?: string;
@@ -355,6 +419,8 @@ export function HomeScrollMotion({ children }: HomeScrollMotionProps) {
       };
 
       window.addEventListener("wheel", handleWheel, { passive: false });
+      window.addEventListener("touchstart", handleTouchStart, { passive: true });
+      window.addEventListener("touchmove", handleTouchMove, { passive: false });
       window.addEventListener(
         "olimpiadas:page-transition",
         handleCustomTransition
@@ -362,6 +428,8 @@ export function HomeScrollMotion({ children }: HomeScrollMotionProps) {
 
       return () => {
         window.removeEventListener("wheel", handleWheel);
+        window.removeEventListener("touchstart", handleTouchStart);
+        window.removeEventListener("touchmove", handleTouchMove);
         window.removeEventListener(
           "olimpiadas:page-transition",
           handleCustomTransition
