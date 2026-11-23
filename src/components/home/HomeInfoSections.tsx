@@ -66,6 +66,7 @@ export function HomeInfoSections() {
           {HOME_FAQS.map((item) => (
             <details
               key={item.question}
+              name="home-faq"
               data-gsap="faq-item"
               className="ta-faq-item"
             >

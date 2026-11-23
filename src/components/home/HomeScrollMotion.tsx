@@ -241,6 +241,12 @@ export function HomeScrollMotion({ children }: HomeScrollMotionProps) {
           .add(() => {
             if (typeof target === "number") {
               window.scrollTo({ top: target, behavior: "auto" });
+            } else if (targetId === "cierre") {
+              const maxScroll = Math.max(
+                0,
+                document.documentElement.scrollHeight - window.innerHeight
+              );
+              window.scrollTo({ top: maxScroll, behavior: "auto" });
             } else {
               const top =
                 target.getBoundingClientRect().top + window.scrollY;
@@ -279,9 +285,14 @@ export function HomeScrollMotion({ children }: HomeScrollMotionProps) {
       };
 
       const handleWheel = (event: WheelEvent) => {
-        // Ignore pinch-zoom gestures, tiny trackpad jitter, or open dialogs
+        // Ignore pinch-zoom gestures, tiny trackpad jitter, open dialogs, or open nav menu
         if (event.ctrlKey || Math.abs(event.deltaY) < 6) return;
-        if (document.querySelector('[role="dialog"]')) return;
+        if (
+          document.querySelector('[role="dialog"]') ||
+          document.querySelector('[data-menu-open="true"]')
+        ) {
+          return;
+        }
 
         const sections = HOME_SECTION_IDS.map((id) =>
           document.getElementById(id)
@@ -301,10 +312,12 @@ export function HomeScrollMotion({ children }: HomeScrollMotionProps) {
 
         // If the active section is taller than the viewport (e.g. expanded FAQs),
         // let the user finish scrolling within it before paging to the next block.
+        // The final closing section (#cierre) always pages back up on the first upward scroll.
+        const isLastSection = currentIdx === sections.length - 1;
         if (direction > 0 && rect.bottom > window.innerHeight + 12) {
           return;
         }
-        if (direction < 0 && rect.top < -12) {
+        if (direction < 0 && !isLastSection && rect.top < -12) {
           return;
         }
 

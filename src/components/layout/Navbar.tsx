@@ -3,7 +3,7 @@
 import gsap from "gsap";
 import { ScrollToPlugin } from "gsap/ScrollToPlugin";
 import Link from "next/link";
-import { useEffect, useState, type MouseEvent } from "react";
+import { useEffect, useRef, useState, type MouseEvent } from "react";
 import type { UserRole } from "@/db/schema";
 import { APP_BRAND } from "@/lib/app-metadata";
 
@@ -44,6 +44,14 @@ export function Navbar({
   const isHome = currentPath === "/";
   const [heroLogoHidden, setHeroLogoHidden] = useState(!isHome);
   const [showClubModal, setShowClubModal] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const panelRef = useRef<HTMLDivElement>(null);
+  const scrimRef = useRef<HTMLDivElement>(null);
+  const burgerTopRef = useRef<HTMLSpanElement>(null);
+  const burgerBotRef = useRef<HTMLSpanElement>(null);
+  const menuTlRef = useRef<gsap.core.Timeline | null>(null);
+
   const workspace = resolvePrimaryWorkspace(userRole);
 
   useEffect(() => {
@@ -71,25 +79,134 @@ export function Navbar({
     return () => observer.disconnect();
   }, [isHome]);
 
+  // Build GSAP orchestrated ease-reverse timeline for bottom menu
   useEffect(() => {
-    if (!showClubModal) return;
+    const panel = panelRef.current;
+    const scrim = scrimRef.current;
+    const lineTop = burgerTopRef.current;
+    const lineBot = burgerBotRef.current;
+    if (!panel || !scrim || !lineTop || !lineBot) return;
+
+    const items = panel.querySelectorAll<HTMLElement>("[data-orch-item]");
+
+    const tl = gsap.timeline({
+      paused: true,
+      defaults: { ease: "power3.out" },
+      onReverseComplete: () => {
+        gsap.set(panel, { visibility: "hidden" });
+        scrim.style.pointerEvents = "none";
+      },
+    });
+
+    tl.set(panel, { visibility: "visible" })
+      .to(scrim, { opacity: 1, duration: 0.28 }, 0)
+      .fromTo(
+        panel,
+        { opacity: 0, y: 20, scale: 0.92 },
+        {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          duration: 0.42,
+          ease: "back.out(1.4)",
+        },
+        0.02
+      )
+      .fromTo(
+        items,
+        { opacity: 0, y: 12 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.3,
+          stagger: 0.05,
+          ease: "power3.out",
+        },
+        0.12
+      )
+      .to(lineTop, { y: 4.5, rotation: 45, duration: 0.24 }, 0)
+      .to(lineBot, { y: -4.5, rotation: -45, duration: 0.24 }, 0);
+
+    menuTlRef.current = tl;
+
+    return () => {
+      tl.kill();
+      menuTlRef.current = null;
+    };
+  }, [isHome, showEditions, userRole]);
+
+  // Play / reverse orchestrated menu timeline when menuOpen changes
+  useEffect(() => {
+    const tl = menuTlRef.current;
+    const scrim = scrimRef.current;
+    const panel = panelRef.current;
+
+    window.dispatchEvent(
+      new CustomEvent("olimpiadas:menu-toggle", {
+        detail: { open: menuOpen },
+      })
+    );
+
+    if (!tl || !scrim || !panel) return;
+
+    const prefersReduced = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+
+    if (menuOpen) {
+      scrim.style.pointerEvents = "auto";
+      if (prefersReduced) {
+        tl.progress(1).pause();
+      } else {
+        tl.timeScale(1).play();
+      }
+    } else {
+      if (prefersReduced) {
+        tl.progress(0).pause();
+        gsap.set(panel, { visibility: "hidden" });
+        scrim.style.pointerEvents = "none";
+      } else {
+        tl.timeScale(1.55).reverse();
+      }
+    }
+  }, [menuOpen]);
+
+  useEffect(() => {
+    if (!showClubModal && !menuOpen) return;
 
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
         setShowClubModal(false);
+        setMenuOpen(false);
       }
     }
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [showClubModal]);
+  }, [showClubModal, menuOpen]);
 
-  const dockLinks = [
-    ...(!isHome ? [{ label: "Inicio", shortLabel: "Inicio", href: "/" }] : []),
-    { label: "Bases", shortLabel: "Bases", href: "/bases-del-concurso" },
-    { label: "Quiénes somos", shortLabel: "El club", href: "/quienes-somos" },
+  const menuLinks = [
+    ...(!isHome
+      ? [{ label: "Inicio", hint: "Portada", href: "/" }]
+      : []),
+    {
+      label: "Bases del Concurso",
+      hint: "Reglamento",
+      href: "/bases-del-concurso",
+    },
+    { label: "Quiénes somos", hint: "El club", href: "/quienes-somos" },
     ...(showEditions
-      ? [{ label: "Ediciones", shortLabel: "Ediciones", href: "/ediciones" }]
+      ? [{ label: "Ediciones", hint: "Archivo", href: "/ediciones" }]
+      : []),
+    ...(userRole
+      ? [
+          {
+            label: userName ?? "Mi Perfil",
+            hint: "Cuenta",
+            href: "/perfil",
+            mobileOnly: true,
+          },
+        ]
       : []),
   ];
 
@@ -98,6 +215,7 @@ export function Navbar({
   function handleContestLogoClick(event: MouseEvent<HTMLAnchorElement>) {
     if (!isHome) return;
     event.preventDefault();
+    setMenuOpen(false);
     const prefersReduced = window.matchMedia(
       "(prefers-reduced-motion: reduce)"
     ).matches;
@@ -141,7 +259,7 @@ export function Navbar({
             <span>{APP_BRAND.contestName}</span>
           </Link>
 
-          <div className="ml-auto flex items-center gap-5">
+          <div className="ml-auto flex items-center gap-3 sm:gap-5">
             {userRole && (
               <Link
                 href="/perfil"
@@ -151,6 +269,15 @@ export function Navbar({
                 {userName ?? "Mi Perfil"}
               </Link>
             )}
+
+            <Link
+              href={workspace.href}
+              aria-current={currentPath === workspace.href ? "page" : undefined}
+              className="ta-top-cta"
+            >
+              <span className="sm:hidden">{workspace.shortLabel}</span>
+              <span className="hidden sm:inline">{workspace.label}</span>
+            </Link>
 
             <button
               type="button"
@@ -172,32 +299,63 @@ export function Navbar({
         </div>
       </header>
 
-      <div className="ta-dock-wrap">
-        <nav className="ta-dock" aria-label="Navegación principal">
-          {dockLinks.map((link) => {
-            const isActive = currentPath === link.href;
-            return (
-              <Link
-                key={link.href}
-                href={link.href}
-                aria-current={isActive ? "page" : undefined}
-                className="ta-dock-link"
-              >
-                <span className="sm:hidden">{link.shortLabel}</span>
-                <span className="hidden sm:inline">{link.label}</span>
-              </Link>
-            );
-          })}
+      {/* Subtle scrim behind orchestrated bottom menu */}
+      <div
+        ref={scrimRef}
+        className="ta-menu-scrim"
+        onClick={() => setMenuOpen(false)}
+        aria-hidden="true"
+      />
 
-          <Link
-            href={workspace.href}
-            aria-current={currentPath === workspace.href ? "page" : undefined}
-            className="ta-dock-link ta-dock-cta"
+      {/* Compact Orchestrated Bottom Menu */}
+      <div
+        className="ta-dock-wrap"
+        data-menu-open={menuOpen ? "true" : undefined}
+      >
+        <div className="ta-orch-anchor">
+          <nav
+            ref={panelRef}
+            id="ta-orch-menu-panel"
+            aria-label="Navegación principal"
+            aria-hidden={!menuOpen}
+            className="ta-orch-panel"
           >
-            <span className="sm:hidden">{workspace.shortLabel}</span>
-            <span className="hidden sm:inline">{workspace.label}</span>
-          </Link>
-        </nav>
+            {menuLinks.map((link) => {
+              const isActive = currentPath === link.href;
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  data-orch-item
+                  tabIndex={menuOpen ? 0 : -1}
+                  aria-current={isActive ? "page" : undefined}
+                  onClick={() => setMenuOpen(false)}
+                  className={`ta-orch-item ${"mobileOnly" in link && link.mobileOnly ? "sm:hidden" : ""}`}
+                >
+                  <span>{link.label}</span>
+                  <span className="ta-orch-hint">{link.hint}</span>
+                </Link>
+              );
+            })}
+          </nav>
+
+          <div className="ta-dock">
+            <button
+              type="button"
+              onClick={() => setMenuOpen((prev) => !prev)}
+              aria-expanded={menuOpen}
+              aria-controls="ta-orch-menu-panel"
+              aria-label={menuOpen ? "Cerrar menú" : "Abrir menú de navegación"}
+              className={`ta-dock-link ta-dock-toggle ${menuOpen ? "ta-dock-toggle--open" : ""}`}
+            >
+              <span className="ta-burger" aria-hidden="true">
+                <span ref={burgerTopRef} />
+                <span ref={burgerBotRef} />
+              </span>
+              <span>{menuOpen ? "Cerrar" : "Menú"}</span>
+            </button>
+          </div>
+        </div>
       </div>
 
       {showClubModal && (
@@ -221,9 +379,9 @@ export function Navbar({
             </h2>
             <p className="mt-3 text-sm leading-relaxed text-muted sm:text-base">
               Estás por salir de las {APP_BRAND.contestName} para abrir el sitio
-              oficial de nuestra comunidad (www.sitelocuento.com).
+              oficial del club de escritura {APP_BRAND.clubName} en una nueva
+              pestaña.
             </p>
-
             <div className="mt-7 flex flex-wrap justify-end gap-3">
               <button
                 type="button"

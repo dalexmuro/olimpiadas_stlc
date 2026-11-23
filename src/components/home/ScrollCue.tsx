@@ -15,6 +15,18 @@ interface ScrollCueProps {
 export function ScrollCue({ sections }: ScrollCueProps) {
   const [nextIndex, setNextIndex] = useState<number>(1);
   const [isHidden, setIsHidden] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const handleMenuToggle = (event: Event) => {
+      const custom = event as CustomEvent<{ open?: boolean }>;
+      setMenuOpen(Boolean(custom.detail?.open));
+    };
+
+    window.addEventListener("olimpiadas:menu-toggle", handleMenuToggle);
+    return () =>
+      window.removeEventListener("olimpiadas:menu-toggle", handleMenuToggle);
+  }, []);
 
   useEffect(() => {
     if (sections.length < 2) return;
@@ -88,6 +100,8 @@ export function ScrollCue({ sections }: ScrollCueProps) {
     );
   }
 
+  const cueHidden = isHidden || menuOpen;
+
   return (
     <div className="ta-scroll-cue-wrap">
       <button
@@ -98,9 +112,9 @@ export function ScrollCue({ sections }: ScrollCueProps) {
             ? `Desplazarse a ${nextSection.label}`
             : "Desplazarse hacia abajo"
         }
-        aria-hidden={isHidden}
-        tabIndex={isHidden ? -1 : 0}
-        className={`ta-scroll-cue ${isHidden ? "ta-scroll-cue--hidden" : ""}`}
+        aria-hidden={cueHidden}
+        tabIndex={cueHidden ? -1 : 0}
+        className={`ta-scroll-cue ${cueHidden ? "ta-scroll-cue--hidden" : ""}`}
       >
         <ChevronDown
           className="ta-scroll-cue-icon h-7 w-7"

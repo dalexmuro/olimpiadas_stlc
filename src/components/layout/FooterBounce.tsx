@@ -18,18 +18,18 @@ export function FooterBounce() {
     let cooldownUntil = 0;
 
     const triggerBounce = (intensity: number) => {
-      const lift = Math.min(136, Math.max(64, intensity));
+      const lift = Math.min(48, Math.max(24, intensity));
 
       gsap.killTweensOf(block);
       const tl = gsap.timeline();
       tl.to(block, {
         y: -lift,
-        duration: 0.2,
+        duration: 0.34,
         ease: "power2.out",
       }).to(block, {
         y: 0,
-        duration: 0.78,
-        ease: "elastic.out(1.05, 0.42)",
+        duration: 0.7,
+        ease: "sine.inOut",
       });
     };
 
@@ -44,9 +44,9 @@ export function FooterBounce() {
 
       const now = performance.now();
       if (now < cooldownUntil) return;
-      cooldownUntil = now + 260;
+      cooldownUntil = now + 420;
 
-      triggerBounce(event.deltaY * 0.85);
+      triggerBounce(event.deltaY * 0.35);
     };
 
     window.addEventListener("wheel", handleWheel, { passive: true });
