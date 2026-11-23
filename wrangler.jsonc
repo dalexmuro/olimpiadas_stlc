@@ -54,7 +54,6 @@
       "vars": {
         "APP_ENV": "dev",
         "BETTER_AUTH_URL": "https://dev-olimpiadas.sitelocuento.com",
-        "EMAIL_FROM_ADDRESS": "olimpiadas@sitelocuento.com",
         "EMAIL_FROM_NAME": "Olimpíadas Literarias de SiTeLoCuento (Dev)"
       }
     }

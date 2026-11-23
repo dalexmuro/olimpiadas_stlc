@@ -27,6 +27,7 @@ const SECRET_KEYS = [
   "BETTER_AUTH_SECRET",
   "CRON_SECRET",
   "BREVO_API_KEY",
+  "EMAIL_FROM_ADDRESS",
   "GOOGLE_CLIENT_ID",
   "GOOGLE_CLIENT_SECRET",
   "MICROSOFT_CLIENT_ID",
@@ -60,6 +61,7 @@ for (const key of SECRET_KEYS) {
     payload[key] = val.trim();
   } else if (
     key !== "CRON_SECRET" &&
+    key !== "EMAIL_FROM_ADDRESS" &&
     (targetEnv === "prod" || !key.startsWith("MICROSOFT_"))
   ) {
     missing.push(key);
