@@ -8,7 +8,7 @@ describe("Cloudflare Runtime Secrets Validator (Step 7.2)", () => {
       BREVO_API_KEY: "xkeysib-dev",
       GOOGLE_CLIENT_ID: "gid",
       GOOGLE_CLIENT_SECRET: "gsec",
-      SUPERADMIN_INITIAL_EMAIL: "dalexmuro@gmail.com",
+      SUPERADMIN_INITIAL_EMAIL: "superadmin@example.com",
     });
 
     expect(res.valid).toBe(true);
@@ -25,7 +25,7 @@ describe("Cloudflare Runtime Secrets Validator (Step 7.2)", () => {
       BREVO_API_KEY: "xkeysib-prod",
       GOOGLE_CLIENT_ID: "gid",
       GOOGLE_CLIENT_SECRET: "gsec",
-      SUPERADMIN_INITIAL_EMAIL: "dalexmuro@gmail.com",
+      SUPERADMIN_INITIAL_EMAIL: "superadmin@example.com",
     });
 
     expect(missingMs.valid).toBe(false);
@@ -41,7 +41,7 @@ describe("Cloudflare Runtime Secrets Validator (Step 7.2)", () => {
       GOOGLE_CLIENT_SECRET: "gsec",
       MICROSOFT_CLIENT_ID: "msid",
       MICROSOFT_CLIENT_SECRET: "mssec",
-      SUPERADMIN_INITIAL_EMAIL: "dalexmuro@gmail.com",
+      SUPERADMIN_INITIAL_EMAIL: "superadmin@example.com",
     });
 
     expect(completeProd.valid).toBe(true);

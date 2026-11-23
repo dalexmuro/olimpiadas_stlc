@@ -11,6 +11,7 @@ import {
   type PublicPageSlug,
   type ResolvedSitePage,
 } from "./public-pages";
+import { sanitizeHtml } from "./security";
 
 export const EDITABLE_SITE_PAGE_SLUGS: readonly PublicPageSlug[] = [
   "bases-del-concurso",
@@ -86,6 +87,14 @@ export async function updateSitePageInDb(
     return { updated: false, error: validation.error };
   }
 
+  const sanitizedHtml = sanitizeHtml(options.contentHtml);
+  if (!sanitizedHtml) {
+    return {
+      updated: false,
+      error: "El contenido de la página no contiene HTML seguro válido.",
+    };
+  }
+
   const nowIso = options.nowIso ?? new Date().toISOString();
   const existing = await db
     .select()
@@ -97,7 +106,7 @@ export async function updateSitePageInDb(
       .update(sitePages)
       .set({
         title: options.title.trim(),
-        contentHtml: options.contentHtml.trim(),
+        contentHtml: sanitizedHtml,
         updatedById: options.updatedById,
         updatedAt: nowIso,
       })
@@ -106,7 +115,7 @@ export async function updateSitePageInDb(
     await db.insert(sitePages).values({
       slug: options.slug,
       title: options.title.trim(),
-      contentHtml: options.contentHtml.trim(),
+      contentHtml: sanitizedHtml,
       updatedById: options.updatedById,
       updatedAt: nowIso,
     });

@@ -197,13 +197,27 @@ export function resolveAuthRuntimeConfig(
     ])
   );
 
+  const rawSecret = (
+    env?.BETTER_AUTH_SECRET ??
+    procEnv.BETTER_AUTH_SECRET ??
+    ""
+  ).trim();
+  const isDeployedEnvironment =
+    env?.APP_ENV === "prod" ||
+    env?.APP_ENV === "dev" ||
+    (procEnv.NODE_ENV === "production" && !procEnv.VITEST);
+
+  if (!rawSecret && isDeployedEnvironment) {
+    throw new Error(
+      "BETTER_AUTH_SECRET is required in deployed/production environments."
+    );
+  }
+
   return {
     baseUrl,
     trustedOrigins,
     secret:
-      env?.BETTER_AUTH_SECRET ??
-      procEnv.BETTER_AUTH_SECRET ??
-      "dev-fallback-secret-minimum-32-chars-olimpiadas-stlc",
+      rawSecret || "local-dev-only-insecure-secret-do-not-use-in-production",
     googleClientId: env?.GOOGLE_CLIENT_ID ?? procEnv.GOOGLE_CLIENT_ID,
     googleClientSecret:
       env?.GOOGLE_CLIENT_SECRET ?? procEnv.GOOGLE_CLIENT_SECRET,

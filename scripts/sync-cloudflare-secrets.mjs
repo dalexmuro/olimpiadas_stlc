@@ -25,6 +25,7 @@ if (!existsSync(envPath)) {
 
 const SECRET_KEYS = [
   "BETTER_AUTH_SECRET",
+  "CRON_SECRET",
   "BREVO_API_KEY",
   "GOOGLE_CLIENT_ID",
   "GOOGLE_CLIENT_SECRET",
@@ -58,8 +59,8 @@ for (const key of SECRET_KEYS) {
   if (val && val.trim().length > 0) {
     payload[key] = val.trim();
   } else if (
-    targetEnv === "prod" ||
-    !key.startsWith("MICROSOFT_")
+    key !== "CRON_SECRET" &&
+    (targetEnv === "prod" || !key.startsWith("MICROSOFT_"))
   ) {
     missing.push(key);
   }

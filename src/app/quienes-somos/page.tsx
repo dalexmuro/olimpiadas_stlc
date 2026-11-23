@@ -5,6 +5,7 @@ import { PageReveal } from "@/components/layout/PageReveal";
 import { createDbClient, isValidD1Binding } from "@/db";
 import type { CloudflareEnv } from "@/lib/cloudflare-env";
 import { getPublicSitePage } from "@/lib/public-pages";
+import { sanitizeHtml } from "@/lib/security";
 
 export default async function AboutUsPage() {
   let db = null;
@@ -38,7 +39,7 @@ export default async function AboutUsPage() {
             </h1>
             <div
               className="riso-prose mt-10"
-              dangerouslySetInnerHTML={{ __html: page.contentHtml }}
+              dangerouslySetInnerHTML={{ __html: sanitizeHtml(page.contentHtml) }}
             />
           </article>
         </PageReveal>

@@ -8,6 +8,7 @@ import {
   insertTagAtCursor,
   type EditableEmailTemplate,
 } from "@/lib/email-template-editor";
+import { sanitizeHtml } from "@/lib/security";
 
 const INITIAL_FALLBACK_TEMPLATES: EditableEmailTemplate[] =
   DEFAULT_EMAIL_TEMPLATES.map((t) => ({
@@ -31,9 +32,7 @@ export default function AdminEmailTemplatesPage() {
   const [bodyHtml, setBodyHtml] = useState<string>(
     INITIAL_FALLBACK_TEMPLATES[0].bodyHtmlTemplate
   );
-  const [superadminEmail, setSuperadminEmail] = useState<string>(
-    "dalexmuro@gmail.com"
-  );
+  const [superadminEmail, setSuperadminEmail] = useState<string>("");
   const [saving, setSaving] = useState(false);
   const [testing, setTesting] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
@@ -336,7 +335,7 @@ export default function AdminEmailTemplatesPage() {
           </p>
           <div
             className="riso-prose mt-4 border-t border-rule pt-4"
-            dangerouslySetInnerHTML={{ __html: preview.htmlContent }}
+            dangerouslySetInnerHTML={{ __html: sanitizeHtml(preview.htmlContent) }}
           />
         </div>
       </div>

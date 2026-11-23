@@ -1,16 +1,16 @@
 import { describe, expect, it } from "vitest";
 import {
-  CLOUDFLARE_ACCOUNT_ID,
   CLOUDFLARE_ENVIRONMENTS,
   MAX_IMAGE_SIZE_BYTES,
   buildR2MediaKey,
+  getCloudflareAccountId,
   getCloudflareConfig,
   validateMediaUpload,
 } from "../cloudflare-resources";
 
 describe("Step 1.1 — Cloudflare R2 & D1 Resource Configuration", () => {
-  it("defines valid Cloudflare account and isolated prod/dev resources", () => {
-    expect(CLOUDFLARE_ACCOUNT_ID).toBe("72a8537e848ff38b562b789901671eec");
+  it("defines valid Cloudflare account helper and isolated prod/dev resources", () => {
+    expect(typeof getCloudflareAccountId).toBe("function");
 
     const prod = getCloudflareConfig("prod");
     const dev = getCloudflareConfig("dev");

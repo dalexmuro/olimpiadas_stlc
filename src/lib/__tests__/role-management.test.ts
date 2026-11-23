@@ -127,7 +127,7 @@ describe("Step 2.2 — Superadmin Role Management & Odd Jury Validation", () => 
       [
         "sa1",
         "Super Admin",
-        "dalexmuro@gmail.com",
+        "superadmin@example.com",
         1,
         null,
         "Dalex",

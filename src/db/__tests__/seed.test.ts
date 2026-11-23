@@ -79,19 +79,19 @@ describe("Step 1.7 — Database Seed (E01-E26 Templates, Site Pages & Superadmin
 
   it("evaluates SUPERADMIN_INITIAL_EMAIL promotion case-insensitively", () => {
     expect(
-      shouldPromoteToSuperadmin("dalexmuro@gmail.com", "dalexmuro@gmail.com")
+      shouldPromoteToSuperadmin("superadmin@example.com", "superadmin@example.com")
     ).toBe(true);
     expect(
       shouldPromoteToSuperadmin(
-        "  DALEXMURO@GMAIL.COM ",
-        "dalexmuro@gmail.com"
+        "  SUPERADMIN@EXAMPLE.COM ",
+        "superadmin@example.com"
       )
     ).toBe(true);
     expect(
-      shouldPromoteToSuperadmin("otro@ejemplo.com", "dalexmuro@gmail.com")
+      shouldPromoteToSuperadmin("otro@ejemplo.com", "superadmin@example.com")
     ).toBe(false);
-    expect(shouldPromoteToSuperadmin("dalexmuro@gmail.com", "")).toBe(false);
-    expect(shouldPromoteToSuperadmin("dalexmuro@gmail.com", undefined)).toBe(
+    expect(shouldPromoteToSuperadmin("superadmin@example.com", "")).toBe(false);
+    expect(shouldPromoteToSuperadmin("superadmin@example.com", undefined)).toBe(
       false
     );
   });
@@ -100,12 +100,12 @@ describe("Step 1.7 — Database Seed (E01-E26 Templates, Site Pages & Superadmin
     const { binding, queries } = createRecordingD1Binding([
       [
         "user_1",
-        "Dalex",
-        "dalexmuro@gmail.com",
+        "Super Admin",
+        "superadmin@example.com",
         1,
         null,
-        "Dalex",
-        "Muro",
+        "Super",
+        "Admin",
         "VE",
         "+58000",
         null,
@@ -118,7 +118,7 @@ describe("Step 1.7 — Database Seed (E01-E26 Templates, Site Pages & Superadmin
     const db = createDbClient(binding);
 
     const result = await seedInitialData(db, {
-      initialSuperadminEmail: "dalexmuro@gmail.com",
+      initialSuperadminEmail: "superadmin@example.com",
       nowIso: "2026-11-18T12:00:00.000Z",
     });
 
@@ -133,7 +133,7 @@ describe("Step 1.7 — Database Seed (E01-E26 Templates, Site Pages & Superadmin
 
   it("generates idempotent SQL seed statements for D1 CLI and remote execution", () => {
     const statements = buildSeedSqlStatements({
-      initialSuperadminEmail: "dalexmuro@gmail.com",
+      initialSuperadminEmail: "superadmin@example.com",
       nowIso: "2026-11-18T12:00:00.000Z",
     });
 
@@ -141,10 +141,9 @@ describe("Step 1.7 — Database Seed (E01-E26 Templates, Site Pages & Superadmin
     expect(statements[0]).toContain("INSERT OR IGNORE INTO email_templates");
     expect(statements[26]).toContain("INSERT OR IGNORE INTO site_pages");
     expect(statements[28]).toContain("UPDATE users SET role = 'SUPERADMIN'");
-    expect(statements[28]).toContain("'dalexmuro@gmail.com'");
+    expect(statements[28]).toContain("'superadmin@example.com'");
 
     const seedFilePath = path.resolve(process.cwd(), "drizzle/seed.sql");
-    fs.writeFileSync(seedFilePath, statements.join("\n") + "\n", "utf-8");
     expect(fs.existsSync(seedFilePath)).toBe(true);
   });
 });

@@ -38,4 +38,4 @@ INSERT OR IGNORE INTO site_pages (slug, title, content_html, updated_at) VALUES 
 <p><strong>SiTeLoCuento</strong> es una comunidad apasionada por la literatura y la creación narrativa breve. Cada año organizamos las <strong>Olimpíadas Literarias</strong> con el propósito de impulsar el hábito de la escritura constante, el intercambio constructivo entre autores y el descubrimiento de nuevas voces literarias en español.</p>
 <h3>Nuestra Misión</h3>
 <p>Brindar un espacio transparente, retador y fraterno donde cada consigna sea una chispa creativa y donde la lectura anónima garantice que cada historia brille por su propio mérito.</p>', '2026-11-18T12:00:00.000Z');
-UPDATE users SET role = 'SUPERADMIN', updated_at = '2026-11-18T12:00:00.000Z' WHERE lower(email) = 'dalexmuro@gmail.com';
+UPDATE users SET role = 'SUPERADMIN', updated_at = '2026-11-18T12:00:00.000Z' WHERE lower(email) = 'superadmin@example.com';

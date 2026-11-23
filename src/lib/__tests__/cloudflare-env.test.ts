@@ -117,7 +117,7 @@ describe("Step 1.3 — Wrangler Configuration & Bindings Validation", () => {
         BREVO_API_KEY: "xkeysib-123",
         GOOGLE_CLIENT_ID: "google-id",
         GOOGLE_CLIENT_SECRET: "google-secret",
-        SUPERADMIN_INITIAL_EMAIL: "dalexmuro@gmail.com",
+        SUPERADMIN_INITIAL_EMAIL: "superadmin@example.com",
       },
       { requireSecrets: true }
     );

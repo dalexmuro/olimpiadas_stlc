@@ -15,7 +15,15 @@ export interface CloudflareEnvironmentConfig {
   cronSchedule: string;
 }
 
-export const CLOUDFLARE_ACCOUNT_ID = "72a8537e848ff38b562b789901671eec";
+/**
+ * Returns the Cloudflare Account ID from the runtime environment when configured.
+ * Never hardcode account identifiers in tracked source code.
+ */
+export function getCloudflareAccountId(): string | undefined {
+  return typeof process !== "undefined"
+    ? process.env.CLOUDFLARE_ACCOUNT_ID?.trim() || undefined
+    : undefined;
+}
 
 export const CLOUDFLARE_ENVIRONMENTS: Record<
   AppEnvironment,

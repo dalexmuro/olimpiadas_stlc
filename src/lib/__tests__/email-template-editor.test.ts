@@ -126,18 +126,18 @@ describe("Step 2.6 — Superadmin Email Template Editor (E01-E26)", () => {
       queries.some((q) => q.includes('update "email_templates"'))
     ).toBe(true);
 
-    const sampleVars = buildSampleEmailPreviewVariables("dalexmuro@gmail.com");
+    const sampleVars = buildSampleEmailPreviewVariables("superadmin@example.com");
     expect(sampleVars.EDICION).toContain("Olimpíadas Literarias");
 
     const testMail = await sendTestTemplateEmail({
-      recipientEmail: "dalexmuro@gmail.com",
-      recipientName: "Dalex",
+      recipientEmail: "superadmin@example.com",
+      recipientName: "Admin",
       subjectTemplate: "Consigna #{{NUMERO_CONSIGNA}} para {{NOMBRE}}",
       bodyHtmlTemplate: "<p>Hola {{NOMBRE}}</p>",
       dryRun: true,
     });
     expect(testMail.sent).toBe(true);
     expect(testMail.dryRun).toBe(true);
-    expect(testMail.subject).toBe("[PRUEBA] Consigna #2 para Dalex");
+    expect(testMail.subject).toBe("[PRUEBA] Consigna #2 para Admin");
   });
 });

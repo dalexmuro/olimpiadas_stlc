@@ -28,7 +28,7 @@ async function requireAdminContext(request: Request) {
   const { env } = await getCloudflareContext({ async: true });
   const cfEnv = env as unknown as CloudflareEnv;
   const db = createDbClient(cfEnv.DB);
-  const auth = createAuthInstance(db, cfEnv);
+  const auth = createAuthInstance(db, cfEnv, request.url);
 
   const session = await auth.api.getSession({ headers: request.headers });
   if (!session?.user?.id) {

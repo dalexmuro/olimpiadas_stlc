@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import { DEFAULT_SITE_PAGES } from "@/db/seed";
 import { insertTagAtCursor } from "@/lib/email-template-editor";
 import type { PublicPageSlug, ResolvedSitePage } from "@/lib/public-pages";
+import { sanitizeHtml } from "@/lib/security";
 
 const INITIAL_PAGES: ResolvedSitePage[] = DEFAULT_SITE_PAGES.map((p) => ({
   slug: p.slug,
@@ -242,7 +243,7 @@ export default function AdminSitePagesEditorPage() {
           </p>
           <div
             className="riso-prose mt-4"
-            dangerouslySetInnerHTML={{ __html: contentHtml }}
+            dangerouslySetInnerHTML={{ __html: sanitizeHtml(contentHtml) }}
           />
         </article>
       </div>

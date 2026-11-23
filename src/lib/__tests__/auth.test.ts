@@ -75,10 +75,10 @@ describe("Step 1.10 — Better Auth Configuration (Email/Password, Google, Micro
 
   it("resolves initial user role with automatic SUPERADMIN promotion", () => {
     expect(
-      resolveInitialUserRole("dalexmuro@gmail.com", "dalexmuro@gmail.com")
+      resolveInitialUserRole("superadmin@example.com", "superadmin@example.com")
     ).toBe("SUPERADMIN");
     expect(
-      resolveInitialUserRole("participante@ejemplo.com", "dalexmuro@gmail.com")
+      resolveInitialUserRole("participante@ejemplo.com", "superadmin@example.com")
     ).toBe("PARTICIPANT");
   });
 
@@ -159,19 +159,44 @@ describe("Step 1.10 — Better Auth Configuration (Email/Password, Google, Micro
     expect(resolved.emailFromAddress).toBe("olimpiadas@sitelocuento.com");
   });
 
+  it("fails closed when BETTER_AUTH_SECRET is missing in deployed environments", () => {
+    expect(() =>
+      resolveAuthRuntimeConfig({
+        APP_ENV: "prod",
+        BETTER_AUTH_URL: "https://olimpiadas.sitelocuento.com",
+        BETTER_AUTH_SECRET: "",
+      })
+    ).toThrow("BETTER_AUTH_SECRET is required");
+
+    expect(() =>
+      resolveAuthRuntimeConfig({
+        APP_ENV: "dev",
+        BETTER_AUTH_URL: "https://dev-olimpiadas.sitelocuento.com",
+        BETTER_AUTH_SECRET: "   ",
+      })
+    ).toThrow("BETTER_AUTH_SECRET is required");
+
+    const withSecret = resolveAuthRuntimeConfig({
+      APP_ENV: "prod",
+      BETTER_AUTH_URL: "https://olimpiadas.sitelocuento.com",
+      BETTER_AUTH_SECRET: "a-strong-runtime-secret-at-least-32-chars",
+    });
+    expect(withSecret.secret).toBe("a-strong-runtime-secret-at-least-32-chars");
+  });
+
   it("adapts baseUrl and trustedOrigins when accessed via a workers.dev preview domain", () => {
     const resolved = resolveAuthRuntimeConfig(
       {
         BETTER_AUTH_URL: "https://dev-olimpiadas.sitelocuento.com",
       },
-      "https://olimpiadas-stlc-dev.dalexmuro.workers.dev/api/auth/sign-in/social"
+      "https://olimpiadas-stlc-dev.example.workers.dev/api/auth/sign-in/social"
     );
 
     expect(resolved.baseUrl).toBe(
-      "https://olimpiadas-stlc-dev.dalexmuro.workers.dev"
+      "https://olimpiadas-stlc-dev.example.workers.dev"
     );
     expect(resolved.trustedOrigins).toContain(
-      "https://olimpiadas-stlc-dev.dalexmuro.workers.dev"
+      "https://olimpiadas-stlc-dev.example.workers.dev"
     );
     expect(resolved.trustedOrigins).toContain(
       "https://dev-olimpiadas.sitelocuento.com"

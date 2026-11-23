@@ -9,15 +9,20 @@ import { createDbClient } from "@/db";
 import { APP_BRAND } from "@/lib/app-metadata";
 import type { CloudflareEnv } from "@/lib/cloudflare-env";
 import { runContestCronTick } from "@/lib/cron-runner";
+import { constantTimeEqual } from "@/lib/security";
 
 export async function POST(request: Request): Promise<Response> {
   const { env } = await getCloudflareContext({ async: true });
   const cfEnv = env as unknown as CloudflareEnv;
 
-  const expectedSecret = cfEnv.BETTER_AUTH_SECRET;
+  const expectedSecret = (cfEnv.CRON_SECRET ?? "").trim();
   const authHeader = request.headers.get("authorization") ?? "";
 
-  if (!expectedSecret || authHeader !== `Bearer ${expectedSecret}`) {
+  const isAuthorized =
+    expectedSecret.length > 0 &&
+    (await constantTimeEqual(authHeader, `Bearer ${expectedSecret}`));
+
+  if (!isAuthorized) {
     return NextResponse.json(
       { ok: false, error: "No autorizado para ejecutar el motor cron." },
       { status: 401 }
