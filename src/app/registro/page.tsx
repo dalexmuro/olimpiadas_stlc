@@ -3,6 +3,7 @@
 import { Check, Eye, EyeOff, Info } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState, type FormEvent } from "react";
+import { OAuthProviderButtons } from "@/components/auth/OAuthProviderButtons";
 import { Navbar } from "@/components/layout/Navbar";
 import { PageReveal } from "@/components/layout/PageReveal";
 import { APP_BRAND } from "@/lib/app-metadata";
@@ -215,26 +216,10 @@ export default function RegisterPage() {
               {APP_BRAND.contestName}.
             </p>
 
-        <div className="mt-6 grid gap-3 sm:grid-cols-2">
-          <button
-            type="button"
-            disabled={loading}
-            onClick={() => void handleOAuthSignIn("google")}
-            aria-label="Registrarse con Google"
-            className="btn btn--secondary w-full"
-          >
-            Con Google
-          </button>
-          <button
-            type="button"
-            disabled={loading}
-            onClick={() => void handleOAuthSignIn("microsoft")}
-            aria-label="Registrarse con Microsoft"
-            className="btn btn--secondary w-full"
-          >
-            Con Microsoft
-          </button>
-        </div>
+        <OAuthProviderButtons
+          disabled={loading}
+          onSelectProvider={(provider) => void handleOAuthSignIn(provider)}
+        />
 
         <div className="my-6 flex items-center gap-3">
           <div className="h-px flex-1 bg-rule" />
