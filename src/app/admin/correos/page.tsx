@@ -1,11 +1,14 @@
 "use client";
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
+import {
+  RichTextEditor,
+  type RichTextEditorHandle,
+} from "@/components/admin/RichTextEditor";
 import { DEFAULT_EMAIL_TEMPLATES } from "@/db/seed";
 import { renderEmailTemplate } from "@/lib/email";
 import {
   buildSampleEmailPreviewVariables,
-  insertTagAtCursor,
   type EditableEmailTemplate,
 } from "@/lib/email-template-editor";
 import { sanitizeHtml } from "@/lib/security";
@@ -39,7 +42,7 @@ export default function AdminEmailTemplatesPage() {
   const [feedback, setFeedback] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const bodyRef = useRef<HTMLTextAreaElement | null>(null);
+  const editorRef = useRef<RichTextEditorHandle | null>(null);
 
   useEffect(() => {
     async function loadTemplates() {
@@ -84,44 +87,7 @@ export default function AdminEmailTemplatesPage() {
   }
 
   function handleInsertTag(tag: string) {
-    const el = bodyRef.current;
-    const start = el ? el.selectionStart : bodyHtml.length;
-    const end = el ? el.selectionEnd : bodyHtml.length;
-    const { nextText, nextCursorPos } = insertTagAtCursor(
-      bodyHtml,
-      tag,
-      start,
-      end
-    );
-    setBodyHtml(nextText);
-
-    requestAnimationFrame(() => {
-      if (bodyRef.current) {
-        bodyRef.current.focus();
-        bodyRef.current.setSelectionRange(nextCursorPos, nextCursorPos);
-      }
-    });
-  }
-
-  function wrapSelectionWithHtml(openTag: string, closeTag: string) {
-    const el = bodyRef.current;
-    const start = el ? el.selectionStart : bodyHtml.length;
-    const end = el ? el.selectionEnd : bodyHtml.length;
-    const selected = bodyHtml.slice(start, end) || "texto";
-    const snippet = `${openTag}${selected}${closeTag}`;
-    const { nextText, nextCursorPos } = insertTagAtCursor(
-      bodyHtml,
-      snippet,
-      start,
-      end
-    );
-    setBodyHtml(nextText);
-    requestAnimationFrame(() => {
-      if (bodyRef.current) {
-        bodyRef.current.focus();
-        bodyRef.current.setSelectionRange(nextCursorPos, nextCursorPos);
-      }
-    });
+    editorRef.current?.insertText(tag);
   }
 
   async function handleSave(event: FormEvent<HTMLFormElement>) {
@@ -284,45 +250,16 @@ export default function AdminEmailTemplatesPage() {
           </div>
         </div>
 
-        <div>
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <label htmlFor="tpl-body" className="block text-sm font-medium">
-              Cuerpo del mensaje (HTML con formato)
-            </label>
-            <div className="flex flex-wrap gap-2">
-              <button
-                type="button"
-                onClick={() => wrapSelectionWithHtml("<strong>", "</strong>")}
-                className="riso-link text-sm font-medium"
-              >
-                Negrita
-              </button>
-              <button
-                type="button"
-                onClick={() => wrapSelectionWithHtml("<em>", "</em>")}
-                className="riso-link text-sm font-medium"
-              >
-                Cursiva
-              </button>
-              <button
-                type="button"
-                onClick={() => wrapSelectionWithHtml("<p>", "</p>")}
-                className="riso-link text-sm font-medium"
-              >
-                Párrafo
-              </button>
-            </div>
-          </div>
-
-          <textarea
-            ref={bodyRef}
-            id="tpl-body"
-            rows={8}
-            value={bodyHtml}
-            onChange={(e) => setBodyHtml(e.target.value)}
-            className="mt-2 block w-full rounded-card border border-ink bg-paper p-3 text-sm text-ink"
-          />
-        </div>
+        <RichTextEditor
+          ref={editorRef}
+          id="tpl-body"
+          label="Cuerpo del mensaje"
+          contentKey={selectedCode}
+          value={bodyHtml}
+          onChange={setBodyHtml}
+          readOnly={!canEdit}
+          minHeightClass="min-h-64"
+        />
 
         </fieldset>
 

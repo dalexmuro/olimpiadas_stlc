@@ -33,5 +33,9 @@ describe("Security Utilities (AUD-004 & AUD-005)", () => {
     expect(clean).toContain(
       '<a href="https://sitelocuento.com" target="_blank" rel="noopener noreferrer">Bueno</a>'
     );
+
+    const richHtml =
+      '<p style="text-align: center"><u>Subrayado</u> y <em>cursiva</em></p><ul><li>Punto 1</li></ul>';
+    expect(sanitizeHtml(richHtml)).toBe(richHtml);
   });
 });

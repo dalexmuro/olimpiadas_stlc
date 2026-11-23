@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
+import { RichTextEditor } from "@/components/admin/RichTextEditor";
 import { DEFAULT_SITE_PAGES } from "@/db/seed";
-import { insertTagAtCursor } from "@/lib/email-template-editor";
 import type { PublicPageSlug, ResolvedSitePage } from "@/lib/public-pages";
 import { sanitizeHtml } from "@/lib/security";
 
@@ -24,8 +24,6 @@ export default function AdminSitePagesEditorPage() {
   const [saving, setSaving] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-  const editorRef = useRef<HTMLTextAreaElement | null>(null);
 
   useEffect(() => {
     async function loadPages() {
@@ -59,26 +57,6 @@ export default function AdminSitePagesEditorPage() {
     setContentHtml(found.contentHtml);
     setFeedback(null);
     setErrorMessage(null);
-  }
-
-  function wrapSelection(openTag: string, closeTag: string) {
-    const el = editorRef.current;
-    const start = el ? el.selectionStart : contentHtml.length;
-    const end = el ? el.selectionEnd : contentHtml.length;
-    const selected = contentHtml.slice(start, end) || "Texto";
-    const { nextText, nextCursorPos } = insertTagAtCursor(
-      contentHtml,
-      `${openTag}${selected}${closeTag}`,
-      start,
-      end
-    );
-    setContentHtml(nextText);
-    requestAnimationFrame(() => {
-      if (editorRef.current) {
-        editorRef.current.focus();
-        editorRef.current.setSelectionRange(nextCursorPos, nextCursorPos);
-      }
-    });
   }
 
   async function handleSave(event: FormEvent<HTMLFormElement>) {
@@ -197,52 +175,15 @@ export default function AdminSitePagesEditorPage() {
           />
         </div>
 
-        <div>
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <label htmlFor="page-content" className="block text-sm font-medium">
-              Contenido HTML
-            </label>
-            <div className="flex flex-wrap gap-3">
-              <button
-                type="button"
-                onClick={() => wrapSelection("<h2>", "</h2>")}
-                className="riso-link text-sm font-medium"
-              >
-                Subtítulo H2
-              </button>
-              <button
-                type="button"
-                onClick={() => wrapSelection("<h3>", "</h3>")}
-                className="riso-link text-sm font-medium"
-              >
-                Subtítulo H3
-              </button>
-              <button
-                type="button"
-                onClick={() => wrapSelection("<p>", "</p>")}
-                className="riso-link text-sm font-medium"
-              >
-                Párrafo
-              </button>
-              <button
-                type="button"
-                onClick={() => wrapSelection("<strong>", "</strong>")}
-                className="riso-link text-sm font-medium"
-              >
-                Negrita
-              </button>
-            </div>
-          </div>
-
-          <textarea
-            ref={editorRef}
-            id="page-content"
-            rows={10}
-            value={contentHtml}
-            onChange={(e) => setContentHtml(e.target.value)}
-            className="mt-2 block w-full rounded-card border border-ink bg-paper p-3 text-sm text-ink"
-          />
-        </div>
+        <RichTextEditor
+          id="page-content"
+          label="Contenido de la página"
+          contentKey={selectedSlug}
+          value={contentHtml}
+          onChange={setContentHtml}
+          readOnly={!canEdit}
+          minHeightClass="min-h-72"
+        />
 
         </fieldset>
 
