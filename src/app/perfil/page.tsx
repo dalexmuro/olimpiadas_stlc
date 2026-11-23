@@ -437,7 +437,7 @@ export default function ProfilePage() {
                   placeholder="+58"
                   value={phoneDialCode}
                   onChange={(e) => setPhoneDialCode(e.target.value)}
-                  className="num block w-16 shrink-0 border-r border-rule bg-transparent px-2 py-2.5 text-center text-sm font-medium text-ink focus:outline-none"
+                  className="num block w-14 shrink-0 border-r border-rule bg-transparent px-2.5 py-2.5 text-left text-sm font-medium text-ink focus:outline-none"
                 />
                 <input
                   id="prof-phone"
