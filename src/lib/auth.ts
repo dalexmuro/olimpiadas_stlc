@@ -58,6 +58,7 @@ export function resolveInitialUserRole(
 
 export interface AuthRuntimeConfig {
   baseUrl: string;
+  trustedOrigins?: string[];
   secret: string;
   googleClientId?: string;
   googleClientSecret?: string;
@@ -72,18 +73,64 @@ export interface AuthRuntimeConfig {
 }
 
 /**
+ * Resolves the effective Better Auth base URL for a request.
+ * Allows testing on `*.workers.dev` and `localhost` before custom domains are active
+ * while keeping the configured `BETTER_AUTH_URL` as the default.
+ */
+export function resolveEffectiveAuthBaseUrl(
+  configuredUrl: string,
+  requestUrl?: string | null
+): string {
+  if (!requestUrl) return configuredUrl;
+  try {
+    const parsedRequest = new URL(requestUrl);
+    if (
+      parsedRequest.protocol !== "https:" &&
+      parsedRequest.protocol !== "http:"
+    ) {
+      return configuredUrl;
+    }
+
+    const host = parsedRequest.hostname.toLowerCase();
+    const configuredHost = new URL(configuredUrl).hostname.toLowerCase();
+    const isAllowedDynamicOrigin =
+      host === configuredHost ||
+      host === "localhost" ||
+      host === "127.0.0.1" ||
+      host.endsWith(".workers.dev");
+
+    return isAllowedDynamicOrigin ? parsedRequest.origin : configuredUrl;
+  } catch {
+    return configuredUrl;
+  }
+}
+
+/**
  * Extracts normalized authentication runtime configuration from Cloudflare bindings or `process.env`.
  */
 export function resolveAuthRuntimeConfig(
-  env?: Partial<CloudflareEnv>
+  env?: Partial<CloudflareEnv>,
+  requestUrl?: string | null
 ): AuthRuntimeConfig {
   const procEnv: Record<string, string | undefined> =
     typeof process !== "undefined" ? process.env : {};
-  return {
-    baseUrl:
-      env?.BETTER_AUTH_URL ??
-      procEnv.BETTER_AUTH_URL ??
+  const configuredUrl =
+    env?.BETTER_AUTH_URL ??
+    procEnv.BETTER_AUTH_URL ??
+    APP_BRAND.productionUrl;
+  const baseUrl = resolveEffectiveAuthBaseUrl(configuredUrl, requestUrl);
+  const trustedOrigins = Array.from(
+    new Set([
+      baseUrl,
+      configuredUrl,
       APP_BRAND.productionUrl,
+      APP_BRAND.stagingUrl,
+    ])
+  );
+
+  return {
+    baseUrl,
+    trustedOrigins,
     secret:
       env?.BETTER_AUTH_SECRET ??
       procEnv.BETTER_AUTH_SECRET ??
@@ -132,6 +179,7 @@ export function buildBetterAuthOptions(
 
   return {
     baseURL: config.baseUrl,
+    trustedOrigins: config.trustedOrigins ?? [config.baseUrl],
     secret: config.secret,
     database: drizzleAdapter(db, {
       provider: "sqlite",
@@ -251,9 +299,10 @@ export function buildBetterAuthOptions(
  */
 export function createAuthInstance(
   db: AppDatabase,
-  env?: Partial<CloudflareEnv>
+  env?: Partial<CloudflareEnv>,
+  requestUrl?: string | null
 ) {
-  const runtimeConfig = resolveAuthRuntimeConfig(env);
+  const runtimeConfig = resolveAuthRuntimeConfig(env, requestUrl);
   const options = buildBetterAuthOptions(db, runtimeConfig);
   return betterAuth(options);
 }

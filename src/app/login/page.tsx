@@ -49,8 +49,40 @@ export default function LoginPage() {
     }
   }
 
-  function handleOAuthSignIn(provider: "google" | "microsoft") {
-    window.location.href = `/api/auth/sign-in/social?provider=${provider}&callbackURL=/`;
+  async function handleOAuthSignIn(provider: "google" | "microsoft") {
+    setServerError(null);
+    setLoading(true);
+    try {
+      const response = await fetch("/api/auth/sign-in/social", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          provider,
+          callbackURL: "/",
+        }),
+      });
+
+      const data = (await response.json().catch(() => null)) as {
+        url?: string;
+        message?: string;
+      } | null;
+
+      if (!response.ok || !data?.url) {
+        setServerError(
+          data?.message ??
+            "No fue posible iniciar sesión con este proveedor. Inténtalo de nuevo."
+        );
+        return;
+      }
+
+      window.location.href = data.url;
+    } catch {
+      setServerError(
+        "No fue posible conectar con el servidor. Inténtalo de nuevo."
+      );
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -94,14 +126,16 @@ export default function LoginPage() {
             <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
               <button
                 type="button"
-                onClick={() => handleOAuthSignIn("google")}
+                disabled={loading}
+                onClick={() => void handleOAuthSignIn("google")}
                 className="btn btn--secondary w-full"
               >
                 Con Google
               </button>
               <button
                 type="button"
-                onClick={() => handleOAuthSignIn("microsoft")}
+                disabled={loading}
+                onClick={() => void handleOAuthSignIn("microsoft")}
                 className="btn btn--secondary w-full"
               >
                 Con Microsoft

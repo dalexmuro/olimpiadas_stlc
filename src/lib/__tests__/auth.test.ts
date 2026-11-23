@@ -150,4 +150,23 @@ describe("Step 1.10 — Better Auth Configuration (Email/Password, Google, Micro
     expect(resolved.baseUrl).toBe("https://dev-olimpiadas.sitelocuento.com");
     expect(resolved.emailFromAddress).toBe("olimpiadas@sitelocuento.com");
   });
+
+  it("adapts baseUrl and trustedOrigins when accessed via a workers.dev preview domain", () => {
+    const resolved = resolveAuthRuntimeConfig(
+      {
+        BETTER_AUTH_URL: "https://dev-olimpiadas.sitelocuento.com",
+      },
+      "https://olimpiadas-stlc-dev.dalexmuro.workers.dev/api/auth/sign-in/social"
+    );
+
+    expect(resolved.baseUrl).toBe(
+      "https://olimpiadas-stlc-dev.dalexmuro.workers.dev"
+    );
+    expect(resolved.trustedOrigins).toContain(
+      "https://olimpiadas-stlc-dev.dalexmuro.workers.dev"
+    );
+    expect(resolved.trustedOrigins).toContain(
+      "https://dev-olimpiadas.sitelocuento.com"
+    );
+  });
 });

@@ -12,7 +12,7 @@ async function handleAuthRequest(request: Request): Promise<Response> {
   const { env } = await getCloudflareContext({ async: true });
   const cfEnv = env as unknown as CloudflareEnv;
   const db = createDbClient(cfEnv.DB);
-  const auth = createAuthInstance(db, cfEnv);
+  const auth = createAuthInstance(db, cfEnv, request.url);
   return auth.handler(request);
 }
 
