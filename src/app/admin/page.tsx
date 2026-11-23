@@ -1,9 +1,15 @@
 import Link from "next/link";
 import { PublishWinnersButton } from "@/components/admin/PublishWinnersButton";
-import { ADMIN_NAV_TABS } from "@/lib/admin-access";
+import { getVisibleAdminTabs } from "@/lib/admin-access";
+import { getCurrentAdminRole } from "@/lib/admin-session";
 
-export default function AdminDashboardPage() {
-  const sections = ADMIN_NAV_TABS.filter((tab) => tab.href !== "/admin");
+export const dynamic = "force-dynamic";
+
+export default async function AdminDashboardPage() {
+  const role = await getCurrentAdminRole();
+  const sections = getVisibleAdminTabs(role).filter(
+    (tab) => tab.href !== "/admin"
+  );
 
   return (
     <div className="space-y-8">

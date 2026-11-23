@@ -30,7 +30,7 @@ export function AdminShell({ role, userName, children }: AdminShellProps) {
             <div className="overflow-hidden rounded-[24px] border border-rule bg-surface shadow-card">
               <div className="p-5">
                 <p className="font-display text-base font-bold tracking-display text-ink">
-                  Panel <span className="ta-serif-italic">organizador</span>
+                  Panel de <span className="ta-serif-italic">administración</span>
                 </p>
                 <p className="mt-0.5 text-xs text-muted">
                   {role === "SUPERADMIN"
