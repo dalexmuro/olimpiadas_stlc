@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import { Navbar } from "@/components/layout/Navbar";
+import { PageReveal } from "@/components/layout/PageReveal";
 import { APP_BRAND } from "@/lib/app-metadata";
 import { COUNTRIES_LIST, validateRegisterForm } from "@/lib/auth-forms";
 
@@ -82,7 +83,8 @@ export default function RegisterPage() {
         id="contenido"
         className="container flex flex-1 items-center justify-center py-6 sm:py-10"
       >
-        <section className="ta-split-auth w-full max-w-5xl">
+        <PageReveal className="w-full max-w-5xl">
+          <section className="ta-split-auth w-full">
           <div className="ta-split-panel">
             <span className="text-sm font-semibold opacity-90">
               {APP_BRAND.contestName}
@@ -140,7 +142,7 @@ export default function RegisterPage() {
         {serverError && (
           <div
             role="alert"
-            className="mb-4 border-l-2 border-error py-1 pl-3 text-sm text-error"
+            className="mb-4 rounded-input border border-error/30 bg-error/5 px-4 py-3 text-sm text-error"
           >
             {serverError}
           </div>
@@ -320,7 +322,8 @@ export default function RegisterPage() {
           </Link>
         </p>
           </div>
-        </section>
+          </section>
+        </PageReveal>
       </main>
     </div>
   );

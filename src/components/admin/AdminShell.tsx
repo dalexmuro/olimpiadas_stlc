@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { Footer } from "@/components/layout/Footer";
 import { Navbar } from "@/components/layout/Navbar";
+import { PageReveal } from "@/components/layout/PageReveal";
 import type { UserRole } from "@/db/schema";
 import { getVisibleAdminTabs } from "@/lib/admin-access";
 
@@ -70,7 +71,7 @@ export function AdminShell({ role, userName, children }: AdminShellProps) {
           </aside>
 
           <main id="contenido" className="min-w-0 lg:col-span-9">
-            {children}
+            <PageReveal>{children}</PageReveal>
           </main>
         </div>
       </div>

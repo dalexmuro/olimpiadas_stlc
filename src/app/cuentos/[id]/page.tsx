@@ -9,6 +9,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Footer } from "@/components/layout/Footer";
 import { Navbar } from "@/components/layout/Navbar";
+import { PageReveal } from "@/components/layout/PageReveal";
 import { createDbClient } from "@/db";
 import { editionPrompts, editions, stories, users } from "@/db/schema";
 import type { CloudflareEnv } from "@/lib/cloudflare-env";
@@ -69,7 +70,7 @@ export default async function PublicStoryDetailPage({
       <Navbar currentPath="/ediciones" showEditions />
 
       <main id="contenido" className="container flex-1 py-16 sm:py-24">
-        <div className="mx-auto max-w-3xl space-y-12">
+        <PageReveal className="mx-auto max-w-3xl space-y-12">
           <nav className="flex flex-wrap items-center gap-6 text-sm">
             <Link href="/resultados" className="ta-inline-link">
               Resultados
@@ -139,7 +140,7 @@ export default async function PublicStoryDetailPage({
               )}
             </section>
           )}
-        </div>
+        </PageReveal>
       </main>
 
       <Footer />

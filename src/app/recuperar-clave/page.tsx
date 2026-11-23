@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import { Navbar } from "@/components/layout/Navbar";
+import { PageReveal } from "@/components/layout/PageReveal";
 import { validateForgotPasswordForm } from "@/lib/auth-forms";
 
 export default function ForgotPasswordPage() {
@@ -43,7 +44,8 @@ export default function ForgotPasswordPage() {
         id="contenido"
         className="container flex flex-1 items-center justify-center py-10"
       >
-        <div className="w-full max-w-md rounded-[28px] border border-rule bg-surface p-8 shadow-card sm:p-10">
+        <PageReveal className="w-full max-w-md">
+          <div className="w-full rounded-[28px] border border-rule bg-surface p-8 shadow-card sm:p-10">
           <h1 className="text-3xl sm:text-4xl">
             Recuperar <span className="ta-serif-italic">contraseña</span>
           </h1>
@@ -95,7 +97,8 @@ export default function ForgotPasswordPage() {
               Volver a entrar
             </Link>
           </p>
-        </div>
+          </div>
+        </PageReveal>
       </main>
     </div>
   );

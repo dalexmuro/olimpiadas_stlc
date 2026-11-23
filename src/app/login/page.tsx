@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import { Navbar } from "@/components/layout/Navbar";
+import { PageReveal } from "@/components/layout/PageReveal";
 import { APP_BRAND } from "@/lib/app-metadata";
 import { validateLoginForm } from "@/lib/auth-forms";
 
@@ -60,7 +61,8 @@ export default function LoginPage() {
         id="contenido"
         className="container flex flex-1 items-center justify-center py-6 sm:py-10"
       >
-        <section className="ta-split-auth w-full max-w-4xl">
+        <PageReveal className="w-full max-w-4xl">
+          <section className="ta-split-auth w-full">
           <div className="ta-split-panel">
             <span className="text-sm font-semibold opacity-90">
               {APP_BRAND.contestName}
@@ -183,15 +185,13 @@ export default function LoginPage() {
 
             <p className="mt-6 text-center text-sm text-muted">
               ¿Aún no tienes cuenta?{" "}
-              <Link
-                href="/registro"
-                className="font-semibold text-ink underline decoration-accent underline-offset-4 hover:decoration-2"
-              >
+              <Link href="/registro" className="ta-inline-link">
                 Crear cuenta
               </Link>
             </p>
           </div>
-        </section>
+          </section>
+        </PageReveal>
       </main>
     </div>
   );

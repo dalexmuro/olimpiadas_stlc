@@ -8,6 +8,7 @@ import { desc, eq } from "drizzle-orm";
 import Link from "next/link";
 import { Footer } from "@/components/layout/Footer";
 import { Navbar } from "@/components/layout/Navbar";
+import { PageReveal } from "@/components/layout/PageReveal";
 import { createDbClient } from "@/db";
 import { editions } from "@/db/schema";
 import type { CloudflareEnv } from "@/lib/cloudflare-env";
@@ -33,7 +34,7 @@ export default async function EdicionesPage() {
       <Navbar currentPath="/ediciones" showEditions={hasEditions} />
 
       <main id="contenido" className="container flex-1 py-16 sm:py-24">
-        <div className="max-w-4xl space-y-12">
+        <PageReveal className="max-w-4xl space-y-12">
           <header className="border-t border-rule pt-10">
             <h1>
               Archivo de <span className="ta-serif-italic">ediciones</span>
@@ -76,7 +77,7 @@ export default async function EdicionesPage() {
               ))}
             </ul>
           )}
-        </div>
+        </PageReveal>
       </main>
 
       <Footer />

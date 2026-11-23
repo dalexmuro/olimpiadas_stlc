@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import { Navbar } from "@/components/layout/Navbar";
+import { PageReveal } from "@/components/layout/PageReveal";
 import { APP_BRAND } from "@/lib/app-metadata";
 import { COUNTRIES_LIST } from "@/lib/auth-forms";
 import { validateProfileCompletionForm } from "@/lib/profile-gate";
@@ -64,7 +65,8 @@ export default function CompleteProfilePage() {
         id="contenido"
         className="container flex flex-1 items-center justify-center py-10"
       >
-        <div className="w-full max-w-lg rounded-[28px] border border-rule bg-surface p-8 shadow-card sm:p-10">
+        <PageReveal className="w-full max-w-lg">
+          <div className="w-full rounded-[28px] border border-rule bg-surface p-8 shadow-card sm:p-10">
           <h1 className="text-3xl sm:text-4xl">
             Completa tu <span className="ta-serif-italic">perfil</span>
           </h1>
@@ -77,7 +79,7 @@ export default function CompleteProfilePage() {
         {serverError && (
           <div
             role="alert"
-            className="mt-4 border-l-2 border-error py-1 pl-3 text-sm text-error"
+            className="mt-4 rounded-input border border-error/30 bg-error/5 px-4 py-3 text-sm text-error"
           >
             {serverError}
           </div>
@@ -183,7 +185,8 @@ export default function CompleteProfilePage() {
             {loading ? "Guardando…" : "Guardar y continuar"}
           </button>
         </form>
-        </div>
+          </div>
+        </PageReveal>
       </main>
     </div>
   );

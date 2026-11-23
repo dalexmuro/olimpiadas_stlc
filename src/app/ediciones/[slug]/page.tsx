@@ -9,6 +9,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Footer } from "@/components/layout/Footer";
 import { Navbar } from "@/components/layout/Navbar";
+import { PageReveal } from "@/components/layout/PageReveal";
 import { createDbClient } from "@/db";
 import {
   editionPrompts,
@@ -108,7 +109,7 @@ export default async function EditionArchiveDetailPage({
       <Navbar currentPath="/ediciones" showEditions />
 
       <main id="contenido" className="container flex-1 py-16 sm:py-24">
-        <div className="max-w-4xl space-y-12">
+        <PageReveal className="max-w-4xl space-y-12">
           <header className="border-t border-rule pt-10">
             <Link href="/ediciones" className="ta-inline-link text-sm">
               Volver al archivo de ediciones
@@ -151,7 +152,7 @@ export default async function EditionArchiveDetailPage({
               </li>
             ))}
           </ul>
-        </div>
+        </PageReveal>
       </main>
 
       <Footer />

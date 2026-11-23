@@ -8,7 +8,7 @@ interface FooterProps {
 export function Footer({ flushTop = false }: FooterProps) {
   return (
     <footer
-      className={`${flushTop ? "mt-0 pb-24" : "mt-32 pb-16 sm:mt-44"} border-t border-rule bg-paper`}
+      className={`${flushTop ? "mt-0" : "mt-32 sm:mt-44"} border-t border-rule bg-paper pb-24`}
     >
       <div className="container pt-12 pb-8">
         <div className="flex flex-wrap items-end justify-between gap-6">

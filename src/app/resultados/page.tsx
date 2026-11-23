@@ -9,6 +9,7 @@ import { Trophy } from "lucide-react";
 import Link from "next/link";
 import { Footer } from "@/components/layout/Footer";
 import { Navbar } from "@/components/layout/Navbar";
+import { PageReveal } from "@/components/layout/PageReveal";
 import { createDbClient } from "@/db";
 import { editionPrompts, editions, stories, users } from "@/db/schema";
 import type { CloudflareEnv } from "@/lib/cloudflare-env";
@@ -41,20 +42,22 @@ export default async function ResultadosPage() {
         <Navbar currentPath="/resultados" showEditions={false} />
 
         <main id="contenido" className="container flex-1 py-16 sm:py-24">
-          <section className="max-w-2xl border-t border-rule pt-10">
-            <h1>
-              Resultados <span className="ta-serif-italic">oficiales</span>
-            </h1>
-            <p className="lead mt-4 text-muted">
-              Todavía no hay una edición con ganadores publicados. Vuelve al
-              concluir la evaluación del jurado para conocer el podio oficial.
-            </p>
-            <div className="mt-8">
-              <Link href="/bases-del-concurso" className="btn btn--primary">
-                Consultar las bases
-              </Link>
-            </div>
-          </section>
+          <PageReveal>
+            <section className="max-w-2xl border-t border-rule pt-10">
+              <h1>
+                Resultados <span className="ta-serif-italic">oficiales</span>
+              </h1>
+              <p className="lead mt-4 text-muted">
+                Todavía no hay una edición con ganadores publicados. Vuelve al
+                concluir la evaluación del jurado para conocer el podio oficial.
+              </p>
+              <div className="mt-8">
+                <Link href="/bases-del-concurso" className="btn btn--primary">
+                  Consultar las bases
+                </Link>
+              </div>
+            </section>
+          </PageReveal>
         </main>
 
         <Footer />
@@ -95,8 +98,9 @@ export default async function ResultadosPage() {
     <div className="flex min-h-screen flex-col justify-between bg-paper text-ink">
       <Navbar currentPath="/resultados" showEditions />
 
-      <main id="contenido" className="container flex-1 space-y-16 py-16 sm:py-24">
-        <header className="border-t border-rule pt-10">
+      <main id="contenido" className="container flex-1 py-16 sm:py-24">
+        <PageReveal className="space-y-16">
+          <header className="border-t border-rule pt-10">
           <div className="flex items-center gap-2 text-accent-2">
             <Trophy className="h-4 w-4" aria-hidden="true" />
             <span className="text-sm font-semibold">Podio oficial</span>
@@ -204,6 +208,7 @@ export default async function ResultadosPage() {
             </Link>
           </div>
         </section>
+        </PageReveal>
       </main>
 
       <Footer />

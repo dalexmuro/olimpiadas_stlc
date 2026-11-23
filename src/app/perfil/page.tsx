@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
 import { Footer } from "@/components/layout/Footer";
 import { Navbar } from "@/components/layout/Navbar";
+import { PageReveal } from "@/components/layout/PageReveal";
 import { COUNTRIES_LIST } from "@/lib/auth-forms";
 import { validateMediaUpload } from "@/lib/cloudflare-resources";
 import {
@@ -206,7 +207,7 @@ export default function ProfilePage() {
       <Navbar currentPath="/perfil" />
 
       <main id="contenido" className="container flex-1 py-16 sm:py-24">
-        <div className="mx-auto max-w-3xl">
+        <PageReveal className="mx-auto max-w-3xl">
           <div className="mb-10 flex flex-wrap items-end justify-between gap-4 border-t border-rule pt-8">
             <h1>
               Mi <span className="ta-serif-italic">Perfil</span>
@@ -490,7 +491,7 @@ export default function ProfilePage() {
           </button>
         </form>
       </section>
-        </div>
+        </PageReveal>
       </main>
 
       <Footer />

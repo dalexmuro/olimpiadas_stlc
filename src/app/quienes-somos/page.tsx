@@ -1,6 +1,7 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { Footer } from "@/components/layout/Footer";
 import { Navbar } from "@/components/layout/Navbar";
+import { PageReveal } from "@/components/layout/PageReveal";
 import { createDbClient, isValidD1Binding } from "@/db";
 import type { CloudflareEnv } from "@/lib/cloudflare-env";
 import { getPublicSitePage } from "@/lib/public-pages";
@@ -24,21 +25,23 @@ export default async function AboutUsPage() {
       <Navbar currentPath="/quienes-somos" />
 
       <main id="contenido" className="container flex-1 py-16 sm:py-24">
-        <article className="max-w-3xl border-t border-rule pt-10">
-          <h1>
-            {page.title === "¿Quiénes somos?" ? (
-              <>
-                ¿Quiénes <span className="ta-serif-italic">somos</span>?
-              </>
-            ) : (
-              page.title
-            )}
-          </h1>
-          <div
-            className="riso-prose mt-10"
-            dangerouslySetInnerHTML={{ __html: page.contentHtml }}
-          />
-        </article>
+        <PageReveal>
+          <article className="max-w-3xl border-t border-rule pt-10">
+            <h1>
+              {page.title === "¿Quiénes somos?" ? (
+                <>
+                  ¿Quiénes <span className="ta-serif-italic">somos</span>?
+                </>
+              ) : (
+                page.title
+              )}
+            </h1>
+            <div
+              className="riso-prose mt-10"
+              dangerouslySetInnerHTML={{ __html: page.contentHtml }}
+            />
+          </article>
+        </PageReveal>
       </main>
 
       <Footer />
