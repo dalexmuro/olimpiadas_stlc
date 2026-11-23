@@ -35,11 +35,6 @@ export default async function AdminDashboardPage() {
                     {section.label}
                   </Link>
                 </h3>
-                {section.superadminOnly && (
-                  <p className="mt-0.5 text-xs text-muted">
-                    Exclusivo para superadministrador
-                  </p>
-                )}
               </div>
               <p className="text-sm text-ink-2">{section.description}</p>
             </div>

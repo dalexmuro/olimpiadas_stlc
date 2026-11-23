@@ -53,10 +53,7 @@ export function AdminShell({ role, userName, children }: AdminShellProps) {
 
               {superadminTabs.length > 0 && (
                 <div className="border-t border-rule bg-accent-soft px-5 py-5">
-                  <p className="text-xs font-semibold text-accent-deep">
-                    Configuración exclusiva
-                  </p>
-                  <nav className="mt-3 flex flex-col gap-0.5">
+                  <nav className="flex flex-col gap-0.5">
                     {superadminTabs.map((tab) => (
                       <Link
                         key={tab.href}
