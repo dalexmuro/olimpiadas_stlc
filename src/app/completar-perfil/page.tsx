@@ -74,7 +74,7 @@ export default function CompleteProfilePage() {
         return;
       }
 
-      window.location.href = "/";
+      window.location.href = "/concurso";
     } catch {
       setServerError(
         "No fue posible conectar con el servidor. Inténtalo de nuevo."

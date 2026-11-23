@@ -45,6 +45,8 @@ export function Navbar({
   const [heroLogoHidden, setHeroLogoHidden] = useState(!isHome);
   const [showClubModal, setShowClubModal] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [resolvedRole, setResolvedRole] = useState<UserRole | null>(userRole);
+  const [resolvedName, setResolvedName] = useState<string | null>(userName);
 
   const panelRef = useRef<HTMLDivElement>(null);
   const scrimRef = useRef<HTMLDivElement>(null);
@@ -52,7 +54,46 @@ export function Navbar({
   const burgerBotRef = useRef<HTMLSpanElement>(null);
   const menuTlRef = useRef<gsap.core.Timeline | null>(null);
 
-  const workspace = resolvePrimaryWorkspace(userRole);
+  useEffect(() => {
+    setResolvedRole(userRole);
+    setResolvedName(userName);
+  }, [userRole, userName]);
+
+  // Keep Navbar session-aware on every page even when SSR did not pass userRole
+  useEffect(() => {
+    if (userRole) return;
+    let active = true;
+
+    async function loadSessionProfile() {
+      try {
+        const res = await fetch("/api/profile", { credentials: "same-origin" });
+        if (!res.ok || !active) return;
+        const data = (await res.json()) as {
+          ok?: boolean;
+          profile?: {
+            role?: UserRole;
+            firstName?: string;
+            lastName?: string;
+            email?: string;
+          };
+        };
+        if (!active || !data.ok || !data.profile?.role) return;
+        setResolvedRole(data.profile.role);
+        const fullName =
+          `${data.profile.firstName ?? ""} ${data.profile.lastName ?? ""}`.trim();
+        setResolvedName(fullName || data.profile.email || null);
+      } catch {
+        // Ignore unauthenticated or offline errors
+      }
+    }
+
+    void loadSessionProfile();
+    return () => {
+      active = false;
+    };
+  }, [userRole]);
+
+  const workspace = resolvePrimaryWorkspace(resolvedRole);
 
   useEffect(() => {
     if (!isHome) {
@@ -133,7 +174,7 @@ export function Navbar({
       tl.kill();
       menuTlRef.current = null;
     };
-  }, [isHome, showEditions, userRole]);
+  }, [isHome, showEditions, resolvedRole]);
 
   // Play / reverse orchestrated menu timeline when menuOpen changes
   useEffect(() => {
@@ -186,9 +227,7 @@ export function Navbar({
   }, [showClubModal, menuOpen]);
 
   const menuLinks = [
-    ...(!isHome
-      ? [{ label: "Inicio", hint: "Portada", href: "/" }]
-      : []),
+    ...(!isHome ? [{ label: "Inicio", hint: "Portada", href: "/" }] : []),
     {
       label: "Bases del Concurso",
       hint: "Reglamento",
@@ -198,10 +237,10 @@ export function Navbar({
     ...(showEditions
       ? [{ label: "Ediciones", hint: "Archivo", href: "/ediciones" }]
       : []),
-    ...(userRole
+    ...(resolvedRole
       ? [
           {
-            label: userName ?? "Mi Perfil",
+            label: resolvedName ?? "Mi Perfil",
             hint: "Cuenta",
             href: "/perfil",
             mobileOnly: true,
@@ -229,6 +268,18 @@ export function Navbar({
       duration: 0.5,
       ease: "power3.inOut",
     });
+  }
+
+  async function handleSignOut() {
+    setMenuOpen(false);
+    try {
+      await fetch("/api/auth/sign-out", {
+        method: "POST",
+        credentials: "same-origin",
+      });
+    } finally {
+      window.location.href = "/";
+    }
   }
 
   return (
@@ -260,13 +311,13 @@ export function Navbar({
           </Link>
 
           <div className="ml-auto flex items-center gap-3 sm:gap-5">
-            {userRole && (
+            {resolvedRole && (
               <Link
                 href="/perfil"
                 aria-current={currentPath === "/perfil" ? "page" : undefined}
                 className="riso-nav-link hidden sm:inline-flex"
               >
-                {userName ?? "Mi Perfil"}
+                {resolvedName ?? "Mi Perfil"}
               </Link>
             )}
 
@@ -342,6 +393,19 @@ export function Navbar({
                 </Link>
               );
             })}
+
+            {resolvedRole && (
+              <button
+                type="button"
+                data-orch-item
+                tabIndex={menuOpen ? 0 : -1}
+                onClick={() => void handleSignOut()}
+                className="ta-orch-item w-full cursor-pointer border-0 bg-transparent text-left"
+              >
+                <span>Cerrar sesión</span>
+                <span className="ta-orch-hint">Salir</span>
+              </button>
+            )}
           </nav>
 
           <div className="ta-dock">

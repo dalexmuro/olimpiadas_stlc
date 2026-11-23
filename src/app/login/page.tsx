@@ -39,7 +39,7 @@ export default function LoginPage() {
         return;
       }
 
-      window.location.href = "/";
+      window.location.href = "/concurso";
     } catch {
       setServerError(
         "No fue posible conectar con el servidor. Inténtalo de nuevo."
@@ -58,7 +58,7 @@ export default function LoginPage() {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
           provider,
-          callbackURL: "/",
+          callbackURL: "/concurso",
         }),
       });
 

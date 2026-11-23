@@ -40,8 +40,11 @@ async function loadHomeContext(): Promise<{
     }
 
     const db = createDbClient(cfEnv.DB);
-    const auth = createAuthInstance(db, cfEnv);
     const reqHeaders = await headers();
+    const host = reqHeaders.get("x-forwarded-host") ?? reqHeaders.get("host");
+    const proto = reqHeaders.get("x-forwarded-proto") ?? "https";
+    const requestUrl = host ? `${proto}://${host}/` : undefined;
+    const auth = createAuthInstance(db, cfEnv, requestUrl);
 
     const [sessionResult, activeEditions, completedEditions] = await Promise.all([
       auth.api.getSession({ headers: reqHeaders }).catch(() => null),
