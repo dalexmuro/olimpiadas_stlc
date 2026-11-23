@@ -11,7 +11,7 @@ import { Navbar } from "@/components/layout/Navbar";
 import { createDbClient } from "@/db";
 import { editions, users, type UserRole } from "@/db/schema";
 import { APP_BRAND } from "@/lib/app-metadata";
-import { createAuthInstance } from "@/lib/auth";
+import { createAuthInstance, resolveRequestUrlFromHeaders } from "@/lib/auth";
 import type { CloudflareEnv } from "@/lib/cloudflare-env";
 import type { EditionStageSnapshot } from "@/lib/contest-stage";
 import {
@@ -41,10 +41,11 @@ async function loadHomeContext(): Promise<{
 
     const db = createDbClient(cfEnv.DB);
     const reqHeaders = await headers();
-    const host = reqHeaders.get("x-forwarded-host") ?? reqHeaders.get("host");
-    const proto = reqHeaders.get("x-forwarded-proto") ?? "https";
-    const requestUrl = host ? `${proto}://${host}/` : undefined;
-    const auth = createAuthInstance(db, cfEnv, requestUrl);
+    const auth = createAuthInstance(
+      db,
+      cfEnv,
+      resolveRequestUrlFromHeaders(reqHeaders)
+    );
 
     const [sessionResult, activeEditions, completedEditions] = await Promise.all([
       auth.api.getSession({ headers: reqHeaders }).catch(() => null),

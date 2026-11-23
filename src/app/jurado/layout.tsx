@@ -10,7 +10,7 @@ export default function JuradoLayout({
 }>) {
   return (
     <div className="flex min-h-screen flex-col justify-between bg-paper text-ink">
-      <Navbar currentPath="/jurado" userRole="JURY" />
+      <Navbar currentPath="/jurado" />
       <div id="contenido" className="flex-1">
         <PageReveal>{children}</PageReveal>
       </div>

@@ -155,6 +155,22 @@ export function resolveEffectiveAuthBaseUrl(
 }
 
 /**
+ * Builds an origin URL from incoming Next.js request headers (for Server Components).
+ */
+export function resolveRequestUrlFromHeaders(
+  reqHeaders: Pick<Headers, "get">
+): string | undefined {
+  const host = reqHeaders.get("x-forwarded-host") ?? reqHeaders.get("host");
+  if (!host) return undefined;
+  const lowerHost = host.toLowerCase();
+  const isLocal =
+    lowerHost.startsWith("localhost") || lowerHost.startsWith("127.0.0.1");
+  const proto =
+    reqHeaders.get("x-forwarded-proto") ?? (isLocal ? "http" : "https");
+  return `${proto}://${host}/`;
+}
+
+/**
  * Extracts normalized authentication runtime configuration from Cloudflare bindings or `process.env`.
  */
 export function resolveAuthRuntimeConfig(
@@ -230,10 +246,17 @@ export function buildBetterAuthOptions(
     };
   }
 
+  const isLocalDev =
+    typeof process !== "undefined" && process.env.NODE_ENV === "development";
+  const useSecureCookies = !isLocalDev && config.baseUrl.startsWith("https://");
+
   return {
     baseURL: config.baseUrl,
     trustedOrigins: config.trustedOrigins ?? [config.baseUrl],
     secret: config.secret,
+    advanced: {
+      useSecureCookies,
+    },
     databaseHooks: {
       user: {
         create: {

@@ -10,7 +10,7 @@ export default function ConcursoLayout({
 }>) {
   return (
     <div className="flex min-h-screen flex-col justify-between bg-paper text-ink">
-      <Navbar currentPath="/concurso" userRole="PARTICIPANT" />
+      <Navbar currentPath="/concurso" />
       <div id="contenido" className="flex-1">
         <PageReveal>{children}</PageReveal>
       </div>

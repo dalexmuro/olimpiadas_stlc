@@ -22,7 +22,7 @@ import {
   storyReadsPreselections,
   users,
 } from "@/db/schema";
-import { createAuthInstance } from "@/lib/auth";
+import { createAuthInstance, resolveRequestUrlFromHeaders } from "@/lib/auth";
 import type { CloudflareEnv } from "@/lib/cloudflare-env";
 import {
   canUserAccessContestWorkspace,
@@ -47,9 +47,12 @@ export default async function ConcursoPage() {
   const { env } = await getCloudflareContext({ async: true });
   const cfEnv = env as unknown as CloudflareEnv;
   const db = createDbClient(cfEnv.DB);
-  const auth = createAuthInstance(db, cfEnv);
-
   const reqHeaders = await headers();
+  const auth = createAuthInstance(
+    db,
+    cfEnv,
+    resolveRequestUrlFromHeaders(reqHeaders)
+  );
   const session = await auth.api.getSession({ headers: reqHeaders });
   if (!session?.user?.id) {
     redirect("/login");

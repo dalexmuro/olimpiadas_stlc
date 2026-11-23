@@ -5,7 +5,7 @@ import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { eq } from "drizzle-orm";
 import { createDbClient, isValidD1Binding } from "@/db";
 import { users, type UserRole } from "@/db/schema";
-import { createAuthInstance } from "@/lib/auth";
+import { createAuthInstance, resolveRequestUrlFromHeaders } from "@/lib/auth";
 import { canAccessAdminPanel } from "@/lib/admin-access";
 import type { CloudflareEnv } from "@/lib/cloudflare-env";
 import { AdminShell } from "@/components/admin/AdminShell";
@@ -26,8 +26,12 @@ export default async function AdminLayout({
     const cfEnv = env as unknown as Partial<CloudflareEnv>;
     if (isValidD1Binding(cfEnv.DB)) {
       const db = createDbClient(cfEnv.DB);
-      const auth = createAuthInstance(db, cfEnv);
       const reqHeaders = await headers();
+      const auth = createAuthInstance(
+        db,
+        cfEnv,
+        resolveRequestUrlFromHeaders(reqHeaders)
+      );
       const session = await auth.api.getSession({ headers: reqHeaders });
 
       if (session?.user?.id) {
