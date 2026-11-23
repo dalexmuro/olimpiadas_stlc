@@ -89,7 +89,10 @@ export function StageExplorer() {
       aria-labelledby="etapas-titulo"
       className="mt-16 scroll-mt-24 border-t border-rule pt-10 sm:mt-20 sm:pt-12"
     >
-      <div className="mb-12 flex flex-wrap items-baseline justify-between gap-4 sm:mb-14">
+      <div
+        data-gsap="stages-header"
+        className="mb-12 flex flex-wrap items-baseline justify-between gap-4 sm:mb-14"
+      >
         <h2 id="etapas-titulo">
           Tres pasos, un solo <span className="ta-serif-italic">cuento</span>
         </h2>
@@ -114,6 +117,7 @@ export function StageExplorer() {
                   tabRefs.current[index] = el;
                 }}
                 id={`stage-tab-${index}`}
+                data-gsap="stage-item"
                 type="button"
                 role="tab"
                 tabIndex={isSelected ? 0 : -1}
@@ -137,6 +141,7 @@ export function StageExplorer() {
 
         <div
           id="stage-spotlight-panel"
+          data-gsap="stage-panel"
           role="tabpanel"
           aria-labelledby={`stage-tab-${activeIndex}`}
           data-stage={activeIndex}

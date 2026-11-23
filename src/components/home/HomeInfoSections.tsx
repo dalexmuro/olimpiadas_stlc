@@ -42,7 +42,7 @@ export function HomeInfoSections() {
   return (
     <section aria-labelledby="faq-titulo" className="mt-40 sm:mt-56">
       <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-14">
-        <div className="lg:col-span-4">
+        <div data-gsap="faq-intro" className="lg:col-span-4">
           <h2 id="faq-titulo">
             Preguntas <span className="ta-serif-italic">frecuentes</span>
           </h2>
@@ -58,7 +58,11 @@ export function HomeInfoSections() {
 
         <div className="divide-y divide-rule border-y border-rule lg:col-span-8">
           {HOME_FAQS.map((item) => (
-            <details key={item.question} className="ta-faq-item">
+            <details
+              key={item.question}
+              data-gsap="faq-item"
+              className="ta-faq-item"
+            >
               <summary className="ta-faq-summary">
                 <span>{item.question}</span>
                 <span className="ta-faq-icon" aria-hidden="true">
