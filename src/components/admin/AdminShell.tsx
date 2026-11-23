@@ -14,8 +14,13 @@ export interface AdminShellProps {
 
 export function AdminShell({ role, userName, children }: AdminShellProps) {
   const tabs = getVisibleAdminTabs(role);
-  const sharedTabs = tabs.filter((t) => !t.superadminOnly);
-  const superadminTabs = tabs.filter((t) => t.superadminOnly);
+  const sharedTabs = tabs.filter((t) => t.accessTier === "shared");
+  const readOnlyForAdminTabs = tabs.filter(
+    (t) => t.accessTier === "admin_readonly"
+  );
+  const superadminOnlyTabs = tabs.filter(
+    (t) => t.accessTier === "superadmin_only"
+  );
 
   return (
     <div className="flex min-h-screen flex-col justify-between bg-paper text-ink">
@@ -51,10 +56,26 @@ export function AdminShell({ role, userName, children }: AdminShellProps) {
                 </nav>
               </div>
 
-              {superadminTabs.length > 0 && (
+              {readOnlyForAdminTabs.length > 0 && (
                 <div className="border-t border-rule bg-accent-soft px-5 py-5">
                   <nav className="flex flex-col gap-0.5">
-                    {superadminTabs.map((tab) => (
+                    {readOnlyForAdminTabs.map((tab) => (
+                      <Link
+                        key={tab.href}
+                        href={tab.href}
+                        className="riso-nav-link self-start"
+                      >
+                        {tab.label}
+                      </Link>
+                    ))}
+                  </nav>
+                </div>
+              )}
+
+              {superadminOnlyTabs.length > 0 && (
+                <div className="border-t border-rule bg-accent/20 px-5 py-5">
+                  <nav className="flex flex-col gap-0.5">
+                    {superadminOnlyTabs.map((tab) => (
                       <Link
                         key={tab.href}
                         href={tab.href}

@@ -8,7 +8,7 @@ import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { createDbClient } from "@/db";
 import { users } from "@/db/schema";
-import { isSuperadmin } from "@/lib/admin-access";
+import { canAccessAdminPanel, isSuperadmin } from "@/lib/admin-access";
 import { createAuthInstance } from "@/lib/auth";
 import type { CloudflareEnv } from "@/lib/cloudflare-env";
 import type { PublicPageSlug } from "@/lib/public-pages";
@@ -17,7 +17,10 @@ import {
   updateSitePageInDb,
 } from "@/lib/site-pages-editor";
 
-async function requireSuperadmin(request: Request) {
+async function requireAdminActor(
+  request: Request,
+  options: { requireSuperadminWrite: boolean }
+) {
   const { env } = await getCloudflareContext({ async: true });
   const cfEnv = env as unknown as CloudflareEnv;
   const db = createDbClient(cfEnv.DB);
@@ -39,14 +42,19 @@ async function requireSuperadmin(request: Request) {
     .from(users)
     .where(eq(users.id, session.user.id));
   const actor = rows[0];
-  if (!actor || !isSuperadmin(actor.role)) {
+  const allowed = options.requireSuperadminWrite
+    ? actor && isSuperadmin(actor.role)
+    : actor && canAccessAdminPanel(actor.role);
+
+  if (!allowed) {
     return {
       ok: false as const,
       errorResponse: NextResponse.json(
         {
           ok: false,
-          error:
-            "Acceso denegado. Solo el superadministrador puede editar páginas públicas.",
+          error: options.requireSuperadminWrite
+            ? "Acceso denegado. Solo el superadministrador puede editar páginas públicas."
+            : "Acceso restringido a administradores.",
         },
         { status: 403 }
       ),
@@ -57,15 +65,23 @@ async function requireSuperadmin(request: Request) {
 }
 
 export async function GET(request: Request): Promise<Response> {
-  const ctx = await requireSuperadmin(request);
+  const ctx = await requireAdminActor(request, {
+    requireSuperadminWrite: false,
+  });
   if (!ctx.ok) return ctx.errorResponse;
 
   const pages = await listEditableSitePagesFromDb(ctx.db);
-  return NextResponse.json({ ok: true, pages });
+  return NextResponse.json({
+    ok: true,
+    canEdit: isSuperadmin(ctx.actor.role),
+    pages,
+  });
 }
 
 export async function PUT(request: Request): Promise<Response> {
-  const ctx = await requireSuperadmin(request);
+  const ctx = await requireAdminActor(request, {
+    requireSuperadminWrite: true,
+  });
   if (!ctx.ok) return ctx.errorResponse;
 
   const body = (await request.json()) as {

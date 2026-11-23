@@ -8,7 +8,7 @@ import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { createDbClient } from "@/db";
 import { editions, users } from "@/db/schema";
-import { isSuperadmin } from "@/lib/admin-access";
+import { canAccessAdminPanel, isSuperadmin } from "@/lib/admin-access";
 import { createAuthInstance } from "@/lib/auth";
 import type { CloudflareEnv } from "@/lib/cloudflare-env";
 import {
@@ -21,7 +21,10 @@ import {
   type JuryMultiplierFormula,
 } from "@/lib/edition-management";
 
-async function requireSuperadmin(request: Request) {
+async function requireAdminActor(
+  request: Request,
+  options: { requireSuperadminWrite: boolean }
+) {
   const { env } = await getCloudflareContext({ async: true });
   const cfEnv = env as unknown as CloudflareEnv;
   const db = createDbClient(cfEnv.DB);
@@ -44,14 +47,19 @@ async function requireSuperadmin(request: Request) {
     .where(eq(users.id, session.user.id));
   const actor = rows[0];
 
-  if (!actor || !isSuperadmin(actor.role)) {
+  const allowed = options.requireSuperadminWrite
+    ? actor && isSuperadmin(actor.role)
+    : actor && canAccessAdminPanel(actor.role);
+
+  if (!allowed) {
     return {
       ok: false as const,
       errorResponse: NextResponse.json(
         {
           ok: false,
-          error:
-            "Acceso denegado. Solo el superadministrador puede gestionar ediciones.",
+          error: options.requireSuperadminWrite
+            ? "Acceso denegado. Solo el superadministrador puede modificar ediciones."
+            : "Acceso restringido a administradores.",
         },
         { status: 403 }
       ),
@@ -62,15 +70,23 @@ async function requireSuperadmin(request: Request) {
 }
 
 export async function GET(request: Request): Promise<Response> {
-  const ctx = await requireSuperadmin(request);
+  const ctx = await requireAdminActor(request, {
+    requireSuperadminWrite: false,
+  });
   if (!ctx.ok) return ctx.errorResponse;
 
   const list = await ctx.db.select().from(editions);
-  return NextResponse.json({ ok: true, editions: list });
+  return NextResponse.json({
+    ok: true,
+    canEdit: isSuperadmin(ctx.actor.role),
+    editions: list,
+  });
 }
 
 export async function POST(request: Request): Promise<Response> {
-  const ctx = await requireSuperadmin(request);
+  const ctx = await requireAdminActor(request, {
+    requireSuperadminWrite: true,
+  });
   if (!ctx.ok) return ctx.errorResponse;
 
   const body = (await request.json()) as {
@@ -139,7 +155,9 @@ export async function POST(request: Request): Promise<Response> {
 }
 
 export async function PATCH(request: Request): Promise<Response> {
-  const ctx = await requireSuperadmin(request);
+  const ctx = await requireAdminActor(request, {
+    requireSuperadminWrite: true,
+  });
   if (!ctx.ok) return ctx.errorResponse;
 
   const body = (await request.json()) as { editionId?: string };

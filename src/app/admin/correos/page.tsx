@@ -33,6 +33,7 @@ export default function AdminEmailTemplatesPage() {
     INITIAL_FALLBACK_TEMPLATES[0].bodyHtmlTemplate
   );
   const [superadminEmail, setSuperadminEmail] = useState<string>("");
+  const [canEdit, setCanEdit] = useState(false);
   const [saving, setSaving] = useState(false);
   const [testing, setTesting] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
@@ -47,10 +48,12 @@ export default function AdminEmailTemplatesPage() {
         if (!res.ok) return;
         const data = (await res.json()) as {
           ok: boolean;
+          canEdit?: boolean;
           templates?: EditableEmailTemplate[];
           superadminEmail?: string;
         };
         if (data.ok && data.templates && data.templates.length > 0) {
+          setCanEdit(Boolean(data.canEdit));
           setTemplates(data.templates);
           const first = data.templates[0];
           setSelectedCode(first.code);
@@ -204,6 +207,16 @@ export default function AdminEmailTemplatesPage() {
         cursor.
       </p>
 
+      {!canEdit && (
+        <div
+          role="status"
+          className="mt-6 rounded-card border border-rule bg-accent-soft px-4 py-3 text-sm text-ink-2"
+        >
+          Modo solo lectura: puedes consultar todas las plantillas y su vista
+          previa, pero solo el superadministrador puede editarlas.
+        </div>
+      )}
+
       {errorMessage && (
         <div
           role="alert"
@@ -239,6 +252,7 @@ export default function AdminEmailTemplatesPage() {
       </div>
 
       <form onSubmit={handleSave} className="mt-6 space-y-5">
+        <fieldset disabled={!canEdit} className="space-y-5 border-0 p-0 disabled:opacity-80">
         <div>
           <label htmlFor="tpl-subject" className="block text-sm font-medium">
             Asunto del correo
@@ -310,19 +324,23 @@ export default function AdminEmailTemplatesPage() {
           />
         </div>
 
-        <div className="flex flex-wrap gap-3">
-          <button type="submit" disabled={saving} className="btn btn--primary">
-            {saving ? "Guardando..." : "Guardar plantilla"}
-          </button>
-          <button
-            type="button"
-            disabled={testing}
-            onClick={handleSendTest}
-            className="btn btn--secondary whitespace-nowrap"
-          >
-            {testing ? "Enviando prueba…" : "Enviar correo de prueba"}
-          </button>
-        </div>
+        </fieldset>
+
+        {canEdit && (
+          <div className="flex flex-wrap gap-3">
+            <button type="submit" disabled={saving} className="btn btn--primary">
+              {saving ? "Guardando..." : "Guardar plantilla"}
+            </button>
+            <button
+              type="button"
+              disabled={testing}
+              onClick={handleSendTest}
+              className="btn btn--secondary whitespace-nowrap"
+            >
+              {testing ? "Enviando prueba…" : "Enviar correo de prueba"}
+            </button>
+          </div>
+        )}
       </form>
 
       {/* Vista previa renderizada con datos de ejemplo */}

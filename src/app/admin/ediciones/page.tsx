@@ -41,6 +41,7 @@ const INITIAL_SCHEDULE: EditionScheduleUtc = {
 
 export default function AdminEditionsPage() {
   const [editionsList, setEditionsList] = useState<EditionSummary[]>([]);
+  const [canEdit, setCanEdit] = useState(false);
   const [title, setTitle] = useState("Olimpíadas Literarias 2026");
   const [slug, setSlug] = useState("2026");
   const [isActive, setIsActive] = useState(true);
@@ -62,10 +63,12 @@ export default function AdminEditionsPage() {
       if (!res.ok) return;
       const data = (await res.json()) as {
         ok: boolean;
+        canEdit?: boolean;
         editions?: EditionSummary[];
       };
       if (data.ok && data.editions) {
         setEditionsList(data.editions);
+        setCanEdit(Boolean(data.canEdit));
       }
     } catch {
       // Ignore offline preview fetch
@@ -189,6 +192,16 @@ export default function AdminEditionsPage() {
         </div>
       )}
 
+      {!canEdit && (
+        <div
+          role="status"
+          className="mt-6 rounded-card border border-rule bg-accent-soft px-4 py-3 text-sm text-ink-2"
+        >
+          Modo solo lectura: puedes consultar las ediciones y su configuración,
+          pero los cambios están reservados al superadministrador.
+        </div>
+      )}
+
       {feedback && (
         <div className="mt-6 rounded-card border border-ink bg-paper p-4 text-sm text-ink">
           {feedback}
@@ -196,6 +209,7 @@ export default function AdminEditionsPage() {
       )}
 
       <form onSubmit={handleSubmit} className="mt-8 space-y-8" noValidate>
+        <fieldset disabled={!canEdit} className="space-y-8 border-0 p-0 disabled:opacity-80">
         {/* Identificación y reglas */}
         <div className="border-t border-rule pt-6">
           <h2>Identificación y reglas</h2>
@@ -406,9 +420,13 @@ export default function AdminEditionsPage() {
           </div>
         </div>
 
-        <button type="submit" disabled={saving} className="btn btn--primary">
-          {saving ? "Guardando edición..." : "Crear edición oficial"}
-        </button>
+        </fieldset>
+
+        {canEdit && (
+          <button type="submit" disabled={saving} className="btn btn--primary">
+            {saving ? "Guardando edición..." : "Crear edición oficial"}
+          </button>
+        )}
       </form>
 
       {/* Ediciones existentes */}
@@ -428,7 +446,7 @@ export default function AdminEditionsPage() {
                   <p className="text-sm text-ink-2 num">
                     Inicio: {formatCaracasDateTime(ed.registrationStartAt)}
                   </p>
-                  {!ed.isActive && (
+                  {canEdit && !ed.isActive && (
                     <button
                       type="button"
                       onClick={() => handleActivate(ed.id)}

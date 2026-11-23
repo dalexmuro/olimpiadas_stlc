@@ -20,6 +20,7 @@ export default function AdminSitePagesEditorPage() {
     useState<PublicPageSlug>("bases-del-concurso");
   const [title, setTitle] = useState(INITIAL_PAGES[0].title);
   const [contentHtml, setContentHtml] = useState(INITIAL_PAGES[0].contentHtml);
+  const [canEdit, setCanEdit] = useState(false);
   const [saving, setSaving] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -33,9 +34,11 @@ export default function AdminSitePagesEditorPage() {
         if (!res.ok) return;
         const data = (await res.json()) as {
           ok: boolean;
+          canEdit?: boolean;
           pages?: ResolvedSitePage[];
         };
         if (data.ok && data.pages && data.pages.length > 0) {
+          setCanEdit(Boolean(data.canEdit));
           setPages(data.pages);
           setSelectedSlug(data.pages[0].slug);
           setTitle(data.pages[0].title);
@@ -120,6 +123,16 @@ export default function AdminSitePagesEditorPage() {
         del club en ¿Quiénes somos?.
       </p>
 
+      {!canEdit && (
+        <div
+          role="status"
+          className="mt-6 rounded-card border border-rule bg-accent-soft px-4 py-3 text-sm text-ink-2"
+        >
+          Modo solo lectura: puedes revisar el contenido de las páginas
+          públicas, pero solo el superadministrador puede guardar cambios.
+        </div>
+      )}
+
       {errorMessage && (
         <div
           role="alert"
@@ -169,6 +182,7 @@ export default function AdminSitePagesEditorPage() {
       </div>
 
       <form onSubmit={handleSave} className="mt-8 space-y-5">
+        <fieldset disabled={!canEdit} className="space-y-5 border-0 p-0 disabled:opacity-80">
         <div>
           <label htmlFor="page-title" className="block text-sm font-medium">
             Título de la página
@@ -230,9 +244,13 @@ export default function AdminSitePagesEditorPage() {
           />
         </div>
 
-        <button type="submit" disabled={saving} className="btn btn--primary">
-          {saving ? "Guardando página…" : "Guardar cambios"}
-        </button>
+        </fieldset>
+
+        {canEdit && (
+          <button type="submit" disabled={saving} className="btn btn--primary">
+            {saving ? "Guardando página…" : "Guardar cambios"}
+          </button>
+        )}
       </form>
 
       <div className="mt-10 border-t-2 border-ink pt-6">

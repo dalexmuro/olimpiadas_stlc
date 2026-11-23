@@ -1,9 +1,7 @@
 import type { ReactNode } from "react";
-import { requireSuperadminOrRedirect } from "@/lib/admin-session";
 
-export default async function SuperadminEdicionesLayout({
+export default function EdicionesLayout({
   children,
 }: Readonly<{ children: ReactNode }>) {
-  await requireSuperadminOrRedirect();
   return <>{children}</>;
 }
