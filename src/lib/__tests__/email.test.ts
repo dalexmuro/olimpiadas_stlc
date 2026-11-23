@@ -154,7 +154,7 @@ describe("Step 1.9 — Brevo Transactional Email Service & Idempotent Dispatch",
     expect(JSON.parse(capturedBody)).toEqual({
       sender: {
         email: "olimpiadas@sitelocuento.com",
-        name: "Olimpíadas Literarias de SiTeLoCuento",
+        name: "Olimpíadas Literarias",
       },
       to: [{ email: "lector@ejemplo.com", name: "Lector" }],
       subject: "Asunto de prueba",

@@ -10,7 +10,7 @@ export default function AdminDashboardPage() {
         <h1>Panel de administración</h1>
         <p className="lead mt-4 text-ink-2">
           Gestiona consignas, ediciones, participantes y resultados de las
-          Olimpíadas Literarias de SiTeLoCuento.
+          Olimpíadas Literarias.
         </p>
 
         <div className="mt-8">

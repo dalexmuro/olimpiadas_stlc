@@ -5,7 +5,10 @@
 
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { and, eq, inArray } from "drizzle-orm";
+import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Footer } from "@/components/layout/Footer";
+import { Navbar } from "@/components/layout/Navbar";
 import { createDbClient } from "@/db";
 import {
   editionPrompts,
@@ -101,49 +104,57 @@ export default async function EditionArchiveDetailPage({
   );
 
   return (
-    <main className="mx-auto max-w-4xl space-y-8 px-4 py-12">
-      <header className="border-b-2 border-ink pb-4">
-        <a href="/ediciones" className="riso-link text-sm font-medium">
-          Volver al archivo de ediciones
-        </a>
-        <h1 className="mt-2">{edition.title}</h1>
-        <p className="mt-2 text-sm text-ink-2">
-          Todos los cuentos que llegaron al final de esta edición, ordenados
-          cronológicamente por consigna y fecha de envío.
-        </p>
-      </header>
+    <div className="flex min-h-screen flex-col justify-between bg-paper text-ink">
+      <Navbar currentPath="/ediciones" showEditions />
 
-      <ul className="divide-y divide-rule border-y border-rule">
-        {sortedStories.map((story) => (
-          <li
-            key={story.id}
-            className="flex flex-wrap items-center justify-between gap-4 py-5"
-          >
-            <div>
-              <div className="flex flex-wrap items-center gap-2 text-xs">
-                <span className="font-semibold text-accent-2">
-                  Consigna {story.promptNumber}
-                </span>
-                {story.podiumPlace && PODIUM_BADGES[story.podiumPlace] && (
-                  <span className="bg-accent px-2 py-0.5 font-semibold text-accent-ink">
-                    {PODIUM_BADGES[story.podiumPlace]}
-                  </span>
-                )}
-              </div>
-              <h2 className="mt-1 text-xl">{story.title}</h2>
-              <p className="mt-1 text-xs text-muted">
-                Por <strong>{story.authorName}</strong>
-              </p>
-            </div>
-            <a
-              href={`/cuentos/${story.id}`}
-              className="btn btn--secondary whitespace-nowrap"
-            >
-              Leer cuento
-            </a>
-          </li>
-        ))}
-      </ul>
-    </main>
+      <main id="contenido" className="container flex-1 py-16 sm:py-24">
+        <div className="max-w-4xl space-y-12">
+          <header className="border-t border-rule pt-10">
+            <Link href="/ediciones" className="ta-inline-link text-sm">
+              Volver al archivo de ediciones
+            </Link>
+            <h1 className="mt-4">{edition.title}</h1>
+            <p className="mt-3 max-w-2xl text-base leading-relaxed text-muted">
+              Todos los cuentos que llegaron al final de esta edición, ordenados
+              cronológicamente por consigna y fecha de envío.
+            </p>
+          </header>
+
+          <ul className="divide-y divide-rule border-y border-rule">
+            {sortedStories.map((story) => (
+              <li
+                key={story.id}
+                className="flex flex-wrap items-center justify-between gap-4 py-6"
+              >
+                <div>
+                  <div className="flex flex-wrap items-center gap-2 text-xs">
+                    <span className="font-semibold text-accent-2">
+                      Consigna {story.promptNumber}
+                    </span>
+                    {story.podiumPlace && PODIUM_BADGES[story.podiumPlace] && (
+                      <span className="rounded-pill bg-accent px-2.5 py-0.5 font-semibold text-accent-ink">
+                        {PODIUM_BADGES[story.podiumPlace]}
+                      </span>
+                    )}
+                  </div>
+                  <h2 className="mt-1.5 text-xl">{story.title}</h2>
+                  <p className="mt-1 text-xs text-muted">
+                    Por <strong>{story.authorName}</strong>
+                  </p>
+                </div>
+                <Link
+                  href={`/cuentos/${story.id}`}
+                  className="btn btn--secondary whitespace-nowrap"
+                >
+                  Leer cuento
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </main>
+
+      <Footer />
+    </div>
   );
 }

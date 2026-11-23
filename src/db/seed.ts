@@ -50,9 +50,9 @@ export const DEFAULT_EMAIL_TEMPLATES: readonly EmailTemplateSeedItem[] = [
     description:
       "Se envía al usuario cuando crea su cuenta en el sitio web para darle la bienvenida y verificar su correo.",
     subjectTemplate:
-      "Bienvenido/a a las Olimpíadas Literarias de SiTeLoCuento, {{NOMBRE}}",
+      "Bienvenido/a a las Olimpíadas Literarias, {{NOMBRE}}",
     bodyHtmlTemplate:
-      "<p>Hola <strong>{{NOMBRE}} {{APELLIDO}}</strong>,</p><p>Tu cuenta en la plataforma de las <strong>Olimpíadas Literarias de SiTeLoCuento</strong> ha sido creada con éxito.</p><p>Por favor verifica tu dirección de correo electrónico o accede a tu cuenta haciendo clic aquí: <a href=\"{{LINK_PLATAFORMA}}\">{{LINK_PLATAFORMA}}</a></p>",
+      "<p>Hola <strong>{{NOMBRE}} {{APELLIDO}}</strong>,</p><p>Tu cuenta en la plataforma de las <strong>Olimpíadas Literarias</strong> ha sido creada con éxito.</p><p>Por favor verifica tu dirección de correo electrónico o accede a tu cuenta haciendo clic aquí: <a href=\"{{LINK_PLATAFORMA}}\">{{LINK_PLATAFORMA}}</a></p>",
     availableTags: [
       "{{NOMBRE}}",
       "{{APELLIDO}}",
@@ -66,7 +66,7 @@ export const DEFAULT_EMAIL_TEMPLATES: readonly EmailTemplateSeedItem[] = [
     description:
       "Se envía cuando un usuario solicita restablecer su contraseña olvidada.",
     subjectTemplate:
-      "Recuperación de contraseña — Olimpíadas Literarias de SiTeLoCuento",
+      "Recuperación de contraseña — Olimpíadas Literarias",
     bodyHtmlTemplate:
       "<p>Hola <strong>{{NOMBRE}}</strong>,</p><p>Hemos recibido una solicitud para restablecer la contraseña de tu cuenta ({{EMAIL}}).</p><p>Haz clic en el siguiente enlace seguro para crear una nueva contraseña: <a href=\"{{LINK_PLATAFORMA}}\">{{LINK_PLATAFORMA}}</a></p>",
     availableTags: ["{{NOMBRE}}", "{{EMAIL}}", "{{LINK_PLATAFORMA}}"],
@@ -425,10 +425,10 @@ export const DEFAULT_EMAIL_TEMPLATES: readonly EmailTemplateSeedItem[] = [
 export const DEFAULT_SITE_PAGES: readonly SitePageSeedItem[] = [
   {
     slug: "bases-del-concurso",
-    title: "Bases del Concurso — Olimpíadas Literarias de SiTeLoCuento",
+    title: "Bases del Concurso — Olimpíadas Literarias",
     contentHtml: [
-      "<h2>Bases Oficiales de las Olimpíadas Literarias de SiTeLoCuento</h2>",
-      "<p>Bienvenido/a a las <strong>Olimpíadas Literarias de SiTeLoCuento</strong>, el certamen anual de cuentos cortos organizado por el club de escritura <strong>SiTeLoCuento</strong>.</p>",
+      "<h2>Bases Oficiales de las Olimpíadas Literarias</h2>",
+      "<p>Bienvenido/a a las <strong>Olimpíadas Literarias</strong>, el certamen anual de cuentos cortos organizado por el club de escritura <strong>SiTeLoCuento</strong>.</p>",
       "<h3>1. Participación e Inscripción</h3>",
       "<p>Podrán participar todos los escritores registrados en la plataforma que completen su perfil y acepten estas bases durante el período oficial de inscripciones. Todas las fechas y horas del certamen se rigen por la zona horaria oficial de <strong>Caracas, Venezuela (UTC-4)</strong>.</p>",
       "<h3>2. Dinámica de Consignas y Envío de Cuentos</h3>",
@@ -444,7 +444,7 @@ export const DEFAULT_SITE_PAGES: readonly SitePageSeedItem[] = [
     title: "¿Quiénes somos? — Club de Escritura SiTeLoCuento",
     contentHtml: [
       "<h2>Sobre el Club de Escritura SiTeLoCuento</h2>",
-      "<p><strong>SiTeLoCuento</strong> es una comunidad apasionada por la literatura y la creación narrativa breve. Cada año organizamos las <strong>Olimpíadas Literarias de SiTeLoCuento</strong> con el propósito de impulsar el hábito de la escritura constante, el intercambio constructivo entre autores y el descubrimiento de nuevas voces literarias en español.</p>",
+      "<p><strong>SiTeLoCuento</strong> es una comunidad apasionada por la literatura y la creación narrativa breve. Cada año organizamos las <strong>Olimpíadas Literarias</strong> con el propósito de impulsar el hábito de la escritura constante, el intercambio constructivo entre autores y el descubrimiento de nuevas voces literarias en español.</p>",
       "<h3>Nuestra Misión</h3>",
       "<p>Brindar un espacio transparente, retador y fraterno donde cada consigna sea una chispa creativa y donde la lectura anónima garantice que cada historia brille por su propio mérito.</p>",
     ].join("\n"),

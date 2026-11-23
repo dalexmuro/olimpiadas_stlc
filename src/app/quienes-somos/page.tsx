@@ -23,11 +23,19 @@ export default async function AboutUsPage() {
     <div className="flex min-h-screen flex-col justify-between bg-paper text-ink">
       <Navbar currentPath="/quienes-somos" />
 
-      <main className="container flex-1 py-14 sm:py-20">
-        <article className="max-w-3xl border-t-2 border-ink pt-8">
-          <h1>{page.title}</h1>
+      <main id="contenido" className="container flex-1 py-16 sm:py-24">
+        <article className="max-w-3xl border-t border-rule pt-10">
+          <h1>
+            {page.title === "¿Quiénes somos?" ? (
+              <>
+                ¿Quiénes <span className="ta-serif-italic">somos</span>?
+              </>
+            ) : (
+              page.title
+            )}
+          </h1>
           <div
-            className="riso-prose mt-8"
+            className="riso-prose mt-10"
             dangerouslySetInnerHTML={{ __html: page.contentHtml }}
           />
         </article>

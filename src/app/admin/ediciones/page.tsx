@@ -40,7 +40,7 @@ const INITIAL_SCHEDULE: EditionScheduleUtc = {
 
 export default function AdminEditionsPage() {
   const [editionsList, setEditionsList] = useState<EditionSummary[]>([]);
-  const [title, setTitle] = useState("Olimpíadas Literarias de SiTeLoCuento 2026");
+  const [title, setTitle] = useState("Olimpíadas Literarias 2026");
   const [slug, setSlug] = useState("2026");
   const [isActive, setIsActive] = useState(true);
   const [minChars, setMinChars] = useState(100);

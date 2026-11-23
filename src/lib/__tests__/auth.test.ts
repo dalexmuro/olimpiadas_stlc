@@ -144,7 +144,7 @@ describe("Step 1.10 — Better Auth Configuration (Email/Password, Google, Micro
     const resolved = resolveAuthRuntimeConfig({
       BETTER_AUTH_URL: "https://dev-olimpiadas.sitelocuento.com",
       EMAIL_FROM_ADDRESS: "olimpiadas@sitelocuento.com",
-      EMAIL_FROM_NAME: "Olimpíadas Literarias de SiTeLoCuento",
+      EMAIL_FROM_NAME: "Olimpíadas Literarias",
     });
 
     expect(resolved.baseUrl).toBe("https://dev-olimpiadas.sitelocuento.com");

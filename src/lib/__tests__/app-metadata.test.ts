@@ -8,7 +8,7 @@ import {
 describe("Step 1.2 — Next.js App Metadata & Public Navigation Configuration", () => {
   it("defines Spanish locale and America/Caracas (UTC-4) official timezone", () => {
     expect(APP_BRAND.contestName).toBe(
-      "Olimpíadas Literarias de SiTeLoCuento"
+      "Olimpíadas Literarias"
     );
     expect(APP_BRAND.clubName).toBe("SiTeLoCuento");
     expect(APP_BRAND.defaultLocale).toBe("es");
@@ -29,12 +29,12 @@ describe("Step 1.2 — Next.js App Metadata & Public Navigation Configuration", 
   });
 
   it("formats page titles consistently with and without subtitles", () => {
-    expect(formatPageTitle()).toBe("Olimpíadas Literarias de SiTeLoCuento");
+    expect(formatPageTitle()).toBe("Olimpíadas Literarias");
     expect(formatPageTitle("   ")).toBe(
-      "Olimpíadas Literarias de SiTeLoCuento"
+      "Olimpíadas Literarias"
     );
     expect(formatPageTitle("Bases del Concurso")).toBe(
-      "Bases del Concurso | Olimpíadas Literarias de SiTeLoCuento"
+      "Bases del Concurso | Olimpíadas Literarias"
     );
   });
 });

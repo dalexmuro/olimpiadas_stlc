@@ -5,7 +5,10 @@
 
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { eq } from "drizzle-orm";
+import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Footer } from "@/components/layout/Footer";
+import { Navbar } from "@/components/layout/Navbar";
 import { createDbClient } from "@/db";
 import { editionPrompts, editions, stories, users } from "@/db/schema";
 import type { CloudflareEnv } from "@/lib/cloudflare-env";
@@ -62,73 +65,84 @@ export default async function PublicStoryDetailPage({
       : null;
 
   return (
-    <main className="mx-auto max-w-3xl space-y-10 px-4 py-12">
-      <nav className="flex flex-wrap items-center gap-4 text-sm">
-        <a href="/resultados" className="riso-link font-medium">
-          Resultados
-        </a>
-        <a href={`/ediciones/${edition.slug}`} className="riso-link font-medium">
-          Todos los cuentos de {edition.title}
-        </a>
-      </nav>
+    <div className="flex min-h-screen flex-col justify-between bg-paper text-ink">
+      <Navbar currentPath="/ediciones" showEditions />
 
-      <article className="rounded-card border border-ink bg-paper p-8">
-        <div className="flex flex-wrap items-center gap-3 text-xs">
-          {prompt && (
-            <span className="font-semibold text-accent-2">
-              Consigna {prompt.promptNumber}
-            </span>
-          )}
-          {story.podiumPlace && PODIUM_BADGES[story.podiumPlace] && (
-            <span className="bg-accent px-2 py-0.5 font-semibold text-accent-ink">
-              {PODIUM_BADGES[story.podiumPlace]}
-            </span>
-          )}
-        </div>
+      <main id="contenido" className="container flex-1 py-16 sm:py-24">
+        <div className="mx-auto max-w-3xl space-y-12">
+          <nav className="flex flex-wrap items-center gap-6 text-sm">
+            <Link href="/resultados" className="ta-inline-link">
+              Resultados
+            </Link>
+            <Link href={`/ediciones/${edition.slug}`} className="ta-inline-link">
+              Todos los cuentos de {edition.title}
+            </Link>
+          </nav>
 
-        <h1 className="mt-3">{story.editedTitle ?? story.originalTitle}</h1>
-        <p className="mt-2 text-sm text-ink-2">
-          Por <strong>{authorName}</strong> ({edition.title})
-        </p>
-
-        <div className="mt-8 whitespace-pre-wrap border-t border-rule pt-6 text-base leading-relaxed text-ink">
-          {story.editedBody ?? story.originalBody}
-        </div>
-      </article>
-
-      {prompt && (
-        <section className="rounded-card border border-ink bg-paper-2 p-8">
-          <p className="text-xs font-semibold text-accent-2">
-            Consigna {prompt.promptNumber}
-          </p>
-          <h2 className="mt-1">{prompt.title}</h2>
-          <p className="mt-4 whitespace-pre-wrap text-sm leading-relaxed text-ink-2">
-            {prompt.body}
-          </p>
-
-          {prompt.mediaType === "IMAGE" && prompt.mediaUrl && (
-            <figure className="mt-5">
-              <img
-                src={prompt.mediaUrl}
-                alt={`Imagen de la consigna ${prompt.promptNumber}`}
-                className="max-h-80 w-auto border border-rule object-contain"
-              />
-            </figure>
-          )}
-
-          {videoEmbedUrl && (
-            <div className="mt-5 aspect-video w-full overflow-hidden border border-rule">
-              <iframe
-                src={videoEmbedUrl}
-                title={`Video de la consigna ${prompt.promptNumber}`}
-                className="h-full w-full"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              />
+          <article className="rounded-[28px] border border-rule bg-surface p-8 shadow-card sm:p-12">
+            <div className="flex flex-wrap items-center gap-3 text-xs">
+              {prompt && (
+                <span className="font-semibold text-accent-2">
+                  Consigna {prompt.promptNumber}
+                </span>
+              )}
+              {story.podiumPlace && PODIUM_BADGES[story.podiumPlace] && (
+                <span className="rounded-pill bg-accent px-2.5 py-0.5 font-semibold text-accent-ink">
+                  {PODIUM_BADGES[story.podiumPlace]}
+                </span>
+              )}
             </div>
+
+            <h1 className="mt-4">
+              {story.editedTitle ?? story.originalTitle}
+            </h1>
+            <p className="mt-3 text-sm text-muted">
+              Por <strong className="text-ink">{authorName}</strong> (
+              {edition.title})
+            </p>
+
+            <div className="mt-10 whitespace-pre-wrap border-t border-rule pt-8 text-base leading-relaxed text-ink sm:text-lg">
+              {story.editedBody ?? story.originalBody}
+            </div>
+          </article>
+
+          {prompt && (
+            <section className="rounded-[24px] border border-rule bg-paper-2 p-8 sm:p-10">
+              <p className="text-xs font-semibold text-accent-2">
+                Consigna {prompt.promptNumber}
+              </p>
+              <h2 className="mt-2 text-2xl">{prompt.title}</h2>
+              <p className="mt-4 whitespace-pre-wrap text-sm leading-relaxed text-ink-2 sm:text-base">
+                {prompt.body}
+              </p>
+
+              {prompt.mediaType === "IMAGE" && prompt.mediaUrl && (
+                <figure className="mt-6">
+                  <img
+                    src={prompt.mediaUrl}
+                    alt={`Imagen de la consigna ${prompt.promptNumber}`}
+                    className="max-h-80 w-auto rounded-[16px] border border-rule object-contain"
+                  />
+                </figure>
+              )}
+
+              {videoEmbedUrl && (
+                <div className="mt-6 aspect-video w-full overflow-hidden rounded-[16px] border border-rule">
+                  <iframe
+                    src={videoEmbedUrl}
+                    title={`Video de la consigna ${prompt.promptNumber}`}
+                    className="h-full w-full"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                </div>
+              )}
+            </section>
           )}
-        </section>
-      )}
-    </main>
+        </div>
+      </main>
+
+      <Footer />
+    </div>
   );
 }

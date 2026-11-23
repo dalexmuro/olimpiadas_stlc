@@ -53,10 +53,12 @@ export default async function AdminLayout({
     return (
       <div className="flex min-h-screen flex-col justify-between bg-paper text-ink">
         <Navbar currentPath="/admin" userRole={userRole} userName={userName} />
-        <main className="container flex-1 py-20">
-          <div className="max-w-xl border-t-2 border-ink pt-8">
-            <h1>Acceso restringido</h1>
-            <p className="mt-4 text-ink-2">
+        <main id="contenido" className="container flex-1 py-20">
+          <div className="max-w-xl border-t border-rule pt-8">
+            <h1>
+              Acceso <span className="ta-serif-italic">restringido</span>
+            </h1>
+            <p className="mt-4 text-muted">
               Esta sección está reservada exclusivamente para los administradores
               y el superadministrador del certamen.
             </p>

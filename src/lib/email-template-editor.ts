@@ -82,7 +82,7 @@ export function buildSampleEmailPreviewVariables(
     NOMBRE: recipientName,
     APELLIDO: "Organizador",
     EMAIL: recipientEmail,
-    EDICION: "Olimpíadas Literarias de SiTeLoCuento 2026",
+    EDICION: "Olimpíadas Literarias 2026",
     NUMERO_CONSIGNA: 2,
     TITULO_CONSIGNA: "El reloj detenido en la estación",
     TITULO_CUENTO: "Cartas para un tren que nunca llegó",

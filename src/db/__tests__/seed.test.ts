@@ -72,7 +72,7 @@ describe("Step 1.7 — Database Seed (E01-E26 Templates, Site Pages & Superadmin
     ]);
 
     for (const page of DEFAULT_SITE_PAGES) {
-      expect(page.title).toContain("SiTeLoCuento");
+      expect(page.title.length).toBeGreaterThan(5);
       expect(page.contentHtml).toContain("<h2>");
     }
   });

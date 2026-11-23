@@ -1,185 +1,210 @@
+import { getCloudflareContext } from "@opennextjs/cloudflare";
+import { eq } from "drizzle-orm";
+import { headers } from "next/headers";
+import Link from "next/link";
+import { HomeInfoSections } from "@/components/home/HomeInfoSections";
+import { StageExplorer } from "@/components/home/StageExplorer";
 import { Footer } from "@/components/layout/Footer";
 import { Navbar } from "@/components/layout/Navbar";
+import { createDbClient } from "@/db";
+import { editions, users, type UserRole } from "@/db/schema";
 import { APP_BRAND } from "@/lib/app-metadata";
+import { createAuthInstance } from "@/lib/auth";
+import type { CloudflareEnv } from "@/lib/cloudflare-env";
+import type { EditionStageSnapshot } from "@/lib/contest-stage";
+import {
+  formatHomeStageStatus,
+  resolveHomeClosingCta,
+} from "@/lib/home-context";
 
-const CONTEST_FAQS = [
-  {
-    question: "¿Cómo se entra al certamen?",
-    answer:
-      "Creas tu cuenta una sola vez en la plataforma con correo y contraseña, Google o Microsoft. Cuando abre la edición anual, confirmas tu inscripción aceptando las bases.",
-  },
-  {
-    question: "¿Cómo funcionan las consignas?",
-    answer:
-      "El equipo organizador publica consignas programadas. Escribes un cuento en texto plano por consigna respetando el límite de caracteres y el cierre en hora de Caracas.",
-  },
-  {
-    question: "¿Qué pasa al elegir mi cuento a postular?",
-    answer:
-      "Al cerrar la escritura, lees todos tus cuentos enviados, eliges uno de forma definitiva y puedes pulir su estilo y ortografía conservando la esencia del relato original.",
-  },
-  {
-    question: "¿Cómo se definen los tres ganadores?",
-    answer:
-      "Todos los autores activos leen de forma anónima y votan por su podio. Los diez cuentos más votados pasan a un jurado impar que define el resultado final.",
-  },
-] as const;
+export const dynamic = "force-dynamic";
 
-export default function HomePage() {
+async function loadHomeContext(): Promise<{
+  userRole: UserRole | null;
+  userName: string | null;
+  activeEdition: EditionStageSnapshot | null;
+  hasPastEditions: boolean;
+}> {
+  try {
+    const { env } = await getCloudflareContext({ async: true });
+    const cfEnv = env as unknown as CloudflareEnv;
+    if (!cfEnv?.DB) {
+      return {
+        userRole: null,
+        userName: null,
+        activeEdition: null,
+        hasPastEditions: false,
+      };
+    }
+
+    const db = createDbClient(cfEnv.DB);
+    const auth = createAuthInstance(db, cfEnv);
+    const reqHeaders = await headers();
+
+    const [sessionResult, activeEditions, completedEditions] = await Promise.all([
+      auth.api.getSession({ headers: reqHeaders }).catch(() => null),
+      db
+        .select()
+        .from(editions)
+        .where(eq(editions.isActive, true))
+        .catch(() => []),
+      db
+        .select({ id: editions.id })
+        .from(editions)
+        .where(eq(editions.winnersAnnounced, true))
+        .catch(() => []),
+    ]);
+
+    let userRole: UserRole | null = null;
+    let userName: string | null = null;
+
+    if (sessionResult?.user?.id) {
+      const userRows = await db
+        .select({
+          role: users.role,
+          firstName: users.firstName,
+          lastName: users.lastName,
+        })
+        .from(users)
+        .where(eq(users.id, sessionResult.user.id));
+
+      const currentUser = userRows[0];
+      if (currentUser) {
+        userRole = currentUser.role;
+        const fullName =
+          `${currentUser.firstName ?? ""} ${currentUser.lastName ?? ""}`.trim();
+        userName = fullName || sessionResult.user.name || null;
+      }
+    }
+
+    const activeEditionRow = activeEditions[0] ?? null;
+    const activeEdition: EditionStageSnapshot | null = activeEditionRow
+      ? {
+          title: activeEditionRow.title,
+          registrationStartAt: activeEditionRow.registrationStartAt,
+          registrationEndAt: activeEditionRow.registrationEndAt,
+          writingStartAt: activeEditionRow.writingStartAt,
+          writingEndAt: activeEditionRow.writingEndAt,
+          submissionStartAt: activeEditionRow.submissionStartAt,
+          submissionEndAt: activeEditionRow.submissionEndAt,
+          adminReviewStartAt: activeEditionRow.adminReviewStartAt,
+          adminReviewEndAt: activeEditionRow.adminReviewEndAt,
+          votingStartAt: activeEditionRow.votingStartAt,
+          votingEndAt: activeEditionRow.votingEndAt,
+          juryStartAt: activeEditionRow.juryStartAt,
+          juryEndAt: activeEditionRow.juryEndAt,
+          juryPausedMissingVotes: activeEditionRow.juryPausedMissingVotes,
+          tieBreakerActive: activeEditionRow.tieBreakerActive,
+          winnersAnnounced: activeEditionRow.winnersAnnounced,
+        }
+      : null;
+
+    return {
+      userRole,
+      userName,
+      activeEdition,
+      hasPastEditions: completedEditions.length > 0,
+    };
+  } catch {
+    return {
+      userRole: null,
+      userName: null,
+      activeEdition: null,
+      hasPastEditions: false,
+    };
+  }
+}
+
+export default async function HomePage() {
+  const { userRole, userName, activeEdition, hasPastEditions } =
+    await loadHomeContext();
+  const editionStatus = formatHomeStageStatus(activeEdition);
+  const closingCta = resolveHomeClosingCta(userRole);
+
   return (
     <div className="flex min-h-screen flex-col justify-between bg-paper text-ink">
-      <Navbar currentPath="/" />
+      <Navbar
+        currentPath="/"
+        userRole={userRole}
+        userName={userName}
+        showEditions={hasPastEditions}
+      />
 
-      <main className="flex-1">
-        {/* Hero Banner (visible within 1280x800 above the fold) */}
-        <section className="container pt-14 pb-20 sm:pt-20 sm:pb-24">
-          <div className="grid grid-cols-1 items-end gap-10 lg:grid-cols-12">
-            <div className="lg:col-span-8">
-              <p className="text-sm font-medium text-muted">
-                Club de escritura {APP_BRAND.clubName}, hora oficial de Caracas
-                ({APP_BRAND.officialUtcOffset})
-              </p>
-              <h1 className="mt-4">
-                <span className="misreg" data-text="Olimpíadas">
-                  Olimpíadas
-                </span>{" "}
-                Literarias de SiTeLoCuento.
-              </h1>
-              <p className="lead mt-6 text-ink-2">
-                Certamen anual de cuentos cortos con consignas, edición y lectura
-                anónima.
-              </p>
-              <div className="mt-8 flex flex-wrap items-center gap-4">
-                <a href="/registro" className="btn btn--primary">
-                  Crear cuenta
-                </a>
-                <a href="/login" className="btn btn--secondary">
-                  Iniciar sesión
-                </a>
-                <a href="/bases-del-concurso" className="riso-link text-sm font-medium">
-                  Leer las bases del concurso
-                </a>
-              </div>
-            </div>
+      <main id="contenido" className="container flex-1">
+        <h1 className="visually-hidden">{APP_BRAND.contestName}</h1>
 
-            <div className="lg:col-span-4">
-              <div
-                data-slot="logo-olimpiadas"
-                data-alt="Emblema oficial de las Olimpíadas Literarias de SiTeLoCuento"
-                className="flex min-h-48 flex-col justify-between rounded-card border border-ink p-6"
-              >
-                <span className="text-sm font-medium text-muted">
-                  Emblema oficial de la edición
+        {/* Open-Paper Editorial Hero: Large centered emblem space framed by subtle corner crop marks */}
+        <section
+          aria-label="Presentación del certamen"
+          className="flex min-h-[78vh] flex-col items-center justify-center py-14 text-center sm:py-20"
+        >
+          <div
+            data-slot="logo-olimpiadas"
+            role="img"
+            aria-label={`Emblema oficial de las ${APP_BRAND.contestName}`}
+            className="ta-crop-stage"
+          >
+            <span className="ta-crop-corners" aria-hidden="true" />
+            <div className="ta-emblem-inner">
+              <p className="font-display text-4xl font-extrabold leading-[0.98] tracking-[-0.04em] text-ink sm:text-6xl">
+                Olimpíadas
+                <br />
+                Literarias
+              </p>
+              {editionStatus.isActive && (
+                <span className="mt-2 text-xs font-medium tracking-wide text-muted">
+                  {editionStatus.editionTitle}
                 </span>
-                <p className="font-display text-2xl font-extrabold text-ink">
-                  {APP_BRAND.clubName}
-                </p>
-              </div>
+              )}
             </div>
+          </div>
+
+          <p className="mt-12 max-w-3xl font-display text-2xl font-bold leading-[1.16] tracking-display text-ink sm:mt-14 sm:text-4xl lg:text-[2.75rem]">
+            Escribe sin miedo, juega con cada{" "}
+            <span className="ta-serif-italic">consigna</span> y celebra tus{" "}
+            <span className="ta-serif-italic">cuentos</span> junto a otros
+            lectores.
+          </p>
+
+          <div className="ta-status-line mt-9" aria-live="polite">
+            <span className="ta-status-dot-airy" aria-hidden="true" />
+            <span>
+              {editionStatus.stageLabel}
+              <span className="ta-caret" aria-hidden="true" />
+            </span>
           </div>
         </section>
 
-        {/* Three-plate risograph process separations (Riso Range: Steps as separations) */}
-        <section className="border-t border-rule py-20 sm:py-24">
-          <div className="container">
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:items-end">
-              <h2 className="lg:col-span-7">Tres pasadas, un solo cuento</h2>
-              <p className="text-ink-2 lg:col-span-5">
-                Desde la primera consigna hasta la lectura del jurado, cada
-                etapa se imprime sobre la anterior.
-              </p>
-            </div>
+        {/* Open-Paper Interactive Editorial Index */}
+        <StageExplorer />
 
-            <div className="mt-12 grid grid-cols-1 gap-8 md:grid-cols-3">
-              <article>
-                <div className="riso-plate">
-                  <span className="text-sm font-medium text-muted">
-                    Primera pasada
-                  </span>
-                  <p className="font-display text-3xl font-extrabold leading-none text-ink">
-                    Consignas en tiempo real
-                  </p>
-                </div>
-                <h3 className="mt-4">Escritura</h3>
-                <p className="mt-1 text-sm text-ink-2">
-                  Un cuento por consigna, en texto plano y dentro del límite de
-                  caracteres de la edición.
-                </p>
-              </article>
+        {/* Frequently Asked Questions */}
+        <HomeInfoSections />
 
-              <article>
-                <div className="riso-plate">
-                  <div className="riso-plate-disc" aria-hidden="true" />
-                  <span className="relative z-10 text-sm font-medium text-ink">
-                    Segunda pasada
-                  </span>
-                  <p className="relative z-10 font-display text-3xl font-extrabold leading-none text-ink">
-                    Selección y edición
-                  </p>
-                </div>
-                <h3 className="mt-4">Postulación</h3>
-                <p className="mt-1 text-sm text-ink-2">
-                  Eliges tu mejor relato de forma irreversible y pules el texto
-                  antes de enviarlo a concurso.
-                </p>
-              </article>
-
-              <article>
-                <div className="riso-plate grained">
-                  <div
-                    className="riso-plate-disc riso-plate-disc--overprint"
-                    aria-hidden="true"
-                  />
-                  <span className="relative z-10 text-sm font-medium text-ink">
-                    Hoja completa
-                  </span>
-                  <p className="relative z-10 font-display text-3xl font-extrabold leading-none text-ink">
-                    Lectura anónima y jurado
-                  </p>
-                </div>
-                <h3 className="mt-4">Veredicto</h3>
-                <p className="mt-1 text-sm text-ink-2">
-                  Voto secreto entre autores y evaluación de un jurado impar
-                  sobre los diez finalistas.
-                </p>
-              </article>
-            </div>
+        {/* Open Full-Width Closing Section */}
+        <section
+          className="ta-closing-open mt-40 pb-20 sm:mt-56 sm:pb-32"
+          aria-labelledby="cierre-titulo"
+        >
+          <div className="max-w-xl">
+            <h2 id="cierre-titulo">
+              {userRole ? (
+                closingCta.heading
+              ) : (
+                <>
+                  ¿Listo para escribir tu próxima{" "}
+                  <span className="ta-serif-italic">historia</span>?
+                </>
+              )}
+            </h2>
+            <p className="mt-4 text-base leading-relaxed text-muted sm:text-lg">
+              {closingCta.description}
+            </p>
           </div>
-        </section>
 
-        {/* Questions as rows on light pink screen (Riso Range: Rows on paper-2) */}
-        <section className="band--screen border-t border-rule py-20 sm:py-24">
-          <div className="container">
-            <h2>Reglas esenciales del certamen</h2>
-            <div className="mt-10 border-b border-rule">
-              {CONTEST_FAQS.map((item) => (
-                <div key={item.question} className="riso-row">
-                  <h3>{item.question}</h3>
-                  <p className="text-ink-2">{item.answer}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Solid blue closing statement band with grain */}
-        <section className="band--solid grained py-20 sm:py-24">
-          <div className="container relative z-10 flex flex-col items-start justify-between gap-8 lg:flex-row lg:items-end">
-            <div>
-              <h2 className="text-paper">
-                Tu cuenta sirve para todas las ediciones.
-              </h2>
-              <p className="mt-4 max-w-xl text-paper">
-                Regístrate hoy, completa tu perfil y queda listo para
-                inscribirte apenas abran las inscripciones oficiales.
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-4">
-              <a href="/registro" className="btn btn--primary">
-                Crear mi cuenta
-              </a>
-            </div>
-          </div>
+          <Link href={closingCta.primaryHref} className="btn btn--primary">
+            {closingCta.primaryLabel}
+          </Link>
         </section>
       </main>
 

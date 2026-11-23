@@ -4,7 +4,7 @@
  */
 
 export const APP_BRAND = {
-  contestName: "Olimpíadas Literarias de SiTeLoCuento",
+  contestName: "Olimpíadas Literarias",
   clubName: "SiTeLoCuento",
   defaultLocale: "es",
   officialTimezone: "America/Caracas",
@@ -13,7 +13,7 @@ export const APP_BRAND = {
   stagingUrl: "https://dev-olimpiadas.sitelocuento.com",
   supportEmail: "olimpiadas@sitelocuento.com",
   description:
-    "Plataforma web oficial del concurso anual de cuentos cortos Olimpíadas Literarias de SiTeLoCuento.",
+    "Plataforma web oficial del concurso anual de cuentos cortos Olimpíadas Literarias, organizado por SiTeLoCuento.",
 } as const;
 
 export interface NavigationLink {

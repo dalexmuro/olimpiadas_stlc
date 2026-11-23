@@ -1,7 +1,30 @@
 import type { Metadata } from "next";
+import { Bricolage_Grotesque, DM_Sans, Newsreader } from "next/font/google";
 import type { ReactNode } from "react";
 import { APP_BRAND } from "@/lib/app-metadata";
 import "./globals.css";
+
+const bricolageGrotesque = Bricolage_Grotesque({
+  subsets: ["latin"],
+  weight: ["600", "700", "800"],
+  variable: "--font-bricolage",
+  display: "swap",
+});
+
+const dmSans = DM_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-dm-sans",
+  display: "swap",
+});
+
+const newsreader = Newsreader({
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  style: ["italic"],
+  variable: "--font-newsreader",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: APP_BRAND.contestName,
@@ -14,18 +37,14 @@ export default function RootLayout({
   children: ReactNode;
 }>) {
   return (
-    <html lang={APP_BRAND.defaultLocale}>
-      <head>
-        <link
-          href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@800&display=swap"
-          rel="stylesheet"
-        />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,400;7..72,500&display=swap"
-          rel="stylesheet"
-        />
-      </head>
+    <html
+      lang={APP_BRAND.defaultLocale}
+      className={`${bricolageGrotesque.variable} ${dmSans.variable} ${newsreader.variable}`}
+    >
       <body className="min-h-screen bg-paper text-ink font-body antialiased">
+        <a href="#contenido" className="skip-link">
+          Saltar al contenido principal
+        </a>
         {children}
       </body>
     </html>

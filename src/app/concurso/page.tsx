@@ -85,7 +85,7 @@ export default async function ConcursoPage() {
     return (
       <main className="mx-auto max-w-4xl px-4 py-12">
         <section className="rounded-card border border-ink bg-paper-2 p-8">
-          <h1>Olimpíadas Literarias de SiTeLoCuento</h1>
+          <h1>Olimpíadas Literarias</h1>
           <p className="lead mt-3 text-ink-2">
             Actualmente no hay ninguna edición activa del concurso. Te
             avisaremos cuando abran las próximas inscripciones.

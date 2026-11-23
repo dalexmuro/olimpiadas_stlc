@@ -127,7 +127,7 @@ describe("Step 2.6 — Superadmin Email Template Editor (E01-E26)", () => {
     ).toBe(true);
 
     const sampleVars = buildSampleEmailPreviewVariables("dalexmuro@gmail.com");
-    expect(sampleVars.EDICION).toContain("SiTeLoCuento");
+    expect(sampleVars.EDICION).toContain("Olimpíadas Literarias");
 
     const testMail = await sendTestTemplateEmail({
       recipientEmail: "dalexmuro@gmail.com",

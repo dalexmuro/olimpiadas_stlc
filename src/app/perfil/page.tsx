@@ -1,7 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
-import { APP_BRAND } from "@/lib/app-metadata";
+import { Footer } from "@/components/layout/Footer";
+import { Navbar } from "@/components/layout/Navbar";
 import { COUNTRIES_LIST } from "@/lib/auth-forms";
 import { validateMediaUpload } from "@/lib/cloudflare-resources";
 import {
@@ -200,33 +202,31 @@ export default function ProfilePage() {
   }
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-10 sm:px-6 lg:px-8">
-      <div className="mb-8 flex items-center justify-between border-b border-slate-200 pb-4">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-wider text-indigo-700">
-            {APP_BRAND.contestName}
-          </p>
-          <h1 className="text-2xl font-bold text-slate-900">Mi Perfil</h1>
-        </div>
-        <a
-          href="/"
-          className="text-sm font-semibold text-indigo-700 hover:underline"
-        >
-          Volver al inicio
-        </a>
-      </div>
+    <div className="flex min-h-screen flex-col justify-between bg-paper text-ink">
+      <Navbar currentPath="/perfil" />
 
-      {/* Sección 1: Foto de perfil */}
-      <section className="mb-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-lg font-semibold text-slate-900">Foto de perfil</h2>
-        <p className="mt-1 text-xs text-slate-500">
+      <main id="contenido" className="container flex-1 py-16 sm:py-24">
+        <div className="mx-auto max-w-3xl">
+          <div className="mb-10 flex flex-wrap items-end justify-between gap-4 border-t border-rule pt-8">
+            <h1>
+              Mi <span className="ta-serif-italic">Perfil</span>
+            </h1>
+            <Link href="/" className="ta-inline-link text-sm">
+              Volver al inicio
+            </Link>
+          </div>
+
+          {/* Sección 1: Foto de perfil */}
+          <section className="mb-8 rounded-[24px] border border-rule bg-surface p-7 shadow-card sm:p-8">
+        <h2>Foto de perfil</h2>
+        <p className="mt-2 text-xs text-muted">
           Formatos permitidos: JPG, PNG o WEBP (máximo 5 MB). Si resultas entre
           los 3 ganadores, esta foto se mostrará junto a tu cuento en la página
           de resultados.
         </p>
 
         <div className="mt-4 flex flex-wrap items-center gap-6">
-          <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border border-slate-200 bg-slate-100 text-lg font-bold text-slate-500">
+          <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border border-rule bg-paper text-lg font-bold text-ink">
             {avatarUrl ? (
               <img
                 src={avatarUrl}
@@ -242,11 +242,8 @@ export default function ProfilePage() {
           </div>
 
           <div>
-            <label
-              htmlFor="avatar-upload"
-              className="inline-flex cursor-pointer items-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
-            >
-              {avatarUploading ? "Subiendo..." : "Cambiar foto"}
+            <label htmlFor="avatar-upload" className="btn btn--secondary">
+              {avatarUploading ? "Subiendo…" : "Cambiar foto"}
             </label>
             <input
               id="avatar-upload"
@@ -257,38 +254,36 @@ export default function ProfilePage() {
               className="hidden"
             />
             {avatarError && (
-              <p className="mt-2 text-xs text-red-600">{avatarError}</p>
+              <p className="mt-2 text-xs text-error">{avatarError}</p>
             )}
             {avatarMessage && (
-              <p className="mt-2 text-xs text-emerald-700">{avatarMessage}</p>
+              <p className="mt-2 text-xs text-success">{avatarMessage}</p>
             )}
           </div>
         </div>
       </section>
 
       {/* Sección 2: Datos personales y Correo */}
-      <section className="mb-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-lg font-semibold text-slate-900">
-          Información personal y correo
-        </h2>
+      <section className="mb-8 rounded-[24px] border border-rule bg-surface p-7 shadow-card sm:p-8">
+        <h2>Información personal y correo</h2>
 
         {profileAlert && (
-          <div className="mt-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+          <div className="mt-4 border-l-2 border-error py-1 pl-3 text-sm text-error">
             {profileAlert}
           </div>
         )}
         {profileMessage && (
-          <div className="mt-4 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">
+          <div className="mt-4 border-l-2 border-success py-1 pl-3 text-sm text-success">
             {profileMessage}
           </div>
         )}
 
-        <form onSubmit={handleProfileSubmit} className="mt-4 space-y-4" noValidate>
+        <form onSubmit={handleProfileSubmit} className="mt-5 space-y-4" noValidate>
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <label
                 htmlFor="prof-first-name"
-                className="block text-sm font-medium text-slate-700"
+                className="block text-sm font-medium text-ink"
               >
                 Nombre *
               </label>
@@ -297,10 +292,10 @@ export default function ProfilePage() {
                 type="text"
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
-                className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-indigo-600 focus:outline-none"
+                className="mt-1.5 block w-full rounded-input border border-rule bg-paper px-3.5 py-2.5 text-sm text-ink"
               />
               {profileErrors.firstName && (
-                <p className="mt-1 text-xs text-red-600">
+                <p className="mt-1 text-xs text-error">
                   {profileErrors.firstName}
                 </p>
               )}
@@ -309,7 +304,7 @@ export default function ProfilePage() {
             <div>
               <label
                 htmlFor="prof-last-name"
-                className="block text-sm font-medium text-slate-700"
+                className="block text-sm font-medium text-ink"
               >
                 Apellido *
               </label>
@@ -318,10 +313,10 @@ export default function ProfilePage() {
                 type="text"
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
-                className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-indigo-600 focus:outline-none"
+                className="mt-1.5 block w-full rounded-input border border-rule bg-paper px-3.5 py-2.5 text-sm text-ink"
               />
               {profileErrors.lastName && (
-                <p className="mt-1 text-xs text-red-600">
+                <p className="mt-1 text-xs text-error">
                   {profileErrors.lastName}
                 </p>
               )}
@@ -332,7 +327,7 @@ export default function ProfilePage() {
             <div>
               <label
                 htmlFor="prof-country"
-                className="block text-sm font-medium text-slate-700"
+                className="block text-sm font-medium text-ink"
               >
                 País de residencia *
               </label>
@@ -340,9 +335,9 @@ export default function ProfilePage() {
                 id="prof-country"
                 value={country}
                 onChange={(e) => setCountry(e.target.value)}
-                className="mt-1 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-indigo-600 focus:outline-none"
+                className="mt-1.5 block w-full rounded-input border border-rule bg-paper px-3.5 py-2.5 text-sm text-ink"
               >
-                <option value="">Selecciona un país...</option>
+                <option value="">Selecciona un país…</option>
                 {COUNTRIES_LIST.map((c) => (
                   <option key={c} value={c}>
                     {c}
@@ -350,7 +345,7 @@ export default function ProfilePage() {
                 ))}
               </select>
               {profileErrors.country && (
-                <p className="mt-1 text-xs text-red-600">
+                <p className="mt-1 text-xs text-error">
                   {profileErrors.country}
                 </p>
               )}
@@ -359,7 +354,7 @@ export default function ProfilePage() {
             <div>
               <label
                 htmlFor="prof-phone"
-                className="block text-sm font-medium text-slate-700"
+                className="block text-sm font-medium text-ink"
               >
                 Número de teléfono *
               </label>
@@ -368,12 +363,10 @@ export default function ProfilePage() {
                 type="tel"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-indigo-600 focus:outline-none"
+                className="mt-1.5 block w-full rounded-input border border-rule bg-paper px-3.5 py-2.5 text-sm text-ink"
               />
               {profileErrors.phone && (
-                <p className="mt-1 text-xs text-red-600">
-                  {profileErrors.phone}
-                </p>
+                <p className="mt-1 text-xs text-error">{profileErrors.phone}</p>
               )}
             </div>
           </div>
@@ -381,7 +374,7 @@ export default function ProfilePage() {
           <div>
             <label
               htmlFor="prof-email"
-              className="block text-sm font-medium text-slate-700"
+              className="block text-sm font-medium text-ink"
             >
               Correo electrónico *
             </label>
@@ -390,45 +383,43 @@ export default function ProfilePage() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-indigo-600 focus:outline-none"
+              className="mt-1.5 block w-full rounded-input border border-rule bg-paper px-3.5 py-2.5 text-sm text-ink"
             />
             {profileErrors.email && (
-              <p className="mt-1 text-xs text-red-600">{profileErrors.email}</p>
+              <p className="mt-1 text-xs text-error">{profileErrors.email}</p>
             )}
           </div>
 
           <button
             type="submit"
             disabled={savingProfile}
-            className="rounded-lg bg-indigo-700 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-800 disabled:opacity-50"
+            className="btn btn--primary"
           >
-            {savingProfile ? "Guardando..." : "Guardar cambios"}
+            {savingProfile ? "Guardando…" : "Guardar cambios"}
           </button>
         </form>
       </section>
 
       {/* Sección 3: Cambiar contraseña */}
-      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-lg font-semibold text-slate-900">
-          Cambiar contraseña
-        </h2>
+      <section className="rounded-[24px] border border-rule bg-surface p-7 shadow-card sm:p-8">
+        <h2>Cambiar contraseña</h2>
 
         {passwordAlert && (
-          <div className="mt-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+          <div className="mt-4 border-l-2 border-error py-1 pl-3 text-sm text-error">
             {passwordAlert}
           </div>
         )}
         {passwordMessage && (
-          <div className="mt-4 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">
+          <div className="mt-4 border-l-2 border-success py-1 pl-3 text-sm text-success">
             {passwordMessage}
           </div>
         )}
 
-        <form onSubmit={handlePasswordSubmit} className="mt-4 space-y-4" noValidate>
+        <form onSubmit={handlePasswordSubmit} className="mt-5 space-y-4" noValidate>
           <div>
             <label
               htmlFor="prof-current-password"
-              className="block text-sm font-medium text-slate-700"
+              className="block text-sm font-medium text-ink"
             >
               Contraseña actual
             </label>
@@ -437,10 +428,10 @@ export default function ProfilePage() {
               type="password"
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
-              className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-indigo-600 focus:outline-none"
+              className="mt-1.5 block w-full rounded-input border border-rule bg-paper px-3.5 py-2.5 text-sm text-ink"
             />
             {passwordErrors.currentPassword && (
-              <p className="mt-1 text-xs text-red-600">
+              <p className="mt-1 text-xs text-error">
                 {passwordErrors.currentPassword}
               </p>
             )}
@@ -450,7 +441,7 @@ export default function ProfilePage() {
             <div>
               <label
                 htmlFor="prof-new-password"
-                className="block text-sm font-medium text-slate-700"
+                className="block text-sm font-medium text-ink"
               >
                 Nueva contraseña
               </label>
@@ -459,10 +450,10 @@ export default function ProfilePage() {
                 type="password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-indigo-600 focus:outline-none"
+                className="mt-1.5 block w-full rounded-input border border-rule bg-paper px-3.5 py-2.5 text-sm text-ink"
               />
               {passwordErrors.newPassword && (
-                <p className="mt-1 text-xs text-red-600">
+                <p className="mt-1 text-xs text-error">
                   {passwordErrors.newPassword}
                 </p>
               )}
@@ -471,7 +462,7 @@ export default function ProfilePage() {
             <div>
               <label
                 htmlFor="prof-confirm-new-password"
-                className="block text-sm font-medium text-slate-700"
+                className="block text-sm font-medium text-ink"
               >
                 Confirmar nueva contraseña
               </label>
@@ -480,10 +471,10 @@ export default function ProfilePage() {
                 type="password"
                 value={confirmNewPassword}
                 onChange={(e) => setConfirmNewPassword(e.target.value)}
-                className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-indigo-600 focus:outline-none"
+                className="mt-1.5 block w-full rounded-input border border-rule bg-paper px-3.5 py-2.5 text-sm text-ink"
               />
               {passwordErrors.confirmNewPassword && (
-                <p className="mt-1 text-xs text-red-600">
+                <p className="mt-1 text-xs text-error">
                   {passwordErrors.confirmNewPassword}
                 </p>
               )}
@@ -493,14 +484,16 @@ export default function ProfilePage() {
           <button
             type="submit"
             disabled={savingPassword}
-            className="rounded-lg bg-slate-800 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-900 disabled:opacity-50"
+            className="btn btn--secondary"
           >
-            {savingPassword
-              ? "Actualizando contraseña..."
-              : "Actualizar contraseña"}
+            {savingPassword ? "Actualizando…" : "Actualizar contraseña"}
           </button>
         </form>
       </section>
-    </main>
+        </div>
+      </main>
+
+      <Footer />
+    </div>
   );
 }
