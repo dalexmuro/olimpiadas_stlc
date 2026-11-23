@@ -44,13 +44,16 @@ export interface PasswordStrengthCheck {
   hasUppercase: boolean;
   hasLowercase: boolean;
   hasNumber: boolean;
+  hasSpecial: boolean;
+  categoriesMet: number;
   isStrong: boolean;
   errorMessage?: string;
 }
 
 /**
  * Evaluates password strength rules:
- * at least 8 characters, 1 uppercase letter, 1 lowercase letter, and 1 number.
+ * at least 8 characters AND at least 3 of:
+ * uppercase letter, lowercase letter, number, special character.
  */
 export function evaluatePasswordStrength(
   password: string
@@ -59,14 +62,21 @@ export function evaluatePasswordStrength(
   const hasUppercase = /[A-ZÁÉÍÓÚÑ]/.test(password);
   const hasLowercase = /[a-záéíóúñ]/.test(password);
   const hasNumber = /\d/.test(password);
-  const isStrong = minLength && hasUppercase && hasLowercase && hasNumber;
+  const hasSpecial = /[^A-Za-zÁÉÍÓÚÑáéíóúñ0-9\s]/.test(password);
+  const categoriesMet = [
+    hasUppercase,
+    hasLowercase,
+    hasNumber,
+    hasSpecial,
+  ].filter(Boolean).length;
+  const isStrong = minLength && categoriesMet >= 3;
 
   let errorMessage: string | undefined;
   if (!minLength) {
     errorMessage = `La contraseña debe tener al menos ${MIN_PASSWORD_LENGTH} caracteres.`;
-  } else if (!hasUppercase || !hasLowercase || !hasNumber) {
+  } else if (categoriesMet < 3) {
     errorMessage =
-      "La contraseña debe incluir al menos una mayúscula, una minúscula y un número.";
+      "La contraseña debe incluir al menos 3 de estos elementos: una mayúscula, una minúscula, un número o un carácter especial.";
   }
 
   return {
@@ -74,6 +84,8 @@ export function evaluatePasswordStrength(
     hasUppercase,
     hasLowercase,
     hasNumber,
+    hasSpecial,
+    categoriesMet,
     isStrong,
     errorMessage,
   };

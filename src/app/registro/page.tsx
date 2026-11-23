@@ -1,8 +1,8 @@
 "use client";
 
-import { Check, Eye, EyeOff } from "lucide-react";
+import { Check, Eye, EyeOff, Info } from "lucide-react";
 import Link from "next/link";
-import { useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { PageReveal } from "@/components/layout/PageReveal";
 import { APP_BRAND } from "@/lib/app-metadata";
@@ -22,12 +22,40 @@ export default function RegisterPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showPasswordInfo, setShowPasswordInfo] = useState(false);
+  const passwordInfoRef = useRef<HTMLDivElement>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [serverError, setServerError] = useState<string | null>(null);
   const [duplicateEmailAlert, setDuplicateEmailAlert] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const passwordStrength = evaluatePasswordStrength(password);
+
+  useEffect(() => {
+    if (!showPasswordInfo) return;
+
+    function handlePointerDown(event: MouseEvent) {
+      if (
+        passwordInfoRef.current &&
+        !passwordInfoRef.current.contains(event.target as Node)
+      ) {
+        setShowPasswordInfo(false);
+      }
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setShowPasswordInfo(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handlePointerDown);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [showPasswordInfo]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -345,12 +373,83 @@ export default function RegisterPage() {
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label
-                htmlFor="reg-password"
-                className="block text-sm font-medium text-ink"
+              <div
+                ref={passwordInfoRef}
+                className="relative flex items-center gap-1.5"
               >
-                Contraseña *
-              </label>
+                <label
+                  htmlFor="reg-password"
+                  className="block text-sm font-medium text-ink"
+                >
+                  Contraseña *
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setShowPasswordInfo((prev) => !prev)}
+                  aria-expanded={showPasswordInfo}
+                  aria-controls="password-rules-popover"
+                  aria-label="Ver requisitos de seguridad de la contraseña"
+                  className="inline-flex h-6 w-6 items-center justify-center rounded-full text-muted transition-colors hover:bg-accent-soft hover:text-accent-deep"
+                >
+                  <Info className="h-4 w-4" aria-hidden="true" />
+                </button>
+
+                {showPasswordInfo && (
+                  <div
+                    id="password-rules-popover"
+                    role="tooltip"
+                    className="absolute bottom-full left-0 z-20 mb-2 w-72 rounded-[16px] border border-rule bg-surface p-4 text-xs shadow-card"
+                  >
+                    <p className="font-semibold text-ink">
+                      Requisitos de contraseña
+                    </p>
+                    <div
+                      className={`mt-2 flex items-center gap-1.5 ${passwordStrength.minLength ? "font-medium text-accent-deep" : "text-muted"}`}
+                    >
+                      <Check
+                        className={`h-3.5 w-3.5 shrink-0 ${passwordStrength.minLength ? "opacity-100" : "opacity-30"}`}
+                        aria-hidden="true"
+                      />
+                      <span>Al menos 8 caracteres</span>
+                    </div>
+                    <p className="mt-2.5 text-muted">
+                      Y al menos 3 de los siguientes (
+                      <span className="num font-semibold text-ink">
+                        {Math.min(passwordStrength.categoriesMet, 3)}/3
+                      </span>
+                      ):
+                    </p>
+                    <ul className="mt-1.5 space-y-1">
+                      {[
+                        {
+                          ok: passwordStrength.hasUppercase,
+                          label: "Una mayúscula",
+                        },
+                        {
+                          ok: passwordStrength.hasLowercase,
+                          label: "Una minúscula",
+                        },
+                        { ok: passwordStrength.hasNumber, label: "Un número" },
+                        {
+                          ok: passwordStrength.hasSpecial,
+                          label: "Un carácter especial",
+                        },
+                      ].map((rule) => (
+                        <li
+                          key={rule.label}
+                          className={`flex items-center gap-1.5 ${rule.ok ? "font-medium text-accent-deep" : "text-muted"}`}
+                        >
+                          <Check
+                            className={`h-3.5 w-3.5 shrink-0 ${rule.ok ? "opacity-100" : "opacity-30"}`}
+                            aria-hidden="true"
+                          />
+                          <span>{rule.label}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
               <div className="relative mt-1.5">
                 <input
                   id="reg-password"
@@ -424,29 +523,6 @@ export default function RegisterPage() {
               )}
             </div>
           </div>
-
-          <ul
-            aria-label="Requisitos de seguridad de la contraseña"
-            className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs"
-          >
-            {[
-              { ok: passwordStrength.minLength, label: "Mínimo 8 caracteres" },
-              { ok: passwordStrength.hasUppercase, label: "Una mayúscula" },
-              { ok: passwordStrength.hasLowercase, label: "Una minúscula" },
-              { ok: passwordStrength.hasNumber, label: "Un número" },
-            ].map((rule) => (
-              <li
-                key={rule.label}
-                className={`flex items-center gap-1.5 ${rule.ok ? "font-medium text-accent-deep" : "text-muted"}`}
-              >
-                <Check
-                  className={`h-3.5 w-3.5 shrink-0 ${rule.ok ? "opacity-100" : "opacity-30"}`}
-                  aria-hidden="true"
-                />
-                <span>{rule.label}</span>
-              </li>
-            ))}
-          </ul>
 
           <button
             type="submit"

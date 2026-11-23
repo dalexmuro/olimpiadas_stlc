@@ -82,11 +82,14 @@ describe("Step 1.11 — Authentication Screens & Form Validation", () => {
     expect(validReset.valid).toBe(true);
   });
 
-  it("enforces strong password rules (8+ chars, uppercase, lowercase, number)", () => {
-    expect(evaluatePasswordStrength("password1").isStrong).toBe(false);
-    expect(evaluatePasswordStrength("PASSWORD1").isStrong).toBe(false);
-    expect(evaluatePasswordStrength("PasswordOnly").isStrong).toBe(false);
-    expect(evaluatePasswordStrength("Pass1").isStrong).toBe(false);
-    expect(evaluatePasswordStrength("Segura2026").isStrong).toBe(true);
+  it("enforces strong password rules (8+ chars and at least 3 of 4 character categories)", () => {
+    expect(evaluatePasswordStrength("password1").isStrong).toBe(false); // only 2 categories (lower + num)
+    expect(evaluatePasswordStrength("PASSWORD1").isStrong).toBe(false); // only 2 categories (upper + num)
+    expect(evaluatePasswordStrength("PasswordOnly").isStrong).toBe(false); // only 2 categories (upper + lower)
+    expect(evaluatePasswordStrength("Pa1!").isStrong).toBe(false); // < 8 chars
+    expect(evaluatePasswordStrength("Segura2026").isStrong).toBe(true); // upper + lower + num (3/4)
+    expect(evaluatePasswordStrength("Segura!!").isStrong).toBe(true); // upper + lower + special (3/4)
+    expect(evaluatePasswordStrength("segura1!").isStrong).toBe(true); // lower + num + special (3/4)
+    expect(evaluatePasswordStrength("SEGURA1!").isStrong).toBe(true); // upper + num + special (3/4)
   });
 });
