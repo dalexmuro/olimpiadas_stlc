@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState, type MouseEvent } from "react";
 import type { UserRole } from "@/db/schema";
 import { APP_BRAND } from "@/lib/app-metadata";
+import { buildBottomMenuLinks } from "@/lib/navigation";
 
 gsap.registerPlugin(ScrollToPlugin);
 
@@ -226,28 +227,11 @@ export function Navbar({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [showClubModal, menuOpen]);
 
-  const menuLinks = [
-    ...(!isHome ? [{ label: "Inicio", hint: "Portada", href: "/" }] : []),
-    {
-      label: "Bases del Concurso",
-      hint: "Reglamento",
-      href: "/bases-del-concurso",
-    },
-    { label: "Quiénes somos", hint: "El club", href: "/quienes-somos" },
-    ...(showEditions
-      ? [{ label: "Ediciones", hint: "Archivo", href: "/ediciones" }]
-      : []),
-    ...(resolvedRole
-      ? [
-          {
-            label: resolvedName ?? "Mi Perfil",
-            hint: "Cuenta",
-            href: "/perfil",
-            mobileOnly: true,
-          },
-        ]
-      : []),
-  ];
+  const menuLinks = buildBottomMenuLinks({
+    isHome,
+    showEditions,
+    userRole: resolvedRole,
+  });
 
   const showDualHeader = !isHome || heroLogoHidden;
   const hideTopAuthCta =
@@ -388,7 +372,10 @@ export function Navbar({
             className="ta-orch-panel"
           >
             {menuLinks.map((link) => {
-              const isActive = currentPath === link.href;
+              const isActive =
+                link.href === "/admin"
+                  ? currentPath === "/admin" || currentPath.startsWith("/admin/")
+                  : currentPath === link.href;
               return (
                 <Link
                   key={link.href}
@@ -397,7 +384,7 @@ export function Navbar({
                   tabIndex={menuOpen ? 0 : -1}
                   aria-current={isActive ? "page" : undefined}
                   onClick={() => setMenuOpen(false)}
-                  className={`ta-orch-item ${"mobileOnly" in link && link.mobileOnly ? "sm:hidden" : ""}`}
+                  className="ta-orch-item"
                 >
                   <span>{link.label}</span>
                   <span className="ta-orch-hint">{link.hint}</span>
