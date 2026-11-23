@@ -926,6 +926,45 @@
     margin-bottom: var(--space-md);
     color: var(--color-ink-2);
   }
+
+  /* Compact, scannable typographic scale for Admin Workspace */
+  .ta-admin-aside .riso-nav-link {
+    min-height: 36px;
+    font-size: 0.8125rem;
+    line-height: 1.3;
+  }
+
+  .ta-admin-main h1 {
+    font-size: clamp(1.5rem, 1.8vw + 0.65rem, 2rem);
+    line-height: 1.15;
+    max-width: 34ch;
+  }
+
+  .ta-admin-main h2 {
+    font-size: clamp(1.125rem, 0.9vw + 0.65rem, 1.375rem);
+    line-height: 1.22;
+  }
+
+  .ta-admin-main h3 {
+    font-size: 1rem;
+    line-height: 1.3;
+    font-weight: 700;
+  }
+
+  .ta-admin-main .lead {
+    font-size: 0.9375rem;
+    line-height: 1.55;
+  }
+
+  .ta-admin-main .riso-row {
+    padding-block: 14px;
+    gap: 12px;
+  }
+
+  .ta-admin-main .riso-link {
+    min-height: 34px;
+    font-size: 0.9375rem;
+  }
 }
 
 /* Overdrive: View Transitions choreography for StageExplorer */

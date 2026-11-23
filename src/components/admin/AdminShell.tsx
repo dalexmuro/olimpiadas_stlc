@@ -25,19 +25,19 @@ export function AdminShell({ role, userName, children }: AdminShellProps) {
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-12">
           <aside
             aria-label="Navegación de administración"
-            className="lg:col-span-3"
+            className="ta-admin-aside lg:col-span-3"
           >
-            <div className="rounded-[24px] border border-rule bg-surface p-6 shadow-card">
-              <p className="font-display text-lg font-bold tracking-display text-ink">
+            <div className="rounded-[24px] border border-rule bg-surface p-5 shadow-card">
+              <p className="font-display text-base font-bold tracking-display text-ink">
                 Panel <span className="ta-serif-italic">organizador</span>
               </p>
-              <p className="mt-1 text-xs text-muted">
+              <p className="mt-0.5 text-xs text-muted">
                 {role === "SUPERADMIN"
                   ? "Superadministrador"
                   : "Administrador del concurso"}
               </p>
 
-              <nav className="mt-5 flex flex-col gap-1 border-t border-rule pt-4">
+              <nav className="mt-4 flex flex-col gap-0.5 border-t border-rule pt-3">
                 {sharedTabs.map((tab) => (
                   <Link
                     key={tab.href}
@@ -50,11 +50,11 @@ export function AdminShell({ role, userName, children }: AdminShellProps) {
               </nav>
 
               {superadminTabs.length > 0 && (
-                <div className="mt-6 border-t border-rule pt-4">
+                <div className="mt-4 border-t border-rule pt-3">
                   <p className="text-xs font-semibold text-muted">
                     Configuración exclusiva
                   </p>
-                  <nav className="mt-2 flex flex-col gap-1">
+                  <nav className="mt-1.5 flex flex-col gap-0.5">
                     {superadminTabs.map((tab) => (
                       <Link
                         key={tab.href}
@@ -70,7 +70,7 @@ export function AdminShell({ role, userName, children }: AdminShellProps) {
             </div>
           </aside>
 
-          <main id="contenido" className="min-w-0 lg:col-span-9">
+          <main id="contenido" className="ta-admin-main min-w-0 lg:col-span-9">
             <PageReveal>{children}</PageReveal>
           </main>
         </div>
