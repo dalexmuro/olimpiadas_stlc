@@ -2,7 +2,7 @@
 
 import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { PageReveal } from "@/components/layout/PageReveal";
 import { APP_BRAND } from "@/lib/app-metadata";
@@ -14,7 +14,15 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [serverError, setServerError] = useState<string | null>(null);
+  const [inactivityNotice, setInactivityNotice] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("motivo") === "inactividad") {
+      setInactivityNotice(true);
+    }
+  }, []);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -149,6 +157,16 @@ export default function LoginPage() {
               <span className="text-xs text-muted">o con tu correo</span>
               <div className="h-px flex-1 bg-rule" />
             </div>
+
+            {inactivityNotice && !serverError && (
+              <div
+                role="status"
+                className="mb-4 rounded-input border border-accent/30 bg-accent-soft px-4 py-3 text-sm text-accent-deep"
+              >
+                Tu sesión se cerró automáticamente por inactividad. Vuelve a
+                iniciar sesión para continuar.
+              </div>
+            )}
 
             {serverError && (
               <div

@@ -17,6 +17,10 @@ import { shouldPromoteToSuperadmin } from "@/db/seed";
 import { APP_BRAND } from "./app-metadata";
 import type { CloudflareEnv } from "./cloudflare-env";
 import { dispatchTemplateEmail } from "./email";
+import {
+  CLOSED_TAB_SESSION_SECONDS,
+  SESSION_UPDATE_AGE_SECONDS,
+} from "./session-timeout";
 
 export const MICROSOFT_OAUTH_TENANT = "common" as const;
 export const MIN_PASSWORD_LENGTH = 8 as const;
@@ -254,6 +258,10 @@ export function buildBetterAuthOptions(
     baseURL: config.baseUrl,
     trustedOrigins: config.trustedOrigins ?? [config.baseUrl],
     secret: config.secret,
+    session: {
+      expiresIn: CLOSED_TAB_SESSION_SECONDS,
+      updateAge: SESSION_UPDATE_AGE_SECONDS,
+    },
     advanced: {
       useSecureCookies,
     },

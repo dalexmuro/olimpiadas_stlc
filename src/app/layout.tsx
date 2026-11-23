@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Bricolage_Grotesque, DM_Sans, Newsreader } from "next/font/google";
 import type { ReactNode } from "react";
+import { SessionActivityGuard } from "@/components/auth/SessionActivityGuard";
 import { APP_BRAND } from "@/lib/app-metadata";
 import "./globals.css";
 
@@ -46,6 +47,7 @@ export default function RootLayout({
           Saltar al contenido principal
         </a>
         {children}
+        <SessionActivityGuard />
       </body>
     </html>
   );
