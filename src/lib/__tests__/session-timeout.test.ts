@@ -5,12 +5,21 @@ import {
   formatCountdownMmSs,
   OPEN_TAB_IDLE_LOGOUT_MS,
   OPEN_TAB_IDLE_WARNING_MS,
+  OPEN_TAB_WARNING_COUNTDOWN_MS,
+  SESSION_HEARTBEAT_INTERVAL_MS,
 } from "../session-timeout";
 
 describe("Banking-style Rolling Session & Inactivity Timeout", () => {
-  it("expires closed-tab sessions faster than open-tab inactivity logout", () => {
+  it("expires closed-tab sessions (10m) faster than open-tab logout (15m) and refreshes safely before expiry", () => {
+    expect(CLOSED_TAB_SESSION_SECONDS).toBe(10 * 60);
+    expect(OPEN_TAB_IDLE_WARNING_MS).toBe(14 * 60 * 1000);
+    expect(OPEN_TAB_WARNING_COUNTDOWN_MS).toBe(1 * 60 * 1000);
+    expect(OPEN_TAB_IDLE_LOGOUT_MS).toBe(15 * 60 * 1000);
     expect(CLOSED_TAB_SESSION_SECONDS * 1000).toBeLessThan(
       OPEN_TAB_IDLE_LOGOUT_MS
+    );
+    expect(SESSION_HEARTBEAT_INTERVAL_MS).toBeLessThan(
+      CLOSED_TAB_SESSION_SECONDS * 1000
     );
   });
 
@@ -22,7 +31,7 @@ describe("Banking-style Rolling Session & Inactivity Timeout", () => {
 
     const warning = evaluateIdleState(start, start + OPEN_TAB_IDLE_WARNING_MS);
     expect(warning.status).toBe("warning");
-    expect(warning.remainingMs).toBe(5 * 60 * 1000);
+    expect(warning.remainingMs).toBe(1 * 60 * 1000);
 
     const expired = evaluateIdleState(start, start + OPEN_TAB_IDLE_LOGOUT_MS);
     expect(expired.status).toBe("expired");
