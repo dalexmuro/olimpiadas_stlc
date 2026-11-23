@@ -1,0 +1,31 @@
+title = "Olimpíadas Literarias — Gitleaks Security Configuration"
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "brevo-smtp-api-key"
+description = "Brevo (Sendinblue) transactional email API key"
+regex = '''xkeysib-[a-f0-9]{16,}'''
+tags = ["key", "brevo", "email"]
+
+[[rules]]
+id = "database-connection-string"
+description = "Database or cache connection string with credentials or host URI"
+regex = '''\b(?:postgres(?:ql)?|mysql|mariadb|mongodb(?:\+srv)?|rediss?|libsql|mssql)://[^\s"'`<>]+'''
+tags = ["database", "connection-string"]
+
+[[rules]]
+id = "hardcoded-cloudflare-account-id"
+description = "Hardcoded Cloudflare Account ID literal in source code"
+regex = '''CLOUDFLARE_ACCOUNT_ID\s*[:=]\s*["'][0-9a-fA-F]{32}["']'''
+tags = ["cloudflare", "infra"]
+
+[allowlist]
+description = "Allowlisted templates, lockfiles, and synthetic unit test fixtures"
+paths = [
+  '''^\.env\.example$''',
+  '''^package-lock\.json$''',
+  '''^src/.*/__tests__/.*\.test\.ts$''',
+  '''^scripts/security-guard-core\.mjs$''',
+]

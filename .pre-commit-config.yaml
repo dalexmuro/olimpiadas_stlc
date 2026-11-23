@@ -1,0 +1,41 @@
+# Pre-commit Hooks (https://pre-commit.com/)
+# Install once per machine:
+#   pip install pre-commit
+#   pre-commit install
+# Run manually across the whole repo:
+#   pre-commit run --all-files
+
+default_install_hook_types: [pre-commit]
+default_stages: [pre-commit]
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: detect-private-key
+      - id: check-added-large-files
+        args: ["--maxkb=500"]
+      - id: check-merge-conflict
+      - id: check-yaml
+
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.24.2
+    hooks:
+      - id: gitleaks
+        name: Gitleaks — Scan staged changes for secrets
+        args: ["protect", "--staged", "--redact", "--config=.gitleaks.toml"]
+
+  - repo: local
+    hooks:
+      - id: olimpiadas-security-guard
+        name: Security & PII Guard (staged files, DB dumps, credentials, participant PII)
+        entry: node scripts/security-precommit-guard.mjs --staged
+        language: system
+        pass_filenames: false
+        always_run: true
+
+      - id: eslint-staged
+        name: ESLint — Lint staged TypeScript/TSX files
+        entry: npx eslint
+        language: system
+        files: ^src/.*\.(ts|tsx)$

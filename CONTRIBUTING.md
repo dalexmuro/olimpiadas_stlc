@@ -20,6 +20,11 @@ Thank you for your interest in contributing to **Olimpíadas Literarias**!
    ```bash
    npm run dev
    ```
+5. Enable local security & lint pre-commit hooks ([pre-commit.com](https://pre-commit.com/)):
+   ```bash
+   pip install pre-commit
+   pre-commit install
+   ```
 
 ## Branching & Pull Requests
 
@@ -35,6 +40,7 @@ All checks below run automatically in GitHub Actions (`.github/workflows/ci.yml`
 npm run typecheck
 npm run lint
 npm test
+npm run security:check
 ```
 
 ## Documentation
