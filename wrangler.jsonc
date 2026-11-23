@@ -29,7 +29,7 @@
     "APP_ENV": "prod",
     "BETTER_AUTH_URL": "https://olimpiadas.sitelocuento.com",
     "EMAIL_FROM_ADDRESS": "olimpiadas@sitelocuento.com",
-    "EMAIL_FROM_NAME": "Olimpíadas Literarias"
+    "EMAIL_FROM_NAME": "Olimpíadas Literarias de SiTeLoCuento"
   },
   "env": {
     "dev": {
@@ -54,8 +54,9 @@
       "vars": {
         "APP_ENV": "dev",
         "BETTER_AUTH_URL": "https://dev-olimpiadas.sitelocuento.com",
-        "EMAIL_FROM_ADDRESS": "olimpiadas@sitelocuento.com",
-        "EMAIL_FROM_NAME": "Olimpíadas Literarias (Dev)"
+        // "EMAIL_FROM_ADDRESS": "olimpiadas@sitelocuento.com",
+       "EMAIL_FROM_ADDRESS": "maratonpincelero@gmail.com",
+        "EMAIL_FROM_NAME": "Olimpíadas Literarias de SiTeLoCuento (Dev)"
       }
     }
   }
