@@ -1,12 +1,16 @@
 "use client";
 
-import { Eye, EyeOff } from "lucide-react";
+import { Check, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { PageReveal } from "@/components/layout/PageReveal";
 import { APP_BRAND } from "@/lib/app-metadata";
-import { COUNTRIES_LIST, validateRegisterForm } from "@/lib/auth-forms";
+import {
+  COUNTRIES_LIST,
+  evaluatePasswordStrength,
+  validateRegisterForm,
+} from "@/lib/auth-forms";
 
 export default function RegisterPage() {
   const [firstName, setFirstName] = useState("");
@@ -20,11 +24,15 @@ export default function RegisterPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [serverError, setServerError] = useState<string | null>(null);
+  const [duplicateEmailAlert, setDuplicateEmailAlert] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const passwordStrength = evaluatePasswordStrength(password);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setServerError(null);
+    setDuplicateEmailAlert(false);
 
     const validation = validateRegisterForm({
       firstName,
@@ -42,6 +50,31 @@ export default function RegisterPage() {
 
     setLoading(true);
     try {
+      // Verify email availability before creating account
+      const checkRes = await fetch("/api/auth/check-email", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ email: email.trim() }),
+      });
+
+      if (checkRes.ok) {
+        const checkData = (await checkRes.json()) as {
+          ok?: boolean;
+          exists?: boolean;
+        };
+        if (checkData.exists) {
+          setDuplicateEmailAlert(true);
+          setFieldErrors((prev) => ({
+            ...prev,
+            email: "Este correo electrónico ya tiene una cuenta registrada.",
+          }));
+          setServerError(
+            "Ya existe una cuenta registrada con este correo electrónico."
+          );
+          return;
+        }
+      }
+
       const response = await fetch("/api/auth/sign-up/email", {
         method: "POST",
         headers: { "content-type": "application/json" },
@@ -181,7 +214,20 @@ export default function RegisterPage() {
             role="alert"
             className="mb-4 rounded-input border border-error/30 bg-error/5 px-4 py-3 text-sm text-error"
           >
-            {serverError}
+            <p>{serverError}</p>
+            {duplicateEmailAlert && (
+              <p className="mt-1.5 text-xs text-ink">
+                Puedes{" "}
+                <Link href="/login" className="ta-inline-link">
+                  iniciar sesión
+                </Link>{" "}
+                o{" "}
+                <Link href="/recuperar-clave" className="ta-inline-link">
+                  recuperar tu contraseña
+                </Link>
+                .
+              </p>
+            )}
           </div>
         )}
 
@@ -378,6 +424,29 @@ export default function RegisterPage() {
               )}
             </div>
           </div>
+
+          <ul
+            aria-label="Requisitos de seguridad de la contraseña"
+            className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs"
+          >
+            {[
+              { ok: passwordStrength.minLength, label: "Mínimo 8 caracteres" },
+              { ok: passwordStrength.hasUppercase, label: "Una mayúscula" },
+              { ok: passwordStrength.hasLowercase, label: "Una minúscula" },
+              { ok: passwordStrength.hasNumber, label: "Un número" },
+            ].map((rule) => (
+              <li
+                key={rule.label}
+                className={`flex items-center gap-1.5 ${rule.ok ? "font-medium text-accent-deep" : "text-muted"}`}
+              >
+                <Check
+                  className={`h-3.5 w-3.5 shrink-0 ${rule.ok ? "opacity-100" : "opacity-30"}`}
+                  aria-hidden="true"
+                />
+                <span>{rule.label}</span>
+              </li>
+            ))}
+          </ul>
 
           <button
             type="submit"

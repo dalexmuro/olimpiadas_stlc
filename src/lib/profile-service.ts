@@ -9,6 +9,7 @@ import { accounts, sessions, users, verifications } from "@/db/schema";
 import { MIN_PASSWORD_LENGTH } from "./auth";
 import {
   EMAIL_REGEX,
+  evaluatePasswordStrength,
   PHONE_REGEX,
   type FormValidationResult,
 } from "./auth-forms";
@@ -81,8 +82,11 @@ export function validatePasswordChangeForm(
     fieldErrors.currentPassword = "Ingresa tu contraseña actual.";
   }
 
-  if (input.newPassword.length < MIN_PASSWORD_LENGTH) {
-    fieldErrors.newPassword = `La nueva contraseña debe tener al menos ${MIN_PASSWORD_LENGTH} caracteres.`;
+  const passwordCheck = evaluatePasswordStrength(input.newPassword);
+  if (!passwordCheck.isStrong) {
+    fieldErrors.newPassword =
+      passwordCheck.errorMessage ??
+      `La nueva contraseña debe tener al menos ${MIN_PASSWORD_LENGTH} caracteres, una mayúscula, una minúscula y un número.`;
   }
 
   if (input.newPassword !== input.confirmNewPassword) {

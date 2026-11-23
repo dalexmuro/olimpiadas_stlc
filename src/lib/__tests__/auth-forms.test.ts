@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   COUNTRIES_LIST,
+  evaluatePasswordStrength,
   validateForgotPasswordForm,
   validateLoginForm,
   validateRegisterForm,
@@ -79,5 +80,13 @@ describe("Step 1.11 — Authentication Screens & Form Validation", () => {
       confirmPassword: "NuevaClaveSegura123",
     });
     expect(validReset.valid).toBe(true);
+  });
+
+  it("enforces strong password rules (8+ chars, uppercase, lowercase, number)", () => {
+    expect(evaluatePasswordStrength("password1").isStrong).toBe(false);
+    expect(evaluatePasswordStrength("PASSWORD1").isStrong).toBe(false);
+    expect(evaluatePasswordStrength("PasswordOnly").isStrong).toBe(false);
+    expect(evaluatePasswordStrength("Pass1").isStrong).toBe(false);
+    expect(evaluatePasswordStrength("Segura2026").isStrong).toBe(true);
   });
 });

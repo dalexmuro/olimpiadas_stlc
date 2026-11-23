@@ -39,6 +39,46 @@ export interface FormValidationResult {
   fieldErrors: Record<string, string>;
 }
 
+export interface PasswordStrengthCheck {
+  minLength: boolean;
+  hasUppercase: boolean;
+  hasLowercase: boolean;
+  hasNumber: boolean;
+  isStrong: boolean;
+  errorMessage?: string;
+}
+
+/**
+ * Evaluates password strength rules:
+ * at least 8 characters, 1 uppercase letter, 1 lowercase letter, and 1 number.
+ */
+export function evaluatePasswordStrength(
+  password: string
+): PasswordStrengthCheck {
+  const minLength = password.length >= MIN_PASSWORD_LENGTH;
+  const hasUppercase = /[A-ZÁÉÍÓÚÑ]/.test(password);
+  const hasLowercase = /[a-záéíóúñ]/.test(password);
+  const hasNumber = /\d/.test(password);
+  const isStrong = minLength && hasUppercase && hasLowercase && hasNumber;
+
+  let errorMessage: string | undefined;
+  if (!minLength) {
+    errorMessage = `La contraseña debe tener al menos ${MIN_PASSWORD_LENGTH} caracteres.`;
+  } else if (!hasUppercase || !hasLowercase || !hasNumber) {
+    errorMessage =
+      "La contraseña debe incluir al menos una mayúscula, una minúscula y un número.";
+  }
+
+  return {
+    minLength,
+    hasUppercase,
+    hasLowercase,
+    hasNumber,
+    isStrong,
+    errorMessage,
+  };
+}
+
 export interface LoginFormInput {
   email: string;
   password: string;
@@ -105,8 +145,11 @@ export function validateRegisterForm(
     fieldErrors.email = "Ingresa un correo electrónico válido.";
   }
 
-  if (input.password.length < MIN_PASSWORD_LENGTH) {
-    fieldErrors.password = `La contraseña debe tener al menos ${MIN_PASSWORD_LENGTH} caracteres.`;
+  const passwordCheck = evaluatePasswordStrength(input.password);
+  if (!passwordCheck.isStrong) {
+    fieldErrors.password =
+      passwordCheck.errorMessage ??
+      `La contraseña debe tener al menos ${MIN_PASSWORD_LENGTH} caracteres, una mayúscula, una minúscula y un número.`;
   }
 
   if (input.password !== input.confirmPassword) {
@@ -151,8 +194,11 @@ export function validateResetPasswordForm(input: {
       "El enlace de recuperación no es válido o ha expirado.";
   }
 
-  if (input.password.length < MIN_PASSWORD_LENGTH) {
-    fieldErrors.password = `La nueva contraseña debe tener al menos ${MIN_PASSWORD_LENGTH} caracteres.`;
+  const passwordCheck = evaluatePasswordStrength(input.password);
+  if (!passwordCheck.isStrong) {
+    fieldErrors.password =
+      passwordCheck.errorMessage ??
+      `La nueva contraseña debe tener al menos ${MIN_PASSWORD_LENGTH} caracteres, una mayúscula, una minúscula y un número.`;
   }
 
   if (input.password !== input.confirmPassword) {

@@ -212,6 +212,8 @@ export default function ProfilePage() {
     try {
       await fetch("/api/auth/sign-out", {
         method: "POST",
+        headers: { "content-type": "application/json" },
+        body: "{}",
         credentials: "same-origin",
       });
     } finally {
@@ -557,15 +559,6 @@ export default function ProfilePage() {
         <div className="mt-6 flex flex-wrap items-center justify-between gap-4 border-t border-rule pt-6">
           <button
             type="button"
-            disabled={signingOut}
-            onClick={() => void handleSignOut()}
-            className="btn btn--secondary"
-          >
-            {signingOut ? "Cerrando sesión…" : "Cerrar sesión"}
-          </button>
-
-          <button
-            type="button"
             onClick={() => {
               setDeleteError(null);
               setShowDeleteModal(true);
@@ -573,6 +566,15 @@ export default function ProfilePage() {
             className="btn border-error/40 bg-surface text-error hover:border-error hover:bg-error/5"
           >
             Eliminar cuenta
+          </button>
+
+          <button
+            type="button"
+            disabled={signingOut}
+            onClick={() => void handleSignOut()}
+            className="btn btn--secondary"
+          >
+            {signingOut ? "Cerrando sesión…" : "Cerrar sesión"}
           </button>
         </div>
       </section>
