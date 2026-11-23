@@ -6,8 +6,10 @@ import {
   MIN_PASSWORD_LENGTH,
   buildBetterAuthOptions,
   evaluateProfileCompletion,
+  mapSocialProfileToUser,
   resolveAuthRuntimeConfig,
   resolveInitialUserRole,
+  splitDisplayName,
 } from "../auth";
 
 function createAuthTestD1Binding(): {
@@ -101,15 +103,21 @@ describe("Step 1.10 — Better Auth Configuration (Email/Password, Google, Micro
     );
     expect(options.emailVerification.sendOnSignUp).toBe(true);
 
-    expect(options.socialProviders.google).toEqual({
+    expect(options.socialProviders.google).toMatchObject({
       clientId: "google-client-id",
       clientSecret: "google-client-secret",
     });
-    expect(options.socialProviders.microsoft).toEqual({
+    expect(typeof options.socialProviders.google.mapProfileToUser).toBe(
+      "function"
+    );
+    expect(options.socialProviders.microsoft).toMatchObject({
       clientId: "ms-client-id",
       clientSecret: "ms-client-secret",
       tenantId: MICROSOFT_OAUTH_TENANT,
     });
+    expect(typeof options.socialProviders.microsoft.mapProfileToUser).toBe(
+      "function"
+    );
   });
 
   it("dispatches E01 for email verification and E02 for password reset", async () => {
@@ -168,5 +176,33 @@ describe("Step 1.10 — Better Auth Configuration (Email/Password, Google, Micro
     expect(resolved.trustedOrigins).toContain(
       "https://dev-olimpiadas.sitelocuento.com"
     );
+  });
+
+  it("maps Google and Microsoft OIDC profile fields to firstName, lastName, and avatarUrl", () => {
+    expect(
+      mapSocialProfileToUser({
+        given_name: "Daniel",
+        family_name: "Muro",
+        picture: "https://lh3.googleusercontent.com/avatar.jpg",
+      })
+    ).toEqual({
+      firstName: "Daniel",
+      lastName: "Muro",
+      avatarUrl: "https://lh3.googleusercontent.com/avatar.jpg",
+    });
+
+    expect(splitDisplayName("Ana María López")).toEqual({
+      firstName: "Ana",
+      lastName: "María López",
+    });
+
+    expect(
+      mapSocialProfileToUser({
+        name: "Carlos Pérez",
+      })
+    ).toEqual({
+      firstName: "Carlos",
+      lastName: "Pérez",
+    });
   });
 });

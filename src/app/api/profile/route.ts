@@ -9,7 +9,7 @@ import { NextResponse } from "next/server";
 import { createDbClient } from "@/db";
 import { users } from "@/db/schema";
 import { APP_BRAND } from "@/lib/app-metadata";
-import { createAuthInstance } from "@/lib/auth";
+import { createAuthInstance, splitDisplayName } from "@/lib/auth";
 import type { CloudflareEnv } from "@/lib/cloudflare-env";
 import {
   updateUserProfileInDb,
@@ -20,7 +20,7 @@ export async function GET(request: Request): Promise<Response> {
   const { env } = await getCloudflareContext({ async: true });
   const cfEnv = env as unknown as CloudflareEnv;
   const db = createDbClient(cfEnv.DB);
-  const auth = createAuthInstance(db, cfEnv);
+  const auth = createAuthInstance(db, cfEnv, request.url);
 
   const session = await auth.api.getSession({ headers: request.headers });
   if (!session?.user?.id) {
@@ -43,17 +43,19 @@ export async function GET(request: Request): Promise<Response> {
     );
   }
 
+  const fallbackName = splitDisplayName(user.name);
+
   return NextResponse.json({
     ok: true,
     profile: {
       id: user.id,
-      firstName: user.firstName ?? "",
-      lastName: user.lastName ?? "",
+      firstName: user.firstName?.trim() || fallbackName.firstName,
+      lastName: user.lastName?.trim() || fallbackName.lastName,
       country: user.country ?? "",
       phone: user.phone ?? "",
       email: user.email,
       emailVerified: user.emailVerified,
-      avatarUrl: user.avatarUrl ?? null,
+      avatarUrl: user.avatarUrl ?? user.image ?? null,
       role: user.role,
     },
   });
@@ -63,7 +65,7 @@ export async function PUT(request: Request): Promise<Response> {
   const { env } = await getCloudflareContext({ async: true });
   const cfEnv = env as unknown as CloudflareEnv;
   const db = createDbClient(cfEnv.DB);
-  const auth = createAuthInstance(db, cfEnv);
+  const auth = createAuthInstance(db, cfEnv, request.url);
 
   const session = await auth.api.getSession({ headers: request.headers });
   if (!session?.user?.id) {

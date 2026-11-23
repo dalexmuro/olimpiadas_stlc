@@ -56,6 +56,55 @@ export function resolveInitialUserRole(
     : "PARTICIPANT";
 }
 
+/**
+ * Splits a full display name (e.g. from Google/Microsoft OAuth) into firstName and lastName.
+ */
+export function splitDisplayName(name?: string | null): {
+  firstName: string;
+  lastName: string;
+} {
+  const cleaned = (name ?? "").trim().replace(/\s+/g, " ");
+  if (!cleaned) {
+    return { firstName: "", lastName: "" };
+  }
+  const parts = cleaned.split(" ");
+  if (parts.length === 1) {
+    return { firstName: parts[0], lastName: "" };
+  }
+  return {
+    firstName: parts[0],
+    lastName: parts.slice(1).join(" "),
+  };
+}
+
+export interface SocialProfileFields {
+  given_name?: string | null;
+  family_name?: string | null;
+  name?: string | null;
+  picture?: string | null;
+}
+
+/**
+ * Maps standard Google/Microsoft OIDC profile fields onto our custom user columns
+ * while keeping every field editable by the user afterward.
+ */
+export function mapSocialProfileToUser(profile: SocialProfileFields): {
+  firstName?: string;
+  lastName?: string;
+  avatarUrl?: string;
+} {
+  const fallback = splitDisplayName(profile.name);
+  const firstName = (profile.given_name ?? "").trim() || fallback.firstName;
+  const lastName = (profile.family_name ?? "").trim() || fallback.lastName;
+  const avatarUrl = (profile.picture ?? "").trim() || undefined;
+
+  return {
+    ...(firstName ? { firstName } : {}),
+    ...(lastName ? { lastName } : {}),
+    ...(avatarUrl ? { avatarUrl } : {}),
+  };
+}
+
 export interface AuthRuntimeConfig {
   baseUrl: string;
   trustedOrigins?: string[];
@@ -160,12 +209,14 @@ export function buildBetterAuthOptions(
   db: AppDatabase,
   config: AuthRuntimeConfig
 ) {
-  const socialProviders: Record<string, Record<string, string>> = {};
+  const socialProviders: Record<string, Record<string, unknown>> = {};
 
   if (config.googleClientId && config.googleClientSecret) {
     socialProviders.google = {
       clientId: config.googleClientId,
       clientSecret: config.googleClientSecret,
+      mapProfileToUser: (profile: SocialProfileFields) =>
+        mapSocialProfileToUser(profile),
     };
   }
 
@@ -174,6 +225,8 @@ export function buildBetterAuthOptions(
       clientId: config.microsoftClientId,
       clientSecret: config.microsoftClientSecret,
       tenantId: MICROSOFT_OAUTH_TENANT,
+      mapProfileToUser: (profile: SocialProfileFields) =>
+        mapSocialProfileToUser(profile),
     };
   }
 
@@ -181,6 +234,43 @@ export function buildBetterAuthOptions(
     baseURL: config.baseUrl,
     trustedOrigins: config.trustedOrigins ?? [config.baseUrl],
     secret: config.secret,
+    databaseHooks: {
+      user: {
+        create: {
+          before: async (user: Record<string, unknown>) => {
+            const email = typeof user.email === "string" ? user.email : "";
+            const name = typeof user.name === "string" ? user.name : "";
+            const image = typeof user.image === "string" ? user.image : "";
+            const parts = splitDisplayName(name);
+            const firstName =
+              typeof user.firstName === "string" && user.firstName.trim()
+                ? user.firstName.trim()
+                : parts.firstName;
+            const lastName =
+              typeof user.lastName === "string" && user.lastName.trim()
+                ? user.lastName.trim()
+                : parts.lastName;
+            const avatarUrl =
+              typeof user.avatarUrl === "string" && user.avatarUrl.trim()
+                ? user.avatarUrl.trim()
+                : image || undefined;
+
+            return {
+              data: {
+                ...user,
+                ...(firstName ? { firstName } : {}),
+                ...(lastName ? { lastName } : {}),
+                ...(avatarUrl ? { avatarUrl } : {}),
+                role: resolveInitialUserRole(
+                  email,
+                  config.superadminInitialEmail
+                ),
+              },
+            };
+          },
+        },
+      },
+    },
     database: drizzleAdapter(db, {
       provider: "sqlite",
       schema: {

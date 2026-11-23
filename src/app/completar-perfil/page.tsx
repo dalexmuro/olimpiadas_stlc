@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { PageReveal } from "@/components/layout/PageReveal";
 import { APP_BRAND } from "@/lib/app-metadata";
@@ -15,6 +15,33 @@ export default function CompleteProfilePage() {
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [serverError, setServerError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    async function preloadProfile() {
+      try {
+        const res = await fetch("/api/profile");
+        if (!res.ok) return;
+        const data = (await res.json()) as {
+          ok: boolean;
+          profile?: {
+            firstName?: string;
+            lastName?: string;
+            country?: string;
+            phone?: string;
+          };
+        };
+        if (data.ok && data.profile) {
+          if (data.profile.firstName) setFirstName(data.profile.firstName);
+          if (data.profile.lastName) setLastName(data.profile.lastName);
+          if (data.profile.country) setCountry(data.profile.country);
+          if (data.profile.phone) setPhone(data.profile.phone);
+        }
+      } catch {
+        // Ignore preload error and let the user fill fields manually
+      }
+    }
+    void preloadProfile();
+  }, []);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
