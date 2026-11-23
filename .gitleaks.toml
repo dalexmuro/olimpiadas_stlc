@@ -20,6 +20,11 @@ id = "hardcoded-cloudflare-account-id"
 description = "Hardcoded Cloudflare Account ID literal in source code"
 regex = '''CLOUDFLARE_ACCOUNT_ID\s*[:=]\s*["'][0-9a-fA-F]{32}["']'''
 tags = ["cloudflare", "infra"]
+  [rules.allowlist]
+  description = "Historical non-secret Cloudflare Account ID removed in commit e90a0ab"
+  commits = [
+    "2a03e9405dcee8b79f7b99ca721efe4fcb026bef",
+  ]
 
 [allowlist]
 description = "Allowlisted templates, lockfiles, and synthetic unit test fixtures"

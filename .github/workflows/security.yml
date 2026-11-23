@@ -38,7 +38,7 @@ jobs:
           rm -f gitleaks.tar.gz
 
       - name: Scan entire git history for leaked secrets
-        run: gitleaks detect --source . --redact --config .gitleaks.toml --log-opts="--all"
+        run: gitleaks detect --source . --redact --verbose --config .gitleaks.toml --log-opts="--all"
 
   repo-security-guard:
     name: Repository Security & PII Policy Guard
