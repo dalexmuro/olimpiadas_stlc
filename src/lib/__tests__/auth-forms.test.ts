@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
+  combinePhoneNumber,
   COUNTRIES_LIST,
   evaluatePasswordStrength,
+  getDialCodeForCountry,
+  splitPhoneNumber,
   validateForgotPasswordForm,
   validateLoginForm,
   validateRegisterForm,
@@ -91,5 +94,19 @@ describe("Step 1.11 — Authentication Screens & Form Validation", () => {
     expect(evaluatePasswordStrength("Segura!!").isStrong).toBe(true); // upper + lower + special (3/4)
     expect(evaluatePasswordStrength("segura1!").isStrong).toBe(true); // lower + num + special (3/4)
     expect(evaluatePasswordStrength("SEGURA1!").isStrong).toBe(true); // upper + num + special (3/4)
+  });
+
+  it("maps country dial codes and splits/combines international phone numbers", () => {
+    expect(getDialCodeForCountry("Venezuela")).toBe("+58");
+    expect(getDialCodeForCountry("España")).toBe("+34");
+    expect(combinePhoneNumber("+58", "412 1234567")).toBe("+58 412 1234567");
+    expect(splitPhoneNumber("+58 412 1234567", "Venezuela")).toEqual({
+      dialCode: "+58",
+      localNumber: "412 1234567",
+    });
+    expect(splitPhoneNumber("+34 612345678")).toEqual({
+      dialCode: "+34",
+      localNumber: "612345678",
+    });
   });
 });

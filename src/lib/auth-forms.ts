@@ -34,6 +34,79 @@ export const COUNTRIES_LIST = [
   "Otro",
 ] as const;
 
+export const COUNTRY_DIAL_CODES: Record<string, string> = {
+  Argentina: "+54",
+  Bolivia: "+591",
+  Chile: "+56",
+  Colombia: "+57",
+  "Costa Rica": "+506",
+  Cuba: "+53",
+  Ecuador: "+593",
+  "El Salvador": "+503",
+  España: "+34",
+  "Estados Unidos": "+1",
+  Francia: "+33",
+  Guatemala: "+502",
+  Honduras: "+504",
+  México: "+52",
+  Nicaragua: "+505",
+  Panamá: "+507",
+  Paraguay: "+595",
+  Perú: "+51",
+  "Puerto Rico": "+1",
+  "República Dominicana": "+1",
+  Uruguay: "+598",
+  Venezuela: "+58",
+  Otro: "+",
+};
+
+export function getDialCodeForCountry(country: string): string {
+  return COUNTRY_DIAL_CODES[country] ?? "";
+}
+
+export function combinePhoneNumber(
+  dialCode: string,
+  localNumber: string
+): string {
+  const cleanCode = dialCode.trim();
+  const cleanLocal = localNumber.trim();
+  if (!cleanCode) return cleanLocal;
+  if (!cleanLocal) return cleanCode;
+  return `${cleanCode} ${cleanLocal}`;
+}
+
+export function splitPhoneNumber(
+  fullPhone: string,
+  country?: string
+): { dialCode: string; localNumber: string } {
+  const trimmed = fullPhone.trim();
+  const countryCode = country ? getDialCodeForCountry(country) : "";
+
+  if (!trimmed) {
+    return { dialCode: countryCode, localNumber: "" };
+  }
+
+  if (countryCode && countryCode !== "+" && trimmed.startsWith(countryCode)) {
+    return {
+      dialCode: countryCode,
+      localNumber: trimmed.slice(countryCode.length).trim(),
+    };
+  }
+
+  const prefixMatch = trimmed.match(/^(\+\d{1,4})\s*(.*)$/);
+  if (prefixMatch) {
+    return {
+      dialCode: prefixMatch[1],
+      localNumber: prefixMatch[2].trim(),
+    };
+  }
+
+  return {
+    dialCode: countryCode || "+",
+    localNumber: trimmed,
+  };
+}
+
 export interface FormValidationResult {
   valid: boolean;
   fieldErrors: Record<string, string>;

@@ -4,14 +4,20 @@ import { useEffect, useState, type FormEvent } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { PageReveal } from "@/components/layout/PageReveal";
 import { APP_BRAND } from "@/lib/app-metadata";
-import { COUNTRIES_LIST } from "@/lib/auth-forms";
+import {
+  combinePhoneNumber,
+  COUNTRIES_LIST,
+  getDialCodeForCountry,
+  splitPhoneNumber,
+} from "@/lib/auth-forms";
 import { validateProfileCompletionForm } from "@/lib/profile-gate";
 
 export default function CompleteProfilePage() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [country, setCountry] = useState("");
-  const [phone, setPhone] = useState("");
+  const [phoneDialCode, setPhoneDialCode] = useState("");
+  const [phoneLocal, setPhoneLocal] = useState("");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [serverError, setServerError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -34,7 +40,14 @@ export default function CompleteProfilePage() {
           if (data.profile.firstName) setFirstName(data.profile.firstName);
           if (data.profile.lastName) setLastName(data.profile.lastName);
           if (data.profile.country) setCountry(data.profile.country);
-          if (data.profile.phone) setPhone(data.profile.phone);
+          if (data.profile.phone || data.profile.country) {
+            const parts = splitPhoneNumber(
+              data.profile.phone ?? "",
+              data.profile.country
+            );
+            setPhoneDialCode(parts.dialCode);
+            setPhoneLocal(parts.localNumber);
+          }
         }
       } catch {
         // Ignore preload error and let the user fill fields manually
@@ -47,11 +60,12 @@ export default function CompleteProfilePage() {
     event.preventDefault();
     setServerError(null);
 
+    const fullPhone = combinePhoneNumber(phoneDialCode, phoneLocal);
     const validation = validateProfileCompletionForm({
       firstName,
       lastName,
       country,
-      phone,
+      phone: fullPhone,
     });
     setFieldErrors(validation.fieldErrors);
     if (!validation.valid) {
@@ -63,7 +77,7 @@ export default function CompleteProfilePage() {
       const response = await fetch("/api/profile/complete", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ firstName, lastName, country, phone }),
+        body: JSON.stringify({ firstName, lastName, country, phone: fullPhone }),
       });
 
       if (!response.ok) {
@@ -168,7 +182,11 @@ export default function CompleteProfilePage() {
               <select
                 id="complete-country"
                 value={country}
-                onChange={(e) => setCountry(e.target.value)}
+                onChange={(e) => {
+                  const nextCountry = e.target.value;
+                  setCountry(nextCountry);
+                  setPhoneDialCode(getDialCodeForCountry(nextCountry));
+                }}
                 className="mt-1.5 block w-full rounded-input border border-rule bg-paper px-3.5 py-2.5 text-sm text-ink"
               >
                 <option value="">Selecciona un país…</option>
@@ -190,14 +208,25 @@ export default function CompleteProfilePage() {
               >
                 Número de teléfono *
               </label>
-              <input
-                id="complete-phone"
-                type="tel"
-                placeholder="+58 412 1234567"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                className="mt-1.5 block w-full rounded-input border border-rule bg-paper px-3.5 py-2.5 text-sm text-ink"
-              />
+              <div className="mt-1.5 flex gap-2">
+                <input
+                  id="complete-phone-code"
+                  type="tel"
+                  aria-label="Código de país"
+                  placeholder="+58"
+                  value={phoneDialCode}
+                  onChange={(e) => setPhoneDialCode(e.target.value)}
+                  className="num block w-20 shrink-0 rounded-input border border-rule bg-paper px-3 py-2.5 text-center text-sm font-medium text-ink"
+                />
+                <input
+                  id="complete-phone"
+                  type="tel"
+                  placeholder="412 1234567"
+                  value={phoneLocal}
+                  onChange={(e) => setPhoneLocal(e.target.value)}
+                  className="num block min-w-0 flex-1 rounded-input border border-rule bg-paper px-3.5 py-2.5 text-sm text-ink"
+                />
+              </div>
               {fieldErrors.phone && (
                 <p className="mt-1 text-xs text-error">{fieldErrors.phone}</p>
               )}

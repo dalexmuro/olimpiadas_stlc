@@ -5,7 +5,12 @@ import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
 import { Footer } from "@/components/layout/Footer";
 import { Navbar } from "@/components/layout/Navbar";
 import { PageReveal } from "@/components/layout/PageReveal";
-import { COUNTRIES_LIST } from "@/lib/auth-forms";
+import {
+  combinePhoneNumber,
+  COUNTRIES_LIST,
+  getDialCodeForCountry,
+  splitPhoneNumber,
+} from "@/lib/auth-forms";
 import { validateMediaUpload } from "@/lib/cloudflare-resources";
 import {
   validatePasswordChangeForm,
@@ -16,7 +21,8 @@ export default function ProfilePage() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [country, setCountry] = useState("");
-  const [phone, setPhone] = useState("");
+  const [phoneDialCode, setPhoneDialCode] = useState("");
+  const [phoneLocal, setPhoneLocal] = useState("");
   const [email, setEmail] = useState("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [profileErrors, setProfileErrors] = useState<Record<string, string>>(
@@ -65,7 +71,12 @@ export default function ProfilePage() {
           setFirstName(data.profile.firstName);
           setLastName(data.profile.lastName);
           setCountry(data.profile.country);
-          setPhone(data.profile.phone);
+          const phoneParts = splitPhoneNumber(
+            data.profile.phone,
+            data.profile.country
+          );
+          setPhoneDialCode(phoneParts.dialCode);
+          setPhoneLocal(phoneParts.localNumber);
           setEmail(data.profile.email);
           setAvatarUrl(data.profile.avatarUrl);
         }
@@ -125,11 +136,12 @@ export default function ProfilePage() {
     setProfileMessage(null);
     setProfileAlert(null);
 
+    const fullPhone = combinePhoneNumber(phoneDialCode, phoneLocal);
     const validation = validateProfileUpdateForm({
       firstName,
       lastName,
       country,
-      phone,
+      phone: fullPhone,
       email,
     });
     setProfileErrors(validation.fieldErrors);
@@ -140,7 +152,13 @@ export default function ProfilePage() {
       const res = await fetch("/api/profile", {
         method: "PUT",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ firstName, lastName, country, phone, email }),
+        body: JSON.stringify({
+          firstName,
+          lastName,
+          country,
+          phone: fullPhone,
+          email,
+        }),
       });
       const data = (await res.json()) as {
         ok: boolean;
@@ -382,7 +400,11 @@ export default function ProfilePage() {
               <select
                 id="prof-country"
                 value={country}
-                onChange={(e) => setCountry(e.target.value)}
+                onChange={(e) => {
+                  const nextCountry = e.target.value;
+                  setCountry(nextCountry);
+                  setPhoneDialCode(getDialCodeForCountry(nextCountry));
+                }}
                 className="mt-1.5 block w-full rounded-input border border-rule bg-paper px-3.5 py-2.5 text-sm text-ink"
               >
                 <option value="">Selecciona un país…</option>
@@ -406,13 +428,25 @@ export default function ProfilePage() {
               >
                 Número de teléfono *
               </label>
-              <input
-                id="prof-phone"
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                className="mt-1.5 block w-full rounded-input border border-rule bg-paper px-3.5 py-2.5 text-sm text-ink"
-              />
+              <div className="mt-1.5 flex gap-2">
+                <input
+                  id="prof-phone-code"
+                  type="tel"
+                  aria-label="Código de país"
+                  placeholder="+58"
+                  value={phoneDialCode}
+                  onChange={(e) => setPhoneDialCode(e.target.value)}
+                  className="num block w-20 shrink-0 rounded-input border border-rule bg-paper px-3 py-2.5 text-center text-sm font-medium text-ink"
+                />
+                <input
+                  id="prof-phone"
+                  type="tel"
+                  placeholder="412 1234567"
+                  value={phoneLocal}
+                  onChange={(e) => setPhoneLocal(e.target.value)}
+                  className="num block min-w-0 flex-1 rounded-input border border-rule bg-paper px-3.5 py-2.5 text-sm text-ink"
+                />
+              </div>
               {profileErrors.phone && (
                 <p className="mt-1 text-xs text-error">{profileErrors.phone}</p>
               )}

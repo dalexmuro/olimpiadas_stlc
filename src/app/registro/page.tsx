@@ -7,8 +7,10 @@ import { Navbar } from "@/components/layout/Navbar";
 import { PageReveal } from "@/components/layout/PageReveal";
 import { APP_BRAND } from "@/lib/app-metadata";
 import {
+  combinePhoneNumber,
   COUNTRIES_LIST,
   evaluatePasswordStrength,
+  getDialCodeForCountry,
   validateRegisterForm,
 } from "@/lib/auth-forms";
 
@@ -16,7 +18,8 @@ export default function RegisterPage() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [country, setCountry] = useState("");
-  const [phone, setPhone] = useState("");
+  const [phoneDialCode, setPhoneDialCode] = useState("");
+  const [phoneLocal, setPhoneLocal] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -62,11 +65,12 @@ export default function RegisterPage() {
     setServerError(null);
     setDuplicateEmailAlert(false);
 
+    const fullPhone = combinePhoneNumber(phoneDialCode, phoneLocal);
     const validation = validateRegisterForm({
       firstName,
       lastName,
       country,
-      phone,
+      phone: fullPhone,
       email,
       password,
       confirmPassword,
@@ -111,7 +115,7 @@ export default function RegisterPage() {
           firstName: firstName.trim(),
           lastName: lastName.trim(),
           country: country.trim(),
-          phone: phone.trim(),
+          phone: fullPhone,
           profileCompleted: true,
           email: email.trim(),
           password,
@@ -315,7 +319,11 @@ export default function RegisterPage() {
               <select
                 id="reg-country"
                 value={country}
-                onChange={(e) => setCountry(e.target.value)}
+                onChange={(e) => {
+                  const nextCountry = e.target.value;
+                  setCountry(nextCountry);
+                  setPhoneDialCode(getDialCodeForCountry(nextCountry));
+                }}
                 className="mt-1.5 block w-full rounded-input border border-rule bg-paper px-3.5 py-2.5 text-sm text-ink"
               >
                 <option value="">Selecciona un país…</option>
@@ -337,14 +345,25 @@ export default function RegisterPage() {
               >
                 Número de teléfono *
               </label>
-              <input
-                id="reg-phone"
-                type="tel"
-                placeholder="+58 412 1234567"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                className="mt-1.5 block w-full rounded-input border border-rule bg-paper px-3.5 py-2.5 text-sm text-ink"
-              />
+              <div className="mt-1.5 flex gap-2">
+                <input
+                  id="reg-phone-code"
+                  type="tel"
+                  aria-label="Código de país"
+                  placeholder="+58"
+                  value={phoneDialCode}
+                  onChange={(e) => setPhoneDialCode(e.target.value)}
+                  className="num block w-20 shrink-0 rounded-input border border-rule bg-paper px-3 py-2.5 text-center text-sm font-medium text-ink"
+                />
+                <input
+                  id="reg-phone"
+                  type="tel"
+                  placeholder="412 1234567"
+                  value={phoneLocal}
+                  onChange={(e) => setPhoneLocal(e.target.value)}
+                  className="num block min-w-0 flex-1 rounded-input border border-rule bg-paper px-3.5 py-2.5 text-sm text-ink"
+                />
+              </div>
               {fieldErrors.phone && (
                 <p className="mt-1 text-xs text-error">{fieldErrors.phone}</p>
               )}
