@@ -9,6 +9,7 @@ import {
   combinePhoneNumber,
   COUNTRIES_LIST,
   getDialCodeForCountry,
+  getPhonePlaceholderForCountry,
   splitPhoneNumber,
 } from "@/lib/auth-forms";
 import { validateMediaUpload } from "@/lib/cloudflare-resources";
@@ -428,7 +429,7 @@ export default function ProfilePage() {
               >
                 Número de teléfono *
               </label>
-              <div className="mt-1.5 flex gap-2">
+              <div className="mt-1.5 flex overflow-hidden rounded-input border border-rule bg-paper focus-within:border-accent">
                 <input
                   id="prof-phone-code"
                   type="tel"
@@ -436,15 +437,15 @@ export default function ProfilePage() {
                   placeholder="+58"
                   value={phoneDialCode}
                   onChange={(e) => setPhoneDialCode(e.target.value)}
-                  className="num block w-20 shrink-0 rounded-input border border-rule bg-paper px-3 py-2.5 text-center text-sm font-medium text-ink"
+                  className="num block w-16 shrink-0 border-r border-rule bg-transparent px-2 py-2.5 text-center text-sm font-medium text-ink focus:outline-none"
                 />
                 <input
                   id="prof-phone"
                   type="tel"
-                  placeholder="412 1234567"
+                  placeholder={getPhonePlaceholderForCountry(country)}
                   value={phoneLocal}
                   onChange={(e) => setPhoneLocal(e.target.value)}
-                  className="num block min-w-0 flex-1 rounded-input border border-rule bg-paper px-3.5 py-2.5 text-sm text-ink"
+                  className="num block min-w-0 flex-1 bg-transparent px-3.5 py-2.5 text-sm text-ink focus:outline-none"
                 />
               </div>
               {profileErrors.phone && (

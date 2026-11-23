@@ -4,6 +4,7 @@ import {
   COUNTRIES_LIST,
   evaluatePasswordStrength,
   getDialCodeForCountry,
+  getPhonePlaceholderForCountry,
   splitPhoneNumber,
   validateForgotPasswordForm,
   validateLoginForm,
@@ -99,6 +100,9 @@ describe("Step 1.11 — Authentication Screens & Form Validation", () => {
   it("maps country dial codes and splits/combines international phone numbers", () => {
     expect(getDialCodeForCountry("Venezuela")).toBe("+58");
     expect(getDialCodeForCountry("España")).toBe("+34");
+    expect(getPhonePlaceholderForCountry("España")).toBe("612 34 56 78");
+    expect(getPhonePlaceholderForCountry("Francia")).toBe("6 12 34 56 78");
+    expect(getPhonePlaceholderForCountry("México")).toBe("55 1234 5678");
     expect(combinePhoneNumber("+58", "412 1234567")).toBe("+58 412 1234567");
     expect(splitPhoneNumber("+58 412 1234567", "Venezuela")).toEqual({
       dialCode: "+58",

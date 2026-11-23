@@ -60,8 +60,38 @@ export const COUNTRY_DIAL_CODES: Record<string, string> = {
   Otro: "+",
 };
 
+export const COUNTRY_PHONE_PLACEHOLDERS: Record<string, string> = {
+  Argentina: "11 1234 5678",
+  Bolivia: "712 34567",
+  Chile: "9 1234 5678",
+  Colombia: "300 123 4567",
+  "Costa Rica": "8312 3456",
+  Cuba: "5 123 4567",
+  Ecuador: "99 123 4567",
+  "El Salvador": "7012 3456",
+  España: "612 34 56 78",
+  "Estados Unidos": "555 234 5678",
+  Francia: "6 12 34 56 78",
+  Guatemala: "5123 4567",
+  Honduras: "9123 4567",
+  México: "55 1234 5678",
+  Nicaragua: "8123 4567",
+  Panamá: "6123 4567",
+  Paraguay: "981 123 456",
+  Perú: "912 345 678",
+  "Puerto Rico": "787 234 5678",
+  "República Dominicana": "809 234 5678",
+  Uruguay: "94 123 456",
+  Venezuela: "412 123 4567",
+  Otro: "123 456 7890",
+};
+
 export function getDialCodeForCountry(country: string): string {
   return COUNTRY_DIAL_CODES[country] ?? "";
+}
+
+export function getPhonePlaceholderForCountry(country: string): string {
+  return COUNTRY_PHONE_PLACEHOLDERS[country] ?? "123 456 7890";
 }
 
 export function combinePhoneNumber(
