@@ -105,6 +105,7 @@ export function Navbar({
       window.scrollTo({ top: 0, behavior: "auto" });
       return;
     }
+    gsap.killTweensOf(window);
     gsap.to(window, {
       scrollTo: { y: 0, autoKill: true },
       duration: 0.5,

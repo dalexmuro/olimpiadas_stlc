@@ -86,13 +86,15 @@ export function StageExplorer() {
   return (
     <section
       id="etapas"
+      data-gsap="panel"
       aria-labelledby="etapas-titulo"
-      className="mt-16 scroll-mt-24 border-t border-rule pt-10 sm:mt-20 sm:pt-12"
+      className="ta-panel flex min-h-svh flex-col justify-center border-t border-rule pb-40 pt-24 sm:pb-44 sm:pt-28"
     >
-      <div
-        data-gsap="stages-header"
-        className="mb-12 flex flex-wrap items-baseline justify-between gap-4 sm:mb-14"
-      >
+      <div data-gsap="panel-inner" className="container">
+        <div
+          data-gsap="stages-header"
+          className="mb-12 flex flex-wrap items-baseline justify-between gap-4 sm:mb-14"
+        >
         <h2 id="etapas-titulo">
           Tres pasos, un solo <span className="ta-serif-italic">cuento</span>
         </h2>
@@ -163,6 +165,7 @@ export function StageExplorer() {
           >
             {current.description}
           </p>
+        </div>
         </div>
       </div>
     </section>

@@ -210,20 +210,65 @@
     animation: ta-caret-blink 1.15s steps(1) infinite;
   }
 
-  /* Subtle Scroll-Down Cue (fades out once #etapas enters viewport) */
+  /* Full-bleed Open-Paper Panels + GSAP Amber Transition Curtain */
+  .ta-panel {
+    position: relative;
+    width: 100%;
+    background: var(--color-paper);
+    overflow-x: clip;
+  }
+
+  .ta-transition-curtain {
+    position: fixed;
+    inset: 0;
+    z-index: calc(var(--z-sticky-nav) + 5);
+    background: var(--color-accent);
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    will-change: transform;
+  }
+
+  /* Elastic GSAP Amber Overscroll Bounce Block below Footer */
+  .ta-footer-bounce-block {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 100%;
+    height: 180px;
+    z-index: calc(var(--z-sticky-nav) - 1);
+    border-radius: 24px 24px 0 0;
+    background: var(--color-accent);
+    pointer-events: none;
+    will-change: transform;
+  }
+
+  /* Subtle Floating Scroll-Down Cue (persists across sections, hides on final closing section) */
+  .ta-scroll-cue-wrap {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 86px;
+    z-index: calc(var(--z-sticky-nav) - 1);
+    display: flex;
+    justify-content: center;
+    pointer-events: none;
+  }
+
   .ta-scroll-cue {
+    pointer-events: auto;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     width: 56px;
     height: 56px;
-    margin-top: 8px;
     border-radius: var(--radius-pill);
     border: 1px solid color-mix(in oklab, var(--color-rule) 85%, transparent);
-    background: color-mix(in oklab, var(--color-surface) 72%, transparent);
+    background: color-mix(in oklab, var(--color-surface) 84%, transparent);
+    backdrop-filter: blur(8px);
     color: var(--color-muted);
     cursor: pointer;
-    opacity: 0.85;
+    opacity: 0.9;
     transform: translateY(0);
     transition:
       opacity 280ms var(--ease-out),

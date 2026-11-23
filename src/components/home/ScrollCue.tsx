@@ -3,73 +3,111 @@
 import { ChevronDown } from "lucide-react";
 import { useEffect, useState } from "react";
 
-interface ScrollCueProps {
-  targetId: string;
+export interface ScrollSectionTarget {
+  id: string;
+  label: string;
 }
 
-export function ScrollCue({ targetId }: ScrollCueProps) {
+interface ScrollCueProps {
+  sections: ScrollSectionTarget[];
+}
+
+export function ScrollCue({ sections }: ScrollCueProps) {
+  const [nextIndex, setNextIndex] = useState<number>(1);
   const [isHidden, setIsHidden] = useState(false);
 
   useEffect(() => {
-    const target = document.getElementById(targetId);
-    if (!target) return;
+    if (sections.length < 2) return;
 
-    const updateFromRect = () => {
-      const rect = target.getBoundingClientRect();
-      // Hide as soon as the target section enters (or is above) the viewport
-      setIsHidden(rect.top < window.innerHeight - 16);
+    const updateActiveSection = () => {
+      const viewportHeight = window.innerHeight;
+      const lastSection = document.getElementById(
+        sections[sections.length - 1].id
+      );
+
+      // Hide as soon as the final section ("¿Listo para escribir...?" + footer) is in view
+      if (lastSection) {
+        const lastRect = lastSection.getBoundingClientRect();
+        const nearBottom =
+          window.scrollY + viewportHeight >=
+          document.documentElement.scrollHeight - 40;
+        if (lastRect.top <= viewportHeight * 0.65 || nearBottom) {
+          setIsHidden(true);
+          return;
+        }
+      }
+
+      setIsHidden(false);
+
+      // Determine the current section based on which section crosses the upper-middle viewport
+      const pivot = viewportHeight * 0.42;
+      let currentIdx = 0;
+      for (let i = 0; i < sections.length; i++) {
+        const el = document.getElementById(sections[i].id);
+        if (!el) continue;
+        if (el.getBoundingClientRect().top <= pivot) {
+          currentIdx = i;
+        }
+      }
+
+      const upcomingIdx = Math.min(currentIdx + 1, sections.length - 1);
+      setNextIndex(upcomingIdx);
     };
 
-    updateFromRect();
+    updateActiveSection();
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const entry = entries[0];
-        if (!entry) return;
-        const enteredOrPassed =
-          entry.isIntersecting || entry.boundingClientRect.top < window.innerHeight - 16;
-        setIsHidden(enteredOrPassed);
-      },
-      { threshold: 0.01, rootMargin: "0px 0px -16px 0px" }
-    );
-
-    observer.observe(target);
-    window.addEventListener("scroll", updateFromRect, { passive: true });
-    window.addEventListener("resize", updateFromRect, { passive: true });
+    window.addEventListener("scroll", updateActiveSection, { passive: true });
+    window.addEventListener("resize", updateActiveSection, { passive: true });
 
     return () => {
-      observer.disconnect();
-      window.removeEventListener("scroll", updateFromRect);
-      window.removeEventListener("resize", updateFromRect);
+      window.removeEventListener("scroll", updateActiveSection);
+      window.removeEventListener("resize", updateActiveSection);
     };
-  }, [targetId]);
+  }, [sections]);
 
-  function handleScrollDown() {
-    const target = document.getElementById(targetId);
+  const nextSection = sections[nextIndex];
+
+  function handleScrollNext() {
+    if (!nextSection) return;
+    const target = document.getElementById(nextSection.id);
     if (!target) return;
+
     const prefersReduced = window.matchMedia(
       "(prefers-reduced-motion: reduce)"
     ).matches;
-    target.scrollIntoView({
-      behavior: prefersReduced ? "auto" : "smooth",
-      block: "start",
-    });
+
+    if (prefersReduced) {
+      target.scrollIntoView({ behavior: "auto", block: "start" });
+      return;
+    }
+
+    window.dispatchEvent(
+      new CustomEvent("olimpiadas:page-transition", {
+        detail: { targetId: nextSection.id, direction: 1 },
+      })
+    );
   }
 
   return (
-    <button
-      type="button"
-      onClick={handleScrollDown}
-      aria-label="Desplazarse a las etapas del certamen"
-      aria-hidden={isHidden}
-      tabIndex={isHidden ? -1 : 0}
-      className={`ta-scroll-cue ${isHidden ? "ta-scroll-cue--hidden" : ""}`}
-    >
-      <ChevronDown
-        className="ta-scroll-cue-icon h-7 w-7"
-        strokeWidth={2}
-        aria-hidden="true"
-      />
-    </button>
+    <div className="ta-scroll-cue-wrap">
+      <button
+        type="button"
+        onClick={handleScrollNext}
+        aria-label={
+          nextSection
+            ? `Desplazarse a ${nextSection.label}`
+            : "Desplazarse hacia abajo"
+        }
+        aria-hidden={isHidden}
+        tabIndex={isHidden ? -1 : 0}
+        className={`ta-scroll-cue ${isHidden ? "ta-scroll-cue--hidden" : ""}`}
+      >
+        <ChevronDown
+          className="ta-scroll-cue-icon h-7 w-7"
+          strokeWidth={2}
+          aria-hidden="true"
+        />
+      </button>
+    </div>
   );
 }

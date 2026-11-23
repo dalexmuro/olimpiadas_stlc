@@ -40,8 +40,14 @@ const HOME_FAQS = [
 
 export function HomeInfoSections() {
   return (
-    <section aria-labelledby="faq-titulo" className="mt-40 sm:mt-56">
-      <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-14">
+    <section
+      id="preguntas"
+      data-gsap="panel"
+      aria-labelledby="faq-titulo"
+      className="ta-panel flex min-h-svh flex-col justify-center border-t border-rule pb-40 pt-24 sm:pb-44 sm:pt-28"
+    >
+      <div data-gsap="panel-inner" className="container">
+        <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-14">
         <div data-gsap="faq-intro" className="lg:col-span-4">
           <h2 id="faq-titulo">
             Preguntas <span className="ta-serif-italic">frecuentes</span>
@@ -72,6 +78,7 @@ export function HomeInfoSections() {
               <p className="ta-faq-answer">{item.answer}</p>
             </details>
           ))}
+        </div>
         </div>
       </div>
     </section>

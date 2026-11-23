@@ -1,11 +1,14 @@
 "use client";
 
 import gsap from "gsap";
+import { ScrollToPlugin } from "gsap/ScrollToPlugin";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
 import { useEffect, useRef, type ReactNode } from "react";
 
-gsap.registerPlugin(ScrollTrigger, SplitText);
+gsap.registerPlugin(ScrollTrigger, ScrollToPlugin, SplitText);
+
+const HOME_SECTION_IDS = ["inicio", "etapas", "preguntas", "cierre"] as const;
 
 interface HomeScrollMotionProps {
   children: ReactNode;
@@ -13,6 +16,7 @@ interface HomeScrollMotionProps {
 
 export function HomeScrollMotion({ children }: HomeScrollMotionProps) {
   const scopeRef = useRef<HTMLDivElement>(null);
+  const curtainRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const scope = scopeRef.current;
@@ -122,173 +126,233 @@ export function HomeScrollMotion({ children }: HomeScrollMotionProps) {
         );
       }
 
-      // Subtle scrub parallax as the hero scrolls out of view
-      const heroSection = scope.querySelector<HTMLElement>(
-        '[data-gsap="hero-section"]'
-      );
-      const heroContent = scope.querySelector<HTMLElement>(
-        '[data-gsap="hero-content"]'
-      );
-      if (heroSection && heroContent) {
-        gsap.to(heroContent, {
-          y: -36,
-          opacity: 0.25,
-          ease: "none",
-          scrollTrigger: {
-            trigger: heroSection,
-            start: "top top",
-            end: "bottom top",
-            scrub: 0.6,
-          },
-        });
-      }
+      // 2. Section content reveal helper (always starts from clean visible DOM, never stuck at opacity: 0)
+      const animateSectionEntrance = (
+        sectionId: string,
+        direction: 1 | -1
+      ) => {
+        const offsetY = direction > 0 ? 22 : -22;
 
-      // 2. Stages section ("Tres pasos, un solo cuento")
-      const stagesSection = scope.querySelector<HTMLElement>("#etapas");
-      if (stagesSection) {
-        const stagesHeader = stagesSection.querySelector<HTMLElement>(
-          '[data-gsap="stages-header"]'
-        );
-        if (stagesHeader) {
-          gsap.from(stagesHeader, {
-            y: 28,
-            opacity: 0,
-            duration: 0.75,
-            ease: "power3.out",
-            clearProps: "transform",
-            scrollTrigger: {
-              trigger: stagesSection,
-              start: "top 85%",
-              once: true,
-            },
-          });
-        }
-
-        const stageItems = stagesSection.querySelectorAll<HTMLElement>(
-          '[data-gsap="stage-item"]'
-        );
-        if (stageItems.length > 0) {
-          gsap.from(stageItems, {
-            y: 24,
-            opacity: 0,
-            duration: 0.65,
-            stagger: 0.11,
-            ease: "power3.out",
-            clearProps: "transform",
-            scrollTrigger: {
-              trigger: stageItems[0],
-              start: "top 84%",
-              once: true,
-            },
-          });
-        }
-
-        const stagePanel = stagesSection.querySelector<HTMLElement>(
-          '[data-gsap="stage-panel"]'
-        );
-        if (stagePanel) {
-          gsap.from(stagePanel, {
-            y: 32,
-            opacity: 0,
-            scale: 0.985,
-            duration: 0.85,
-            delay: 0.12,
-            ease: "power3.out",
-            clearProps: "transform",
-            scrollTrigger: {
-              trigger: stagePanel,
-              start: "top 84%",
-              once: true,
-            },
-          });
-        }
-      }
-
-      // 3. FAQ section ("Preguntas frecuentes")
-      const faqIntro = scope.querySelector<HTMLElement>(
-        '[data-gsap="faq-intro"]'
-      );
-      if (faqIntro) {
-        gsap.from(faqIntro, {
-          y: 26,
-          opacity: 0,
-          duration: 0.75,
-          ease: "power3.out",
-          clearProps: "transform",
-          scrollTrigger: {
-            trigger: faqIntro,
-            start: "top 85%",
-            once: true,
-          },
-        });
-      }
-
-      const faqItems = scope.querySelectorAll<HTMLElement>(
-        '[data-gsap="faq-item"]'
-      );
-      if (faqItems.length > 0) {
-        gsap.from(faqItems, {
-          y: 20,
-          opacity: 0,
-          duration: 0.58,
-          stagger: 0.065,
-          ease: "power2.out",
-          clearProps: "transform",
-          scrollTrigger: {
-            trigger: faqItems[0],
-            start: "top 84%",
-            once: true,
-          },
-        });
-      }
-
-      // 4. Closing CTA section
-      const closingSection = scope.querySelector<HTMLElement>(
-        '[data-gsap="closing-section"]'
-      );
-      if (closingSection) {
-        const closingCopy = closingSection.querySelector<HTMLElement>(
-          '[data-gsap="closing-copy"]'
-        );
-        const closingCta = closingSection.querySelector<HTMLElement>(
-          '[data-gsap="closing-cta"]'
-        );
-
-        const tl = gsap.timeline({
-          scrollTrigger: {
-            trigger: closingSection,
-            start: "top 86%",
-            once: true,
-          },
-        });
-
-        if (closingCopy) {
-          tl.from(closingCopy, {
-            y: 28,
-            opacity: 0,
-            duration: 0.8,
-            ease: "power3.out",
-            clearProps: "transform",
-          });
-        }
-
-        if (closingCta) {
-          tl.from(
-            closingCta,
-            {
-              y: 18,
-              opacity: 0,
-              scale: 0.96,
-              duration: 0.65,
-              ease: "power3.out",
-              clearProps: "transform",
-            },
-            "-=0.5"
+        if (sectionId === "etapas") {
+          const targets = scope.querySelectorAll<HTMLElement>(
+            '[data-gsap="stages-header"], [data-gsap="stage-item"], [data-gsap="stage-panel"]'
           );
+          if (targets.length > 0) {
+            gsap.killTweensOf(targets);
+            gsap.fromTo(
+              targets,
+              { y: offsetY, opacity: 0 },
+              {
+                y: 0,
+                opacity: 1,
+                duration: 0.55,
+                stagger: 0.07,
+                ease: "power3.out",
+                clearProps: "transform,opacity",
+              }
+            );
+          }
+          return;
         }
-      }
+
+        if (sectionId === "preguntas") {
+          const targets = scope.querySelectorAll<HTMLElement>(
+            '[data-gsap="faq-intro"], [data-gsap="faq-item"]'
+          );
+          if (targets.length > 0) {
+            gsap.killTweensOf(targets);
+            gsap.fromTo(
+              targets,
+              { y: offsetY, opacity: 0 },
+              {
+                y: 0,
+                opacity: 1,
+                duration: 0.5,
+                stagger: 0.045,
+                ease: "power3.out",
+                clearProps: "transform,opacity",
+              }
+            );
+          }
+          return;
+        }
+
+        if (sectionId === "cierre") {
+          const targets = scope.querySelectorAll<HTMLElement>(
+            '[data-gsap="closing-copy"], [data-gsap="closing-cta"]'
+          );
+          if (targets.length > 0) {
+            gsap.killTweensOf(targets);
+            gsap.fromTo(
+              targets,
+              { y: offsetY, opacity: 0 },
+              {
+                y: 0,
+                opacity: 1,
+                duration: 0.55,
+                stagger: 0.1,
+                ease: "power3.out",
+                clearProps: "transform,opacity",
+              }
+            );
+          }
+        }
+      };
+
+      // 3. Full-page block-by-block transition with rising/falling Amber Curtain panel
+      let lockedUntil = 0;
+
+      const runAmberPanelTransition = (
+        targetId: string,
+        target: number | HTMLElement,
+        direction: 1 | -1
+      ) => {
+        const curtain = curtainRef.current;
+        const now = performance.now();
+        lockedUntil = now + 760;
+
+        if (!curtain) {
+          gsap.killTweensOf(window);
+          gsap.to(window, {
+            scrollTo: { y: target, autoKill: false },
+            duration: 0.6,
+            ease: "power3.inOut",
+          });
+          return;
+        }
+
+        const enterFrom = direction > 0 ? 105 : -105;
+        const exitTo = direction > 0 ? -105 : 105;
+
+        gsap.killTweensOf(curtain);
+        gsap.killTweensOf(window);
+
+        const tl = gsap.timeline();
+        tl.fromTo(
+          curtain,
+          { y: 0, yPercent: enterFrom, autoAlpha: 1 },
+          {
+            y: 0,
+            yPercent: 0,
+            duration: 0.26,
+            ease: "power3.inOut",
+          }
+        )
+          .add(() => {
+            if (typeof target === "number") {
+              window.scrollTo({ top: target, behavior: "auto" });
+            } else {
+              const top =
+                target.getBoundingClientRect().top + window.scrollY;
+              window.scrollTo({ top, behavior: "auto" });
+            }
+
+            // Sync Navbar, ScrollCue, and ScrollTrigger immediately after jump
+            ScrollTrigger.update();
+            window.dispatchEvent(new Event("scroll"));
+            requestAnimationFrame(() => {
+              ScrollTrigger.update();
+              window.dispatchEvent(new Event("scroll"));
+            });
+
+            // Reveal the newly arrived section right as the amber curtain lifts away
+            animateSectionEntrance(targetId, direction);
+          })
+          .to(curtain, {
+            y: 0,
+            yPercent: exitTo,
+            duration: 0.34,
+            ease: "power3.out",
+          })
+          .set(curtain, { autoAlpha: 0 });
+      };
+
+      const getActiveSectionIndex = (sections: HTMLElement[]): number => {
+        const pivot = window.innerHeight * 0.45;
+        let activeIdx = 0;
+        for (let i = 0; i < sections.length; i++) {
+          if (sections[i].getBoundingClientRect().top <= pivot) {
+            activeIdx = i;
+          }
+        }
+        return activeIdx;
+      };
+
+      const handleWheel = (event: WheelEvent) => {
+        // Ignore pinch-zoom gestures, tiny trackpad jitter, or open dialogs
+        if (event.ctrlKey || Math.abs(event.deltaY) < 6) return;
+        if (document.querySelector('[role="dialog"]')) return;
+
+        const sections = HOME_SECTION_IDS.map((id) =>
+          document.getElementById(id)
+        ).filter((el): el is HTMLElement => el !== null);
+        if (sections.length < 2) return;
+
+        const now = performance.now();
+        if (now < lockedUntil) {
+          event.preventDefault();
+          return;
+        }
+
+        const direction: 1 | -1 = event.deltaY > 0 ? 1 : -1;
+        const currentIdx = getActiveSectionIndex(sections);
+        const currentEl = sections[currentIdx];
+        const rect = currentEl.getBoundingClientRect();
+
+        // If the active section is taller than the viewport (e.g. expanded FAQs),
+        // let the user finish scrolling within it before paging to the next block.
+        if (direction > 0 && rect.bottom > window.innerHeight + 12) {
+          return;
+        }
+        if (direction < 0 && rect.top < -12) {
+          return;
+        }
+
+        const targetIdx = currentIdx + direction;
+        if (targetIdx < 0 || targetIdx >= sections.length) {
+          return;
+        }
+
+        event.preventDefault();
+        const targetEl = sections[targetIdx];
+        const targetId = targetEl.id;
+        const scrollTarget: number | HTMLElement =
+          targetIdx === 0 ? 0 : targetEl;
+        runAmberPanelTransition(targetId, scrollTarget, direction);
+      };
+
+      const handleCustomTransition = (event: Event) => {
+        const custom = event as CustomEvent<{
+          targetId?: string;
+          direction?: 1 | -1;
+        }>;
+        const targetId = custom.detail?.targetId;
+        if (!targetId) return;
+        const targetEl = document.getElementById(targetId);
+        if (!targetEl) return;
+
+        const now = performance.now();
+        if (now < lockedUntil) return;
+
+        runAmberPanelTransition(
+          targetId,
+          targetId === "inicio" ? 0 : targetEl,
+          custom.detail?.direction ?? 1
+        );
+      };
+
+      window.addEventListener("wheel", handleWheel, { passive: false });
+      window.addEventListener(
+        "olimpiadas:page-transition",
+        handleCustomTransition
+      );
 
       return () => {
+        window.removeEventListener("wheel", handleWheel);
+        window.removeEventListener(
+          "olimpiadas:page-transition",
+          handleCustomTransition
+        );
         splits.forEach((split) => split.revert());
       };
     });
@@ -298,5 +362,14 @@ export function HomeScrollMotion({ children }: HomeScrollMotionProps) {
     };
   }, []);
 
-  return <div ref={scopeRef}>{children}</div>;
+  return (
+    <div ref={scopeRef}>
+      {children}
+      <div
+        ref={curtainRef}
+        className="ta-transition-curtain"
+        aria-hidden="true"
+      />
+    </div>
+  );
 }

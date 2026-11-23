@@ -4,7 +4,7 @@ import { headers } from "next/headers";
 import Link from "next/link";
 import { HomeInfoSections } from "@/components/home/HomeInfoSections";
 import { HomeScrollMotion } from "@/components/home/HomeScrollMotion";
-import { ScrollCue } from "@/components/home/ScrollCue";
+import { ScrollCue, type ScrollSectionTarget } from "@/components/home/ScrollCue";
 import { StageExplorer } from "@/components/home/StageExplorer";
 import { Footer } from "@/components/layout/Footer";
 import { Navbar } from "@/components/layout/Navbar";
@@ -117,6 +117,13 @@ async function loadHomeContext(): Promise<{
   }
 }
 
+const HOME_SECTIONS: ScrollSectionTarget[] = [
+  { id: "inicio", label: "Inicio" },
+  { id: "etapas", label: "Tres pasos, un solo cuento" },
+  { id: "preguntas", label: "Preguntas frecuentes" },
+  { id: "cierre", label: "Cierre" },
+];
+
 export default async function HomePage() {
   const { userRole, userName, activeEdition, hasPastEditions } =
     await loadHomeContext();
@@ -132,19 +139,20 @@ export default async function HomePage() {
         showEditions={hasPastEditions}
       />
 
-      <main id="contenido" className="container flex-1">
+      <main id="contenido" className="flex-1">
         <HomeScrollMotion>
           <h1 className="visually-hidden">{APP_BRAND.contestName}</h1>
 
-          {/* Open-Paper Editorial Hero: Official SVG emblem + expressive literary tagline */}
+          {/* Panel 1: Open-Paper Editorial Hero */}
           <section
-            data-gsap="hero-section"
+            id="inicio"
+            data-gsap="panel"
             aria-label="Presentación del certamen"
-            className="flex min-h-[calc(100svh-76px)] flex-col items-center pb-24 pt-6 text-center sm:pb-28 sm:pt-8"
+            className="ta-panel flex min-h-[calc(100svh-76px)] flex-col items-center justify-center pb-40 pt-6 text-center sm:pb-44 sm:pt-8"
           >
             <div
-              data-gsap="hero-content"
-              className="my-auto flex flex-col items-center py-6"
+              data-gsap="panel-inner"
+              className="container flex flex-col items-center py-6"
             >
               <div
                 id="hero-emblem-trigger"
@@ -194,50 +202,53 @@ export default async function HomePage() {
                 </span>
               </div>
             </div>
-
-            <ScrollCue targetId="etapas" />
           </section>
 
-          {/* Open-Paper Interactive Editorial Index */}
+          {/* Panel 2: Open-Paper Interactive Editorial Index */}
           <StageExplorer />
 
-          {/* Frequently Asked Questions */}
+          {/* Panel 3: Frequently Asked Questions */}
           <HomeInfoSections />
 
-          {/* Open Full-Width Closing Section */}
+          {/* Panel 4: Open Full-Width Closing Section */}
           <section
+            id="cierre"
             data-gsap="closing-section"
-            className="ta-closing-open mt-40 pb-20 sm:mt-56 sm:pb-32"
+            className="ta-panel flex min-h-[calc(100svh-210px)] flex-col justify-center border-t border-rule py-24 sm:py-28"
             aria-labelledby="cierre-titulo"
           >
-            <div data-gsap="closing-copy" className="max-w-xl">
-              <h2 id="cierre-titulo">
-                {userRole ? (
-                  closingCta.heading
-                ) : (
-                  <>
-                    ¿Listo para escribir tu próxima{" "}
-                    <span className="ta-serif-italic">historia</span>?
-                  </>
-                )}
-              </h2>
-              <p className="mt-4 text-base leading-relaxed text-muted sm:text-lg">
-                {closingCta.description}
-              </p>
-            </div>
+            <div className="container flex flex-wrap items-end justify-between gap-8">
+              <div data-gsap="closing-copy" className="max-w-xl">
+                <h2 id="cierre-titulo">
+                  {userRole ? (
+                    closingCta.heading
+                  ) : (
+                    <>
+                      ¿Listo para escribir tu próxima{" "}
+                      <span className="ta-serif-italic">historia</span>?
+                    </>
+                  )}
+                </h2>
+                <p className="mt-4 text-base leading-relaxed text-muted sm:text-lg">
+                  {closingCta.description}
+                </p>
+              </div>
 
-            <Link
-              data-gsap="closing-cta"
-              href={closingCta.primaryHref}
-              className="btn btn--primary"
-            >
-              {closingCta.primaryLabel}
-            </Link>
+              <Link
+                data-gsap="closing-cta"
+                href={closingCta.primaryHref}
+                className="btn btn--primary"
+              >
+                {closingCta.primaryLabel}
+              </Link>
+            </div>
           </section>
+
+          <ScrollCue sections={HOME_SECTIONS} />
         </HomeScrollMotion>
       </main>
 
-      <Footer />
+      <Footer flushTop />
     </div>
   );
 }
