@@ -250,6 +250,9 @@ export function Navbar({
   ];
 
   const showDualHeader = !isHome || heroLogoHidden;
+  const hideTopAuthCta =
+    !resolvedRole &&
+    (currentPath === "/login" || currentPath === "/registro");
 
   function handleContestLogoClick(event: MouseEvent<HTMLAnchorElement>) {
     if (!isHome) return;
@@ -323,14 +326,18 @@ export function Navbar({
               </Link>
             )}
 
-            <Link
-              href={workspace.href}
-              aria-current={currentPath === workspace.href ? "page" : undefined}
-              className="ta-top-cta"
-            >
-              <span className="sm:hidden">{workspace.shortLabel}</span>
-              <span className="hidden sm:inline">{workspace.label}</span>
-            </Link>
+            {!hideTopAuthCta && (
+              <Link
+                href={workspace.href}
+                aria-current={
+                  currentPath === workspace.href ? "page" : undefined
+                }
+                className="ta-top-cta"
+              >
+                <span className="sm:hidden">{workspace.shortLabel}</span>
+                <span className="hidden sm:inline">{workspace.label}</span>
+              </Link>
+            )}
 
             {isHome && (
               <button
