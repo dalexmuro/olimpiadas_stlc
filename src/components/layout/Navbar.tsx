@@ -1,9 +1,13 @@
 "use client";
 
+import gsap from "gsap";
+import { ScrollToPlugin } from "gsap/ScrollToPlugin";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type MouseEvent } from "react";
 import type { UserRole } from "@/db/schema";
 import { APP_BRAND } from "@/lib/app-metadata";
+
+gsap.registerPlugin(ScrollToPlugin);
 
 const SITELOCUENTO_URL = "https://www.sitelocuento.com";
 
@@ -91,6 +95,23 @@ export function Navbar({
 
   const showDualHeader = !isHome || heroLogoHidden;
 
+  function handleContestLogoClick(event: MouseEvent<HTMLAnchorElement>) {
+    if (!isHome) return;
+    event.preventDefault();
+    const prefersReduced = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+    if (prefersReduced) {
+      window.scrollTo({ top: 0, behavior: "auto" });
+      return;
+    }
+    gsap.to(window, {
+      scrollTo: { y: 0, autoKill: true },
+      duration: 0.5,
+      ease: "power3.inOut",
+    });
+  }
+
   return (
     <>
       <header
@@ -99,8 +120,13 @@ export function Navbar({
         <div className="container ta-top-bar">
           <Link
             href="/"
+            onClick={handleContestLogoClick}
             aria-current={isHome ? "page" : undefined}
-            aria-label={`${APP_BRAND.contestName} — Ir al inicio`}
+            aria-label={
+              isHome
+                ? `${APP_BRAND.contestName} — Volver arriba`
+                : `${APP_BRAND.contestName} — Ir al inicio`
+            }
             aria-hidden={!showDualHeader}
             tabIndex={showDualHeader ? 0 : -1}
             className={`ta-contest-mini gap-2.5 hover:text-accent-deep ${showDualHeader ? "ta-contest-mini--visible" : ""}`}

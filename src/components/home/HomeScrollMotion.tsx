@@ -2,9 +2,10 @@
 
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { SplitText } from "gsap/SplitText";
 import { useEffect, useRef, type ReactNode } from "react";
 
-gsap.registerPlugin(ScrollTrigger);
+gsap.registerPlugin(ScrollTrigger, SplitText);
 
 interface HomeScrollMotionProps {
   children: ReactNode;
@@ -20,19 +21,105 @@ export function HomeScrollMotion({ children }: HomeScrollMotionProps) {
     const mm = gsap.matchMedia();
 
     mm.add("(prefers-reduced-motion: no-preference)", () => {
-      // 1. Calm editorial hero entrance on initial load
-      const heroItems = scope.querySelectorAll<HTMLElement>(
-        '[data-gsap="hero-emblem"], [data-gsap="hero-tagline"], [data-gsap="hero-status"]'
+      const splits: SplitText[] = [];
+
+      // 1. Expressive horizontal kinetic text entrance on load (SplitText)
+      const heroLogoImg = scope.querySelector<HTMLElement>(
+        '[data-gsap="hero-logo-img"]'
       );
-      if (heroItems.length > 0) {
-        gsap.from(heroItems, {
-          y: 22,
+      const heroTitle = scope.querySelector<HTMLElement>(
+        '[data-gsap="hero-title"]'
+      );
+      const heroEdition = scope.querySelector<HTMLElement>(
+        '[data-gsap="hero-edition"]'
+      );
+      const heroTagline = scope.querySelector<HTMLElement>(
+        '[data-gsap="hero-tagline"]'
+      );
+      const heroStatus = scope.querySelector<HTMLElement>(
+        '[data-gsap="hero-status"]'
+      );
+
+      const heroTl = gsap.timeline({
+        onComplete: () => {
+          splits.forEach((split) => split.revert());
+          splits.length = 0;
+        },
+      });
+
+      if (heroLogoImg) {
+        heroTl.from(heroLogoImg, {
+          y: 16,
+          scale: 0.94,
           opacity: 0,
-          duration: 0.75,
-          stagger: 0.1,
+          duration: 0.6,
           ease: "power3.out",
           clearProps: "transform,opacity",
         });
+      }
+
+      if (heroTitle) {
+        const titleSplit = SplitText.create(heroTitle, {
+          type: "chars,words",
+        });
+        splits.push(titleSplit);
+        heroTl.from(
+          titleSplit.chars,
+          {
+            x: 26,
+            opacity: 0,
+            duration: 0.65,
+            stagger: 0.024,
+            ease: "power4.out",
+          },
+          heroLogoImg ? "-=0.38" : 0
+        );
+      }
+
+      if (heroEdition) {
+        heroTl.from(
+          heroEdition,
+          {
+            x: 16,
+            opacity: 0,
+            duration: 0.45,
+            ease: "power3.out",
+            clearProps: "transform,opacity",
+          },
+          "-=0.35"
+        );
+      }
+
+      if (heroTagline) {
+        const taglineSplit = SplitText.create(heroTagline, {
+          type: "words",
+        });
+        splits.push(taglineSplit);
+        heroTl.from(
+          taglineSplit.words,
+          {
+            x: 30,
+            opacity: 0,
+            duration: 0.65,
+            stagger: 0.04,
+            ease: "power3.out",
+          },
+          "-=0.32"
+        );
+      }
+
+      if (heroStatus) {
+        heroTl.from(
+          heroStatus,
+          {
+            y: 12,
+            opacity: 0,
+            duration: 0.5,
+            ease: "power2.out",
+            clearProps: "transform,opacity",
+          },
+          "-=0.28"
+        );
       }
 
       // Subtle scrub parallax as the hero scrolls out of view
@@ -200,6 +287,10 @@ export function HomeScrollMotion({ children }: HomeScrollMotionProps) {
           );
         }
       }
+
+      return () => {
+        splits.forEach((split) => split.revert());
+      };
     });
 
     return () => {

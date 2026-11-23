@@ -148,19 +148,25 @@ export default async function HomePage() {
             >
               <div
                 id="hero-emblem-trigger"
-                data-gsap="hero-emblem"
                 className="flex flex-col items-center"
               >
                 <img
+                  data-gsap="hero-logo-img"
                   src="/images/logo-olimpiadas.svg"
                   alt={`Emblema oficial de las ${APP_BRAND.contestName}`}
                   className="h-auto w-56 sm:w-72"
                 />
-                <p className="mt-4 font-display text-4xl font-extrabold leading-none tracking-[-0.035em] text-ink sm:text-5xl">
+                <p
+                  data-gsap="hero-title"
+                  className="mt-4 font-display text-4xl font-extrabold leading-none tracking-[-0.035em] text-ink sm:text-5xl"
+                >
                   Olimpíadas <span className="ta-serif-italic">Literarias</span>
                 </p>
                 {editionStatus.isActive && (
-                  <span className="mt-2 text-xs font-medium tracking-wide text-muted">
+                  <span
+                    data-gsap="hero-edition"
+                    className="mt-2 text-xs font-medium tracking-wide text-muted"
+                  >
                     {editionStatus.editionTitle}
                   </span>
                 )}
@@ -173,7 +179,7 @@ export default async function HomePage() {
                 Escribe sin miedo, juega con cada{" "}
                 <span className="ta-serif-italic">consigna</span> y celebra tus{" "}
                 <span className="ta-serif-italic">cuentos</span> junto a otros
-                lectores.
+                lectores
               </p>
 
               <div
