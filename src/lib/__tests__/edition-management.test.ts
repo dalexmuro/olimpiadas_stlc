@@ -2,8 +2,10 @@ import { describe, expect, it } from "vitest";
 import { createDbClient } from "@/db";
 import type { D1DatabaseBinding } from "../cloudflare-env";
 import {
-  DEFAULT_JURY_BRACKETS,
+  DEFAULT_JURY_MULTIPLIER_FORMULA,
   activateEditionInDb,
+  buildJuryFormulaPreviewBrackets,
+  calculateFormulaJuryMultiplier,
   convertCaracasScheduleFormToUtc,
   createEditionInDb,
   resolveJuryMultiplier,
@@ -11,6 +13,7 @@ import {
   validateEditionSchedule,
   type EditionScheduleUtc,
 } from "../edition-management";
+import { parseJuryBracketsJson } from "../stage6-jury";
 
 function createEditionTestD1Binding(): {
   binding: D1DatabaseBinding;
@@ -116,34 +119,74 @@ describe("Step 2.3 — Edition Configuration & Strict 48h Buffer Calendar Valida
     expect(badParams.errors.length).toBeGreaterThanOrEqual(5);
   });
 
-  it("resolves automatic Jury point multipliers across participant brackets", () => {
-    expect(resolveJuryMultiplier(20, DEFAULT_JURY_BRACKETS)).toEqual({
+  it("resolves automatic Jury point multipliers with 50-participant formula tiers (1-50 => 5x, 51-100 => 10x, ...)", () => {
+    expect(resolveJuryMultiplier(0)).toEqual({
       multiplier: 5,
       first: 15,
       second: 10,
       third: 5,
     });
-    expect(resolveJuryMultiplier(45, DEFAULT_JURY_BRACKETS)).toEqual({
+    expect(resolveJuryMultiplier(1)).toEqual({
+      multiplier: 5,
+      first: 15,
+      second: 10,
+      third: 5,
+    });
+    expect(resolveJuryMultiplier(50)).toEqual({
+      multiplier: 5,
+      first: 15,
+      second: 10,
+      third: 5,
+    });
+    expect(resolveJuryMultiplier(51)).toEqual({
       multiplier: 10,
       first: 30,
       second: 20,
       third: 10,
     });
-    expect(resolveJuryMultiplier(85, DEFAULT_JURY_BRACKETS)).toEqual({
+    expect(resolveJuryMultiplier(100)).toEqual({
+      multiplier: 10,
+      first: 30,
+      second: 20,
+      third: 10,
+    });
+    expect(resolveJuryMultiplier(101)).toEqual({
       multiplier: 15,
       first: 45,
       second: 30,
       third: 15,
     });
-    expect(resolveJuryMultiplier(120, DEFAULT_JURY_BRACKETS)).toEqual({
-      multiplier: 20,
-      first: 60,
-      second: 40,
-      third: 20,
+    expect(resolveJuryMultiplier(225)).toEqual({
+      multiplier: 25,
+      first: 75,
+      second: 50,
+      third: 25,
     });
+
+    // Supports custom formula step/base and preview builder
+    expect(
+      calculateFormulaJuryMultiplier(61, { stepSize: 30, baseMultiplier: 5 })
+    ).toEqual({ multiplier: 15, first: 45, second: 30, third: 15 });
+
+    expect(buildJuryFormulaPreviewBrackets(DEFAULT_JURY_MULTIPLIER_FORMULA, 3)).toEqual([
+      { min: 1, max: 50, k: 5 },
+      { min: 51, max: 100, k: 10 },
+      { min: 101, max: 150, k: 15 },
+    ]);
+
+    // Parses formula JSON and legacy array JSON seamlessly
+    const parsedFormula = parseJuryBracketsJson(
+      JSON.stringify({ mode: "formula", stepSize: 50, baseMultiplier: 5 })
+    );
+    expect(resolveJuryMultiplier(150, parsedFormula).multiplier).toBe(15);
+
+    const parsedLegacy = parseJuryBracketsJson(
+      JSON.stringify([{ min: 0, max: 40, k: 7 }])
+    );
+    expect(resolveJuryMultiplier(20, parsedLegacy).multiplier).toBe(7);
   });
 
-  it("persists a valid edition in D1 and ensures single active edition activation", async () => {
+  it("persists a valid edition in D1 with formula config and ensures single active edition activation", async () => {
     const { binding, queries } = createEditionTestD1Binding();
     const db = createDbClient(binding);
     const utcSchedule = convertCaracasScheduleFormToUtc(VALID_CARACAS_SCHEDULE);
@@ -159,7 +202,7 @@ describe("Step 2.3 — Edition Configuration & Strict 48h Buffer Calendar Valida
         maxChars: 3000,
         maxAllowedMisses: 2,
         minSimilarityPct: 70,
-        juryBrackets: [...DEFAULT_JURY_BRACKETS],
+        juryFormula: { ...DEFAULT_JURY_MULTIPLIER_FORMULA },
         ...utcSchedule,
       },
       "2026-11-20T12:00:00.000Z"

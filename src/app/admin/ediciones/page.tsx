@@ -2,11 +2,12 @@
 
 import { useEffect, useState, type FormEvent } from "react";
 import {
+  buildJuryFormulaPreviewBrackets,
   convertCaracasScheduleFormToUtc,
-  DEFAULT_JURY_BRACKETS,
+  DEFAULT_JURY_MULTIPLIER_FORMULA,
   validateEditionParameters,
   type EditionScheduleUtc,
-  type JuryBracket,
+  type JuryMultiplierFormula,
 } from "@/lib/edition-management";
 import { formatCaracasDateTime } from "@/lib/timezone";
 
@@ -47,9 +48,9 @@ export default function AdminEditionsPage() {
   const [maxChars, setMaxChars] = useState(3000);
   const [maxAllowedMisses, setMaxAllowedMisses] = useState(2);
   const [minSimilarityPct, setMinSimilarityPct] = useState(70);
-  const [juryBrackets, setJuryBrackets] = useState<JuryBracket[]>([
-    ...DEFAULT_JURY_BRACKETS,
-  ]);
+  const [juryFormula, setJuryFormula] = useState<JuryMultiplierFormula>({
+    ...DEFAULT_JURY_MULTIPLIER_FORMULA,
+  });
   const [schedule, setSchedule] = useState<EditionScheduleUtc>(INITIAL_SCHEDULE);
   const [errors, setErrors] = useState<string[]>([]);
   const [feedback, setFeedback] = useState<string | null>(null);
@@ -100,7 +101,7 @@ export default function AdminEditionsPage() {
       maxChars,
       maxAllowedMisses,
       minSimilarityPct,
-      juryBrackets,
+      juryFormula,
       ...utcSchedule,
     });
 
@@ -122,7 +123,7 @@ export default function AdminEditionsPage() {
           maxChars,
           maxAllowedMisses,
           minSimilarityPct,
-          juryBrackets,
+          juryFormula,
           scheduleCaracas: schedule,
         }),
       });
@@ -161,13 +162,7 @@ export default function AdminEditionsPage() {
     setSchedule((prev) => ({ ...prev, [key]: value }));
   }
 
-  function updateBracket(index: number, field: keyof JuryBracket, value: number) {
-    setJuryBrackets((prev) =>
-      prev.map((item, idx) =>
-        idx === index ? { ...item, [field]: value } : item
-      )
-    );
-  }
+  const previewTiers = buildJuryFormulaPreviewBrackets(juryFormula, 4);
 
   return (
     <section className="border-t-2 border-ink pt-6">
@@ -294,56 +289,84 @@ export default function AdminEditionsPage() {
           </label>
         </div>
 
-        {/* Tramos de puntaje del jurado */}
+        {/* Cálculo automático de puntaje del jurado */}
         <div className="border-t border-rule pt-6">
           <h2>Escalones de puntaje del jurado</h2>
           <p className="mt-1 text-sm text-muted">
-            Multiplicador K según los participantes activos que llegan a
-            votación (1er lugar = 3K, 2do = 2K, 3ro = 1K).
+            El multiplicador K se calcula automáticamente según la cantidad de
+            participantes activos que llegan a votación (1er lugar = 3K, 2do =
+            2K, 3ro = 1K).
           </p>
-          <div className="mt-4 space-y-3">
-            {juryBrackets.map((b, idx) => (
-              <div
-                key={idx}
-                className="grid grid-cols-3 gap-3 rounded-card border border-rule bg-paper-2 p-3"
+
+          <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <label
+                htmlFor="jury-step-size"
+                className="block text-sm font-medium"
               >
-                <div>
-                  <label className="block text-xs text-muted">Mín. participantes</label>
-                  <input
-                    type="number"
-                    value={b.min}
-                    onChange={(e) =>
-                      updateBracket(idx, "min", Number(e.target.value))
-                    }
-                    className="mt-1 block min-h-12 w-full rounded-card border border-ink bg-paper px-2 text-sm num"
-                  />
+                Participantes por escalón
+              </label>
+              <input
+                id="jury-step-size"
+                type="number"
+                min={1}
+                value={juryFormula.stepSize}
+                onChange={(e) =>
+                  setJuryFormula((prev) => ({
+                    ...prev,
+                    stepSize: Number(e.target.value),
+                  }))
+                }
+                className="mt-1 block min-h-12 w-full rounded-card border border-ink bg-paper px-3 py-2 text-sm text-ink num"
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="jury-base-multiplier"
+                className="block text-sm font-medium"
+              >
+                Incremento de multiplicador K por escalón
+              </label>
+              <input
+                id="jury-base-multiplier"
+                type="number"
+                min={1}
+                value={juryFormula.baseMultiplier}
+                onChange={(e) =>
+                  setJuryFormula((prev) => ({
+                    ...prev,
+                    baseMultiplier: Number(e.target.value),
+                  }))
+                }
+                className="mt-1 block min-h-12 w-full rounded-card border border-ink bg-paper px-3 py-2 text-sm text-ink num"
+              />
+            </div>
+          </div>
+
+          <div className="mt-4 rounded-card border border-rule bg-paper-2 p-4">
+            <p className="text-xs font-semibold text-ink">
+              Vista previa automática (escala de forma ilimitada)
+            </p>
+            <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+              {previewTiers.map((tier) => (
+                <div
+                  key={tier.min}
+                  className="flex items-center justify-between rounded-card border border-rule bg-paper px-3 py-2 text-xs num"
+                >
+                  <span className="font-medium text-ink">
+                    {tier.min} a {tier.max} participantes
+                  </span>
+                  <span className="text-muted">
+                    K={tier.k} ({tier.k * 3}/{tier.k * 2}/{tier.k} pts)
+                  </span>
                 </div>
-                <div>
-                  <label className="block text-xs text-muted">Máx. participantes</label>
-                  <input
-                    type="number"
-                    value={b.max}
-                    onChange={(e) =>
-                      updateBracket(idx, "max", Number(e.target.value))
-                    }
-                    className="mt-1 block min-h-12 w-full rounded-card border border-ink bg-paper px-2 text-sm num"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs text-muted">
-                    Multiplicador K ({b.k * 3}/{b.k * 2}/{b.k} pts)
-                  </label>
-                  <input
-                    type="number"
-                    value={b.k}
-                    onChange={(e) =>
-                      updateBracket(idx, "k", Number(e.target.value))
-                    }
-                    className="mt-1 block min-h-12 w-full rounded-card border border-ink bg-paper px-2 text-sm num"
-                  />
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
+            <p className="mt-2 text-xs text-muted num">
+              … y así sucesivamente (+{Math.max(1, Math.floor(juryFormula.baseMultiplier || 1))}× cada{" "}
+              {Math.max(1, Math.floor(juryFormula.stepSize || 1))} participantes).
+            </p>
           </div>
         </div>
 

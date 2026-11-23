@@ -15,9 +15,10 @@ import {
   activateEditionInDb,
   convertCaracasScheduleFormToUtc,
   createEditionInDb,
-  DEFAULT_JURY_BRACKETS,
+  DEFAULT_JURY_MULTIPLIER_FORMULA,
   type EditionScheduleUtc,
   type JuryBracket,
+  type JuryMultiplierFormula,
 } from "@/lib/edition-management";
 
 async function requireSuperadmin(request: Request) {
@@ -80,6 +81,7 @@ export async function POST(request: Request): Promise<Response> {
     maxChars?: number;
     maxAllowedMisses?: number;
     minSimilarityPct?: number;
+    juryFormula?: JuryMultiplierFormula;
     juryBrackets?: JuryBracket[];
     scheduleCaracas?: EditionScheduleUtc;
   };
@@ -116,7 +118,10 @@ export async function POST(request: Request): Promise<Response> {
     maxChars: Number(body.maxChars ?? 3000),
     maxAllowedMisses: Number(body.maxAllowedMisses ?? 2),
     minSimilarityPct: Number(body.minSimilarityPct ?? 70),
-    juryBrackets: body.juryBrackets ?? [...DEFAULT_JURY_BRACKETS],
+    juryFormula:
+      body.juryFormula ??
+      (!body.juryBrackets ? { ...DEFAULT_JURY_MULTIPLIER_FORMULA } : undefined),
+    juryBrackets: body.juryBrackets,
     ...utcSchedule,
   });
 

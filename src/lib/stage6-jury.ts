@@ -14,9 +14,11 @@ import {
   votes,
 } from "@/db/schema";
 import {
-  DEFAULT_JURY_BRACKETS,
+  DEFAULT_JURY_MULTIPLIER_FORMULA,
+  isJuryMultiplierFormula,
   resolveJuryMultiplier,
   type JuryBracket,
+  type JuryMultiplierConfig,
 } from "./edition-management";
 import { dispatchTemplateEmail } from "./email";
 import { validateTop3VoteSelection } from "./stage5-voting";
@@ -163,16 +165,23 @@ export function detectPodiumTie(
   };
 }
 
-export function parseJuryBracketsJson(rawJson: string): readonly JuryBracket[] {
+export function parseJuryBracketsJson(rawJson: string): JuryMultiplierConfig {
   try {
-    const parsed = JSON.parse(rawJson) as JuryBracket[];
-    if (Array.isArray(parsed) && parsed.length > 0) {
+    const parsed = JSON.parse(rawJson) as unknown;
+    if (
+      isJuryMultiplierFormula(parsed) &&
+      parsed.stepSize >= 1 &&
+      parsed.baseMultiplier >= 1
+    ) {
       return parsed;
     }
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      return parsed as JuryBracket[];
+    }
   } catch {
-    // Fallback to defaults
+    // Fallback to formula defaults
   }
-  return DEFAULT_JURY_BRACKETS;
+  return DEFAULT_JURY_MULTIPLIER_FORMULA;
 }
 
 export interface CloseStage5Input {

@@ -78,10 +78,10 @@ export const AUDIT_ACTION_TYPES = [
 export type AuditActionType = (typeof AUDIT_ACTION_TYPES)[number];
 
 export const DEFAULT_JURY_BRACKETS_JSON = JSON.stringify([
-  { min: 0, max: 29, k: 5 },
-  { min: 30, max: 60, k: 10 },
-  { min: 61, max: 100, k: 15 },
-  { min: 101, max: 99999, k: 20 },
+  { min: 0, max: 50, k: 5 },
+  { min: 51, max: 100, k: 10 },
+  { min: 101, max: 150, k: 15 },
+  { min: 151, max: 99999, k: 20 },
 ]);
 
 // ============================================================================
