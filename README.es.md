@@ -5,24 +5,26 @@
 [![Next.js 15](https://img.shields.io/badge/Next.js-15_App_Router-black?logo=next.js)](https://nextjs.org/)
 [![Cloudflare Workers](https://img.shields.io/badge/Cloudflare-Workers_%2B_D1_%2B_R2-F38020?logo=cloudflare&logoColor=white)](https://developers.cloudflare.com/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Strict-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Vitest](https://img.shields.io/badge/Tests-144_Passing-15803D?logo=vitest&logoColor=white)](https://vitest.dev/)
+[![Vitest](https://img.shields.io/badge/Tests-155_Passing-15803D?logo=vitest&logoColor=white)](https://vitest.dev/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-D47E17)](LICENSE)
 
-Plataforma web full-stack y serverless del certamen anual de relatos cortos **Olimpíadas Literarias**, organizado por el club de escritura **SiTeLoCuento** — **desarrollada de principio a fin mediante Agentes de Código de IA** bajo un modelo de ingeniería guiada por especificaciones y control humano (*human-in-the-loop*).
+Plataforma web full-stack y serverless del certamen anual de relatos cortos **Olimpíadas Literarias**, organizado por el club de escritura **SiTeLoCuento** — desarrollada de extremo a extremo mediante **agentes de código con IA** bajo un flujo de ingeniería guiado por especificaciones y control humano (*human-in-the-loop*).
 
 - **Producción (`main`):** `https://olimpiadas.sitelocuento.com`
 - **Desarrollo (`dev`):** `https://dev-olimpiadas.sitelocuento.com`
+- **Resumen del proyecto (GitHub Pages):** `https://dalexmuro.github.io/olimpiadas_stlc/`
 - **Zona horaria oficial:** `America/Caracas` (UTC-4)
 
 ---
 
-## Caso de Estudio: Ingeniería de Software con Agentes de IA
+## Enfoque de Ingeniería
 
-Este repositorio funciona como referencia real de **Desarrollo Nativo con IA** y **Consultoría en Gen AI**, demostrando cómo diseñar, construir, probar, refinar visualmente y desplegar una plataforma SaaS completa en producción mediante agentes de código con disciplina de ingeniería:
+Esta plataforma fue diseñada, implementada, probada, auditada y desplegada de extremo a extremo mediante **agentes de código con IA**, gobernados por especificaciones formales, controles automatizados de verificación y revisión humana en cada entrega:
 
 - **Desarrollo Guiado por Especificaciones (*Spec-Driven*):** cada regla de negocio, tabla de base de datos, transición de estado y correo automático (`E01`–`E26`) fue formalmente especificado en [`docs/ESPECIFICACION_FUNCIONAL_AGENTE.md`](docs/ESPECIFICACION_FUNCIONAL_AGENTE.md) y [`docs/ESPECIFICACION_TECNICA.md`](docs/ESPECIFICACION_TECNICA.md) antes de escribir código.
 - **Gobernanza de Agentes (`AGENTS.md`):** reglas operativas explícitas garantizan ejecución paso a paso, compuertas obligatorias de verificación (`vitest`, `eslint`, `tsc --noEmit`), consistencia estricta de tokens visuales y commits de Git revisados y ejecutados exclusivamente por humanos.
 - **Ingeniería de Sistema de Diseño (`PRODUCT.md`):** sistema visual propio **Editorial Ámbar SiTeLoCuento** (`#D47E17` / `#B3640C`, `Bricolage Grotesque`, `DM Sans`, `Newsreader` italic) combinado con coreografía de animaciones GSAP (`SplitText`, `ScrollTrigger`, `ScrollToPlugin`) y accesibilidad (`prefers-reduced-motion`).
-- **Calidad Lista para Producción:** 22 tablas normalizadas en SQLite/D1, 4 roles RBAC con guardas en servidor, cierre de sesión por inactividad estilo bancario, **38 archivos de pruebas / 144 tests unitarios en verde**, 0 errores de lint/tipos y CI/CD automatizado en GitHub Actions sobre una arquitectura serverless edge de **\$0/mes**.
+- **Calidad y Seguridad en Producción:** 22 tablas normalizadas en SQLite/D1, 4 roles RBAC con guardas en servidor, cierre de sesión por inactividad estilo bancario (10m pestaña cerrada / 15m inactivo), **42 archivos de pruebas / 155 tests unitarios en verde**, `pre-commit` + Gitleaks en historial completo en CI, 0 vulnerabilidades en producción y CI/CD automatizado en GitHub Actions sobre una arquitectura serverless edge de **\$0/mes**.
 
 ---
 

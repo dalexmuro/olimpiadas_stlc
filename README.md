@@ -5,24 +5,26 @@
 [![Next.js 15](https://img.shields.io/badge/Next.js-15_App_Router-black?logo=next.js)](https://nextjs.org/)
 [![Cloudflare Workers](https://img.shields.io/badge/Cloudflare-Workers_%2B_D1_%2B_R2-F38020?logo=cloudflare&logoColor=white)](https://developers.cloudflare.com/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Strict-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Vitest](https://img.shields.io/badge/Tests-144_Passing-15803D?logo=vitest&logoColor=white)](https://vitest.dev/)
+[![Vitest](https://img.shields.io/badge/Tests-155_Passing-15803D?logo=vitest&logoColor=white)](https://vitest.dev/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-D47E17)](LICENSE)
 
-A full-stack, serverless web platform for the annual short-story writing competition **Olimpíadas Literarias**, organized by the **SiTeLoCuento** writing club — **engineered end-to-end using AI Coding Agents** under a spec-driven, human-in-the-loop governance model.
+A full-stack, serverless web platform for the annual short-story writing competition **Olimpíadas Literarias**, organized by the **SiTeLoCuento** writing club — built end-to-end with **AI coding agents** under a spec-driven, human-in-the-loop engineering workflow.
 
 - **Production (`main`):** `https://olimpiadas.sitelocuento.com`
 - **Staging (`dev`):** `https://dev-olimpiadas.sitelocuento.com`
+- **Project Overview (GitHub Pages):** `https://dalexmuro.github.io/olimpiadas_stlc/`
 - **Official Contest Timezone:** `America/Caracas` (UTC-4)
 
 ---
 
-## Agentic AI Engineering Showcase
+## Engineering Approach
 
-This repository serves as a real-world portfolio reference for **AI-Native Software Delivery** and **Gen AI Consulting** — demonstrating how an entire production-grade SaaS platform can be architected, implemented, tested, visually refined, and deployed using coding agents with strict engineering discipline:
+This platform was architected, implemented, tested, audited, and deployed end-to-end using **AI coding agents** governed by formal specifications, automated verification gates, and human-in-the-loop review:
 
 - **Spec-Driven Delivery:** Every domain rule, database table, state machine transition, and email trigger (`E01`–`E26`) was formally specified in [`docs/FUNCTIONAL_SPECIFICATION_AGENT.md`](docs/FUNCTIONAL_SPECIFICATION_AGENT.md) and [`docs/TECHNICAL_SPECIFICATION.md`](docs/TECHNICAL_SPECIFICATION.md) prior to implementation.
 - **Agent Governance (`AGENTS.md`):** Explicit operational guardrails enforce step-by-step execution, mandatory verification gates (`vitest`, `eslint`, `tsc --noEmit`), single-accent design token compliance, and human-owned Git commits.
 - **Design System Engineering (`PRODUCT.md`):** Custom **Editorial Ámbar SiTeLoCuento** single-accent visual system (`#D47E17` / `#B3640C`, `Bricolage Grotesque`, `DM Sans`, `Newsreader` italic) paired with GSAP motion choreography (`SplitText`, `ScrollTrigger`, `ScrollToPlugin`) and `prefers-reduced-motion` accessibility.
-- **Production-Grade Quality:** 22 normalized SQLite/D1 tables, 4 RBAC roles with server-side route guards, banking-style rolling session timeout, **38 test files / 144 passing unit tests**, 0 lint/typecheck errors, and automated GitHub Actions CI/CD targeting a **\$0/month serverless edge stack**.
+- **Production-Grade Quality & Security:** 22 normalized SQLite/D1 tables, 4 RBAC roles with server-side route guards, banking-style rolling session timeout (10m closed-tab / 15m idle), **42 test files / 155 passing unit tests**, `pre-commit` + Gitleaks full-history CI security gates, 0 production audit vulnerabilities, and automated GitHub Actions CI/CD targeting a **\$0/month serverless edge stack**.
 
 ---
 
