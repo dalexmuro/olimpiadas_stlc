@@ -44,10 +44,13 @@ flowchart LR
 - **Multi-Edition Annual Lifecycle:** 7 sequential contest stages (Registration → Prompt Writing → Story Selection & Editing → Admin Review & 24h Correction Window → Anonymous Randomized Peer Voting → Independent Jury Evaluation & Tie-Breaker → Official Winners & Public Anthology).
 - **Text Similarity & Diff Engine:** Myers Diff + Levenshtein ratio prevents story replacement during Stage 3 editing and provides side-by-side red/green diffs for administrators in Stage 4.
 - **Authentication & Banking-Style Sessions:**
-  - Email/Password (duplicate-email pre-check, 3-of-4 strong password policy with info popover, show/hide toggle, email verification `E01` & recovery `E02`) + Google & Microsoft OAuth (`tenant: "common"`) with automatic profile prefill.
-  - Rolling short-lived D1 session tokens: **15-minute** expiry when the tab is closed; **25-minute** inactivity warning modal with **5-minute** countdown (`Seguir conectado` / `Cerrar sesión`) and cross-tab sync when open.
-  - Self-service profile management with unified country-code phone input, R2 avatar upload, sign-out, and safe account deletion (`DELETE /api/profile`).
-- **Role-Based Access Control (RBAC):** `PARTICIPANT`, `JURY`, `ADMIN`, and `SUPERADMIN` enforced at both API and Next.js Server Component layout levels, plus an immutable administrative Audit Log.
+  - Email/Password (duplicate-email pre-check, 3-of-4 strong password policy with info popover, show/hide toggle, email verification `E01` & recovery `E02`) + Google & Microsoft OAuth (`tenant: "common"`) with automatic profile prefill and fail-closed `BETTER_AUTH_SECRET` enforcement in deployed environments.
+  - Rolling short-lived D1 session tokens: **10-minute** expiry when the tab is closed; **4-minute** silent heartbeat while active; **14-minute** inactivity warning modal with **1-minute** countdown (**15 minutes** total, `Seguir conectado` / `Cerrar sesión`) and cross-tab sync.
+  - Self-service profile management with unified country-code phone input, magic-byte validated R2 avatar upload, sign-out, and safe account deletion (`DELETE /api/profile`).
+- **Admin Workspace & Role-Based Access Control (RBAC):**
+  - 4 roles (`PARTICIPANT`, `JURY`, `ADMIN`, `SUPERADMIN`) enforced at API and Next.js Server Component levels, with an immutable administrative Audit Log.
+  - 3-tier color-coded admin sidebar: shared editable tools (`ADMIN` & `SUPERADMIN`), read-only inspection for `ADMIN` on Editions, Email Templates, and Public Pages, and `SUPERADMIN`-exclusive Role Management.
+  - Built-in **WYSIWYG Rich Text Editor** with automatic HTML sanitization for public pages and all 26 email templates (`E01`–`E26`), plus an automatic **50-participant step formula** (`1–50 → 5×`, `51–100 → 10×`, scaling indefinitely) for jury scoring weights.
 
 ---
 
@@ -57,12 +60,12 @@ flowchart LR
 | :--- | :--- |
 | **Framework** | Next.js 15 (App Router) + React 19 + TypeScript (strict) |
 | **Styling & Motion** | Tailwind CSS v4 + Editorial Ámbar CSS Tokens + Lucide Icons + GSAP (`SplitText`, `ScrollTrigger`, `ScrollToPlugin`) |
-| **Edge Runtime** | Cloudflare Workers via `@opennextjs/cloudflare` |
+| **Edge Runtime** | Cloudflare Workers via `@opennextjs/cloudflare` + custom `src/worker.ts` (`fetch` + Cron `scheduled()`) |
 | **Database & ORM** | Cloudflare D1 (Serverless SQLite) + Drizzle ORM & Drizzle Kit |
-| **Media Storage** | Cloudflare R2 |
-| **Auth & Security** | Better Auth (Drizzle D1 Adapter) + Rolling Session Guard |
+| **Media Storage** | Cloudflare R2 (binary magic-byte validation + `nosniff`) |
+| **Auth & Security** | Better Auth (Drizzle D1 Adapter) + Rolling Session Guard + CSP/HSTS Headers + HTML Sanitizer |
 | **Transactional Email** | Brevo HTTP REST API |
-| **Testing & CI/CD** | Vitest + ESLint + TypeScript + GitHub Actions |
+| **Testing, Security & CI/CD** | Vitest + ESLint + TypeScript + `pre-commit` + Gitleaks + GitHub Actions + Dependabot |
 
 ---
 
@@ -95,15 +98,23 @@ npx wrangler d1 execute olimpiadas-db-prod --local --file=./drizzle/seed.sql
 ```
 *(For the `dev` local database binding, run `npm run db:migrate:local` and `npm run db:seed:local`.)*
 
-### 4. Start Development Server & Verify
+### 4. Enable Pre-commit Security Hooks (Recommended)
 ```bash
-npm run dev       # Starts local server on http://localhost:3000
-npm test          # Runs the full Vitest unit test suite
-npm run lint      # Runs ESLint static analysis
-npm run typecheck # Runs TypeScript strict type-checking
+pip install pre-commit
+pre-commit install
+```
+Before every commit, hooks inspect the Git staging area using `gitleaks`, `detect-private-key`, `scripts/security-precommit-guard.mjs --staged` (blocks `.env*`, unauthorized `.sql`/`.db`/`.dump`/`.bak`/`.csv`, private keys, DB connection strings, provider keys, and participant PII), and ESLint.
+
+### 5. Start Development Server & Verify
+```bash
+npm run dev            # Starts local server on http://localhost:3000
+npm test               # Runs the full Vitest unit test suite (42 files / 155 tests)
+npm run lint           # Runs ESLint static analysis
+npm run typecheck      # Runs TypeScript strict type-checking
+npm run security:check # Runs custom security & PII policy guard across tracked files
 ```
 
-### 5. Optional: Promote a Local Test User to `SUPERADMIN`
+### 6. Optional: Promote a Local Test User to `SUPERADMIN`
 ```bash
 npx wrangler d1 execute olimpiadas-db-prod --local --command "UPDATE users SET email_verified = 1, role = 'SUPERADMIN', profile_completed = 1 WHERE lower(email) = 'admin@example.com';"
 ```
@@ -113,35 +124,39 @@ npx wrangler d1 execute olimpiadas-db-prod --local --command "UPDATE users SET e
 ## Available Scripts
 
 ```bash
-npm run dev              # Start Next.js local dev server
-npm run build            # Next.js production build
-npm run cf:build         # Build bundle for Cloudflare Workers (@opennextjs/cloudflare)
-npm run cf:secrets:dev   # Sync .env secrets to dev Worker (olimpiadas-stlc-dev)
-npm run cf:secrets:prod  # Sync .env secrets to prod Worker (olimpiadas-stlc)
-npm run db:generate      # Generate Drizzle SQL migrations from src/db/schema.ts
-npm run db:migrate:local # Apply migrations to local dev D1
-npm run db:migrate:dev   # Apply migrations to remote dev D1
-npm run db:seed:local    # Seed templates and public pages in local dev D1
-npm run db:seed:dev      # Seed templates and public pages in remote dev D1
-npm run db:studio        # Launch Drizzle Studio visual DB browser
-npm test                 # Run all Vitest unit tests
-npm run lint             # Run ESLint across src/**/*.{ts,tsx}
-npm run typecheck        # Run tsc --noEmit
+npm run dev                  # Start Next.js local dev server
+npm run build                # Next.js production build
+npm run cf:build             # Build bundle for Cloudflare Workers (@opennextjs/cloudflare)
+npm run cf:secrets:dev       # Sync .env secrets to dev Worker (olimpiadas-stlc-dev)
+npm run cf:secrets:prod      # Sync .env secrets to prod Worker (olimpiadas-stlc)
+npm run db:generate          # Generate Drizzle SQL migrations from src/db/schema.ts
+npm run db:migrate:local     # Apply migrations to local dev D1
+npm run db:migrate:dev       # Apply migrations to remote dev D1
+npm run db:seed:local        # Seed templates and public pages in local dev D1
+npm run db:seed:dev          # Seed templates and public pages in remote dev D1
+npm run db:studio            # Launch Drizzle Studio visual DB browser
+npm test                     # Run all Vitest unit tests
+npm run lint                 # Run ESLint across src/**/*.{ts,tsx}
+npm run typecheck            # Run tsc --noEmit
+npm run security:check       # Scan all tracked files for secrets, DB dumps, and PII
+npm run security:check:staged # Scan Git staging area before commit
 ```
 
 ---
 
-## CI/CD Pipeline (GitHub Actions → Cloudflare Workers)
+## CI/CD & Security Gates (GitHub Actions)
 
-[`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) automatically runs `typecheck`, `lint`, `test`, `cf:build`, D1 migrations, and Worker deployment:
-- **`dev` branch** → `olimpiadas-stlc-dev` + `olimpiadas-db-dev`
-- **`main` branch** → `olimpiadas-stlc` + `olimpiadas-db-prod`
+- **[`.github/workflows/deploy.yml`](.github/workflows/deploy.yml):** Runs `typecheck`, `lint`, `test`, `cf:build`, D1 migrations, and Cloudflare Worker deployment (`dev` → `olimpiadas-stlc-dev`, `main` → `olimpiadas-stlc`).
+- **[`.github/workflows/ci.yml`](.github/workflows/ci.yml):** Runs `typecheck`, `lint`, and `test` on pull requests targeting `dev` and `main`.
+- **[`.github/workflows/security.yml`](.github/workflows/security.yml):** Runs Gitleaks full Git history scan (`fetch-depth: 0`), `npm run security:check`, and `npm audit --omit=dev --audit-level=high`.
+- **[`.github/workflows/pages.yml`](.github/workflows/pages.yml):** Publishes [`docs-site/`](docs-site/index.html) to GitHub Pages.
+- **[`.github/dependabot.yml`](.github/dependabot.yml):** Weekly automated updates for `npm` and `github-actions`.
 
 Required GitHub Actions secrets: `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`.
 
 ---
 
-## Bilingual Documentation
+## Bilingual Documentation & Community
 
 | Document | English | Español |
 | :--- | :--- | :--- |
@@ -151,3 +166,4 @@ Required GitHub Actions secrets: `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_
 | **Organizer Functional Guide** | [ORGANIZER_FUNCTIONAL_GUIDE.md](docs/ORGANIZER_FUNCTIONAL_GUIDE.md) | [GUIA_FUNCIONAL_ORGANIZADORES.md](docs/GUIA_FUNCIONAL_ORGANIZADORES.md) |
 | **Deployment & Secrets Guide** | [DEPLOYMENT_GUIDE.md](docs/DEPLOYMENT_GUIDE.md) | [GUIA_DESPLIEGUE.md](docs/GUIA_DESPLIEGUE.md) |
 | **Agent Governance & Design System** | [AGENTS.md](AGENTS.md) / [PRODUCT.md](PRODUCT.md) | [AGENTS.md](AGENTS.md) / [PRODUCT.md](PRODUCT.md) |
+| **Security, Contributing & License** | [SECURITY.md](SECURITY.md) · [CONTRIBUTING.md](CONTRIBUTING.md) · [LICENSE](LICENSE) | [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) |

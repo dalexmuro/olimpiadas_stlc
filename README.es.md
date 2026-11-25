@@ -44,10 +44,13 @@ flowchart LR
 - **Ciclo Anual Multiedición:** 7 etapas secuenciales (Inscripción → Escritura por Consignas → Selección y Edición → Revisión Administrativa y Ventana de 24h → Votación Anónima Aleatoria → Evaluación del Jurado y Desempate → Podio Oficial y Archivo Público).
 - **Motor de Similitud y Comparación (*Diff*):** Myers Diff + Levenshtein impide reemplazar el cuento durante la edición en Etapa 3 y genera vistas comparativas rojo/verde para administradores en Etapa 4.
 - **Autenticación y Sesiones Estilo Bancario:**
-  - Correo/Contraseña (verificación previa de correo duplicado, política de contraseña segura 3 de 4 con tooltip informativo, botón de revelar contraseña, verificación `E01` y recuperación `E02`) + OAuth con Google y Microsoft (`tenant: "common"`) con precarga automática de perfil.
-  - Tokens rodantes de corta duración en D1: expiración en **15 minutos** si la pestaña está cerrada; aviso modal a los **25 minutos** de inactividad con cuenta regresiva de **5 minutos** (`Seguir conectado` / `Cerrar sesión`) y sincronización entre pestañas.
-  - Gestión de perfil con campo telefónico unificado (prefijo y formato automático por país), subida de foto a R2, cierre de sesión y eliminación segura de cuenta (`DELETE /api/profile`).
-- **Control de Acceso por Roles (RBAC):** `PARTICIPANT`, `JURY`, `ADMIN` y `SUPERADMIN` aplicados en APIs y layouts de servidor, más un historial de auditoría administrativa inmutable.
+  - Correo/Contraseña (verificación previa de correo duplicado, política de contraseña segura 3 de 4 con tooltip informativo, botón de revelar contraseña, verificación `E01` y recuperación `E02`) + OAuth con Google y Microsoft (`tenant: "common"`) con precarga automática de perfil y validación *fail-closed* de `BETTER_AUTH_SECRET` en entornos desplegados.
+  - Tokens rodantes de corta duración en D1: expiración en **10 minutos** si la pestaña está cerrada; renovación silenciosa cada **4 minutos** en uso; aviso modal a los **14 minutos** de inactividad con cuenta regresiva de **1 minuto** (**15 minutos** totales, `Seguir conectado` / `Cerrar sesión`) y sincronización entre pestañas.
+  - Gestión de perfil con campo telefónico unificado (prefijo y formato automático por país), subida de foto a R2 validada por *magic bytes*, cierre de sesión y eliminación segura de cuenta (`DELETE /api/profile`).
+- **Panel de Administración y Control de Acceso (RBAC):**
+  - 4 roles (`PARTICIPANT`, `JURY`, `ADMIN` y `SUPERADMIN`) aplicados en APIs y layouts de servidor, más un historial de auditoría administrativa inmutable.
+  - Menú lateral diferenciado en 3 niveles de color: herramientas compartidas editables (`ADMIN` y `SUPERADMIN`), acceso de solo lectura para `ADMIN` en Ediciones, Plantillas de correo y Páginas públicas, y Gestión de roles exclusiva para `SUPERADMIN`.
+  - **Editor de texto enriquecido (WYSIWYG)** integrado con sanitización HTML automática para páginas públicas y las 26 plantillas de correo (`E01`–`E26`), además de una **fórmula automática por escalones de 50 participantes** (`1–50 → 5×`, `51–100 → 10×`, escalando ilimitadamente) para el peso del jurado.
 
 ---
 
@@ -57,12 +60,12 @@ flowchart LR
 | :--- | :--- |
 | **Framework** | Next.js 15 (App Router) + React 19 + TypeScript (estricto) |
 | **Estilos y Motion** | Tailwind CSS v4 + Tokens CSS Editorial Ámbar + Lucide Icons + GSAP (`SplitText`, `ScrollTrigger`, `ScrollToPlugin`) |
-| **Runtime Edge** | Cloudflare Workers vía `@opennextjs/cloudflare` |
+| **Runtime Edge** | Cloudflare Workers vía `@opennextjs/cloudflare` + `src/worker.ts` (`fetch` + Cron `scheduled()`) |
 | **Base de Datos y ORM** | Cloudflare D1 (SQLite Serverless) + Drizzle ORM y Drizzle Kit |
-| **Almacenamiento** | Cloudflare R2 |
-| **Autenticación y Seguridad** | Better Auth (Adaptador Drizzle D1) + Guardia de Inactividad de Sesión |
+| **Almacenamiento** | Cloudflare R2 (validación binaria de *magic bytes* + `nosniff`) |
+| **Autenticación y Seguridad** | Better Auth (Adaptador Drizzle D1) + Guardia de Inactividad + Cabeceras CSP/HSTS + Sanitizador HTML |
 | **Correo Transaccional** | Brevo HTTP REST API |
-| **Pruebas y CI/CD** | Vitest + ESLint + TypeScript + GitHub Actions |
+| **Pruebas, Seguridad y CI/CD** | Vitest + ESLint + TypeScript + `pre-commit` + Gitleaks + GitHub Actions + Dependabot |
 
 ---
 
@@ -95,15 +98,23 @@ npx wrangler d1 execute olimpiadas-db-prod --local --file=./drizzle/seed.sql
 ```
 *(Para la base local del entorno `dev`, ejecutar `npm run db:migrate:local` y `npm run db:seed:local`.)*
 
-### 4. Iniciar el servidor local y verificar calidad
+### 4. Activar Hooks de Seguridad Pre-commit (Recomendado)
 ```bash
-npm run dev       # Inicia el servidor local en http://localhost:3000
-npm test          # Ejecuta la suite completa de pruebas unitarias (Vitest)
-npm run lint      # Análisis estático (ESLint)
-npm run typecheck # Verificación estricta de tipos (TypeScript)
+pip install pre-commit
+pre-commit install
+```
+Antes de cada commit, los hooks inspeccionan el *staging area* de Git con `gitleaks`, `detect-private-key`, `scripts/security-precommit-guard.mjs --staged` (bloquea `.env*`, `.sql`/`.db`/`.dump`/`.bak`/`.csv` no autorizados, claves privadas, *connection strings*, claves de proveedores y datos personales de participantes) y ESLint.
+
+### 5. Iniciar el servidor local y verificar calidad
+```bash
+npm run dev            # Inicia el servidor local en http://localhost:3000
+npm test               # Ejecuta la suite completa de pruebas unitarias (42 archivos / 155 tests)
+npm run lint           # Análisis estático (ESLint)
+npm run typecheck      # Verificación estricta de tipos (TypeScript)
+npm run security:check # Ejecuta la guardia de seguridad y PII en todo el repositorio
 ```
 
-### 5. Opcional: Promover una cuenta local a `SUPERADMIN`
+### 6. Opcional: Promover una cuenta local a `SUPERADMIN`
 ```bash
 npx wrangler d1 execute olimpiadas-db-prod --local --command "UPDATE users SET email_verified = 1, role = 'SUPERADMIN', profile_completed = 1 WHERE lower(email) = 'admin@ejemplo.com';"
 ```
@@ -113,35 +124,39 @@ npx wrangler d1 execute olimpiadas-db-prod --local --command "UPDATE users SET e
 ## Comandos Disponibles
 
 ```bash
-npm run dev              # Servidor local de desarrollo
-npm run build            # Compilación de producción de Next.js
-npm run cf:build         # Empaquetado para Cloudflare Workers (@opennextjs/cloudflare)
-npm run cf:secrets:dev   # Sincroniza secretos de .env al Worker dev (olimpiadas-stlc-dev)
-npm run cf:secrets:prod  # Sincroniza secretos de .env al Worker prod (olimpiadas-stlc)
-npm run db:generate      # Genera migraciones SQL desde src/db/schema.ts
-npm run db:migrate:local # Aplica migraciones en D1 dev local
-npm run db:migrate:dev   # Aplica migraciones en D1 dev remoto
-npm run db:seed:local    # Ejecuta semilla inicial en D1 dev local
-npm run db:seed:dev      # Ejecuta semilla inicial en D1 dev remoto
-npm run db:studio        # Abre Drizzle Studio para inspección visual de tablas
-npm test                 # Ejecuta todas las pruebas unitarias (Vitest)
-npm run lint             # Ejecuta ESLint en src/**/*.{ts,tsx}
-npm run typecheck        # Ejecuta tsc --noEmit
+npm run dev                  # Servidor local de desarrollo
+npm run build                # Compilación de producción de Next.js
+npm run cf:build             # Empaquetado para Cloudflare Workers (@opennextjs/cloudflare)
+npm run cf:secrets:dev       # Sincroniza secretos de .env al Worker dev (olimpiadas-stlc-dev)
+npm run cf:secrets:prod      # Sincroniza secretos de .env al Worker prod (olimpiadas-stlc)
+npm run db:generate          # Genera migraciones SQL desde src/db/schema.ts
+npm run db:migrate:local     # Aplica migraciones en D1 dev local
+npm run db:migrate:dev       # Aplica migraciones en D1 dev remoto
+npm run db:seed:local        # Ejecuta semilla inicial en D1 dev local
+npm run db:seed:dev          # Ejecuta semilla inicial en D1 dev remoto
+npm run db:studio            # Abre Drizzle Studio para inspección visual de tablas
+npm test                     # Ejecuta todas las pruebas unitarias (Vitest)
+npm run lint                 # Ejecuta ESLint en src/**/*.{ts,tsx}
+npm run typecheck            # Ejecuta tsc --noEmit
+npm run security:check       # Escanea archivos rastreados buscando secretos, dumps SQL y PII
+npm run security:check:staged # Escanea el staging area antes de un commit
 ```
 
 ---
 
-## Despliegue CI/CD (GitHub Actions → Cloudflare Workers)
+## CI/CD y Security Gates (GitHub Actions)
 
-[`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) ejecuta automáticamente `typecheck`, `lint`, `test`, `cf:build`, migraciones D1 y despliegue del Worker:
-- **Rama `dev`** → `olimpiadas-stlc-dev` + `olimpiadas-db-dev`
-- **Rama `main`** → `olimpiadas-stlc` + `olimpiadas-db-prod`
+- **[`.github/workflows/deploy.yml`](.github/workflows/deploy.yml):** Ejecuta `typecheck`, `lint`, `test`, `cf:build`, migraciones D1 y despliegue del Worker (`dev` → `olimpiadas-stlc-dev`, `main` → `olimpiadas-stlc`).
+- **[`.github/workflows/ci.yml`](.github/workflows/ci.yml):** Ejecuta `typecheck`, `lint` y `test` en *pull requests* hacia `dev` y `main`.
+- **[`.github/workflows/security.yml`](.github/workflows/security.yml):** Ejecuta Gitleaks sobre todo el historial Git (`fetch-depth: 0`), `npm run security:check` y `npm audit --omit=dev --audit-level=high`.
+- **[`.github/workflows/pages.yml`](.github/workflows/pages.yml):** Publica [`docs-site/`](docs-site/index.html) en GitHub Pages.
+- **[`.github/dependabot.yml`](.github/dependabot.yml):** Actualizaciones semanales automáticas de `npm` y `github-actions`.
 
 Secretos requeridos en GitHub Actions: `CLOUDFLARE_API_TOKEN` y `CLOUDFLARE_ACCOUNT_ID`.
 
 ---
 
-## Documentación Bilingüe
+## Documentación Bilingüe y Comunidad
 
 | Documento | English | Español |
 | :--- | :--- | :--- |
@@ -151,3 +166,4 @@ Secretos requeridos en GitHub Actions: `CLOUDFLARE_API_TOKEN` y `CLOUDFLARE_ACCO
 | **Guía Funcional para Organizadores** | [ORGANIZER_FUNCTIONAL_GUIDE.md](docs/ORGANIZER_FUNCTIONAL_GUIDE.md) | [GUIA_FUNCIONAL_ORGANIZADORES.md](docs/GUIA_FUNCIONAL_ORGANIZADORES.md) |
 | **Guía de Despliegue y Secretos** | [DEPLOYMENT_GUIDE.md](docs/DEPLOYMENT_GUIDE.md) | [GUIA_DESPLIEGUE.md](docs/GUIA_DESPLIEGUE.md) |
 | **Gobernanza de Agentes y Diseño** | [AGENTS.md](AGENTS.md) / [PRODUCT.md](PRODUCT.md) | [AGENTS.md](AGENTS.md) / [PRODUCT.md](PRODUCT.md) |
+| **Seguridad, Contribuciones y Licencia** | [SECURITY.md](SECURITY.md) · [CONTRIBUTING.md](CONTRIBUTING.md) · [LICENSE](LICENSE) | [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) |
